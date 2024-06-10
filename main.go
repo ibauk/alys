@@ -95,7 +95,8 @@ func main() {
 	http.HandleFunc("/", central_dispatch)
 	http.HandleFunc("/about", about_alys)
 	http.HandleFunc("/stats", show_stats)
-	http.HandleFunc("/odo", update_odo)
+	http.HandleFunc("/odos", show_odo)
+	http.HandleFunc("/putodo", update_odo)
 	http.ListenAndServe(":"+*HTTPPort, nil)
 }
 
@@ -156,6 +157,44 @@ func beyond24(starttime, finishtime string) bool {
 	hrs := ft.Sub(st).Hours()
 	fmt.Printf("%v - %v == %v hours\n", finishtime, starttime, hrs)
 	return hrs > 24 || !ok
+}
+
+func show_odo(w http.ResponseWriter, r *http.Request) {
+
+	sqlx := "SELECT EntrantID,RiderFirst,RiderLast,ifnull(OdoStart,''),ifnull(StartTime,''),ifnull(OdoFinish,''),ifnull(FinishTime,''),EntrantStatus"
+	sqlx += " FROM entrants WHERE "
+	showstart := r.FormValue("t") == "s"
+	sclist := ""
+	if showstart {
+		sclist = strconv.Itoa(STATUSCODES["signedin"])
+	} else {
+		sclist = strconv.Itoa(STATUSCODES["riding"]) + "," + strconv.Itoa(STATUSCODES["DNF"])
+	}
+	sqlx += " EntrantStatus IN (" + sclist + ",8)"
+	sqlx += " ORDER BY RiderLast,RiderFirst"
+	rows, _ := DBH.Query(sqlx)
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	oe := true
+	for rows.Next() {
+		var EntrantID int
+		var RiderFirst, RiderLast, OdoStart, StartTime, OdoFinish, FinishTime string
+		var EntrantStatus int
+		rows.Scan(&EntrantID, &RiderFirst, &RiderLast, &OdoStart, &StartTime, &OdoFinish, &FinishTime, EntrantStatus)
+		fmt.Fprint(w, `<div class="odorow `)
+		if oe {
+			fmt.Fprint(w, "odd")
+		} else {
+			fmt.Fprint(w, "even")
+		}
+		oe = !oe
+		fmt.Fprint(w, `">`)
+
+		fmt.Fprintf(w, `<span class="lastname">%v</span> <span class="firstname">%v</span> `, RiderLast, RiderFirst)
+		fmt.Fprint(w, `</div>`)
+
+	}
 }
 
 func update_odo(w http.ResponseWriter, r *http.Request) {
