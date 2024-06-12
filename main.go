@@ -10,14 +10,18 @@ import (
 	"strconv"
 	"time"
 
+	_ "embed"
+
 	_ "github.com/mattn/go-sqlite3"
 )
+
+const PROGRAMVERSION = "Alys v0.1  Copyright (c) 2024 Bob Stammers"
 
 // DBNAME names the database file
 var DBNAME *string = flag.String("db", "rblr.db", "database file")
 
 // HTTPPort is the web port to serve
-var HTTPPort *string = flag.String("port", "8080", "Web port")
+var HTTPPort *string = flag.String("port", "80", "Web port")
 
 // DBH provides access to the database
 var DBH *sql.DB
@@ -25,6 +29,12 @@ var DBH *sql.DB
 var STATUSCODES map[string]int
 
 const timefmt = "2006-01-02T15:04"
+
+//go:embed rblr.js
+var my_js string
+
+//go:embed rblr.css
+var my_css string
 
 func init() {
 	STATUSCODES = make(map[string]int)
@@ -36,7 +46,7 @@ func init() {
 	STATUSCODES["finishedOK"] = 8   // Finished inside 24 hours
 	STATUSCODES["finished24+"] = 10 // Finished outside 24 hours
 
-	fmt.Printf("Statuses:\n%v\n\n", STATUSCODES)
+	//fmt.Printf("Statuses:\n%v\n\n", STATUSCODES)
 }
 
 func getIntegerFromDB(sqlx string, defval int) int {
@@ -71,7 +81,7 @@ func getStringFromDB(sqlx string, defval string) string {
 
 func main() {
 
-	fmt.Println("Hello sailor")
+	fmt.Println(PROGRAMVERSION)
 	flag.Parse()
 
 	dbx, _ := filepath.Abs(*DBNAME)
@@ -90,12 +100,14 @@ func main() {
 		return
 	}
 
-	fmt.Printf("Beyond24? - %v\n", beyond24("", "2024-06-09T19:31"))
+	//	fmt.Printf("Beyond24? - %v\n", beyond24("", "2024-06-09T19:31"))
 
-	http.HandleFunc("/", central_dispatch)
+	http.HandleFunc("/", show_menu)
+	http.HandleFunc("/menu", show_menu)
 	http.HandleFunc("/about", about_alys)
 	http.HandleFunc("/stats", show_stats)
-	http.HandleFunc("/odos", show_odo)
+	http.HandleFunc("/checkin", check_in)
+	http.HandleFunc("/checkout", check_out)
 	http.HandleFunc("/putodo", update_odo)
 	http.ListenAndServe(":"+*HTTPPort, nil)
 }
@@ -104,6 +116,12 @@ func about_alys(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Hello there, I say, I say")
 }
 
+func check_in(w http.ResponseWriter, r *http.Request) {
+	show_odo(w, r, false)
+}
+func check_out(w http.ResponseWriter, r *http.Request) {
+	show_odo(w, r, true)
+}
 func show_stats(w http.ResponseWriter, r *http.Request) {
 
 	const showzero = true
@@ -159,11 +177,58 @@ func beyond24(starttime, finishtime string) bool {
 	return hrs > 24 || !ok
 }
 
-func show_odo(w http.ResponseWriter, r *http.Request) {
+// When showing the odo capture list, this sets the time shown in the header
+func get_odolist_start_time(ischeckout bool) (string, int, int) {
 
-	sqlx := "SELECT EntrantID,RiderFirst,RiderLast,ifnull(OdoStart,''),ifnull(StartTime,''),ifnull(OdoFinish,''),ifnull(FinishTime,''),EntrantStatus"
+	res := storeTimeDB((time.Now()))
+	if !ischeckout {
+		return res, 0, 0
+	}
+	// Need to show next available start rather than real time
+	st := getStringFromDB("SELECT StartTime FROM config", "")
+	if st == "" {
+		return res, 0, 0
+	}
+	res = res[0:11] + st
+	mins := getIntegerFromDB("SELECT StartCohortMins FROM config", 10)
+	xtra := getIntegerFromDB("SELECT ExtraCohorts FROM config", 3)
+	return res, mins, xtra
+
+}
+
+func show_menu(w http.ResponseWriter, r *http.Request) {
+
+	var refresher = `<!DOCTYPE html>
+	<html lang="en">
+	<head><title>RBLR1000</title>
+	<style>` + my_css + `</style>
+	<script>` + my_js + `</script>
+	</head><body>
+	`
+
+	fmt.Fprint(w, refresher+`<main class="frontmenu">`)
+	fmt.Fprint(w, `<h1>RBLR1000</h1>`)
+	fmt.Fprint(w, `<button onclick="loadPage('checkout');">CHECK-OUT(start)</button>`)
+	fmt.Fprint(w, `<button onclick="loadPage('checkin');">CHECK-IN(finish)</button>`)
+	fmt.Fprint(w, `<button onclick="loadPage('stats');">show stats</button>`)
+	fmt.Fprint(w, `<button>SIGN IN(start)</button>`)
+	fmt.Fprint(w, `<button>administration</button>`)
+	fmt.Fprint(w, `</main>`)
+}
+
+func show_odo(w http.ResponseWriter, r *http.Request, showstart bool) {
+
+	var refresher = `<!DOCTYPE html>
+	<html lang="en">
+	<head><title>Odo capture</title>
+	<style>` + my_css + `</style>
+	<script>` + my_js + `</script>
+	</head><body>
+	`
+
+	sqlx := "SELECT EntrantID,RiderFirst,RiderLast,ifnull(OdoStart,''),ifnull(StartTime,''),ifnull(OdoFinish,''),ifnull(FinishTime,''),EntrantStatus,OdoKms"
 	sqlx += " FROM entrants WHERE "
-	showstart := r.FormValue("t") == "s"
+	st, gap, xtra := get_odolist_start_time(showstart)
 	sclist := ""
 	if showstart {
 		sclist = strconv.Itoa(STATUSCODES["signedin"])
@@ -176,12 +241,25 @@ func show_odo(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
+	fmt.Fprint(w, refresher)
+
+	fmt.Fprint(w, `<div id="odohdr">`)
+
+	fmt.Fprintf(w, `<span id="timenow" data-time="%v" data-refresh="1000" data-pause="120000" data-paused="0"`, st)
+	fmt.Fprintf(w, ` data-mins="%v" data-xtra="%v"`, gap, xtra)
+	fmt.Fprint(w, ` onclick="clicktime();"></span>`)
+	fmt.Fprint(w, `</div>`)
+
+	fmt.Fprint(w, `<div id="odolist">`)
 	oe := true
+	itemno := 0
 	for rows.Next() {
 		var EntrantID int
 		var RiderFirst, RiderLast, OdoStart, StartTime, OdoFinish, FinishTime string
 		var EntrantStatus int
-		rows.Scan(&EntrantID, &RiderFirst, &RiderLast, &OdoStart, &StartTime, &OdoFinish, &FinishTime, EntrantStatus)
+		var OdoKms int
+		rows.Scan(&EntrantID, &RiderFirst, &RiderLast, &OdoStart, &StartTime, &OdoFinish, &FinishTime, EntrantStatus, &OdoKms)
+		itemno++
 		fmt.Fprint(w, `<div class="odorow `)
 		if oe {
 			fmt.Fprint(w, "odd")
@@ -191,10 +269,18 @@ func show_odo(w http.ResponseWriter, r *http.Request) {
 		oe = !oe
 		fmt.Fprint(w, `">`)
 
-		fmt.Fprintf(w, `<span class="lastname">%v</span> <span class="firstname">%v</span> `, RiderLast, RiderFirst)
+		fmt.Fprintf(w, `<span class="name"><strong>%v</strong>, %v</span> `, RiderLast, RiderFirst)
+		pch := "finish"
+		val := OdoFinish
+		if showstart {
+			pch = "start"
+			val = OdoStart
+		}
+		fmt.Fprintf(w, `<span><input id="%v" data-e="%v" type="number" class="bignumber" oninput="oi(this);" onchange="oc(this);" min="0" placeholder="%v" value="%v"></span>`, itemno, EntrantID, pch, val)
 		fmt.Fprint(w, `</div>`)
 
 	}
+	fmt.Fprint(w, `</div><hr><button class="nav" onclick="loadPage('menu');">Main menu</button></body></html`)
 }
 
 func update_odo(w http.ResponseWriter, r *http.Request) {
@@ -221,57 +307,16 @@ func update_odo(w http.ResponseWriter, r *http.Request) {
 		sqlx += ",EntrantStatus=" + strconv.Itoa(ns)
 		sqlx += " WHERE EntrantID=" + r.FormValue("e")
 		sqlx += " AND FinishTime IS NULL"
-		sqlx += " AND EntrantStatus=" + strconv.Itoa(STATUSCODES["riding"])
+		sqlx += " AND EntrantStatus IN (" + strconv.Itoa(STATUSCODES["riding"]) + strconv.Itoa(STATUSCODES["DNF"]) + ")"
 	case "s":
 		sqlx = "OdoStart=" + r.FormValue("v")
 		sqlx += ",StartTime='" + dt + "'"
 		sqlx += ",EntrantStatus=" + strconv.Itoa(STATUSCODES["riding"])
 		sqlx += " WHERE EntrantID=" + r.FormValue("e")
-		sqlx += " AND EntrantStatus=" + strconv.Itoa(STATUSCODES["signedin"])
+		sqlx += " AND EntrantStatus IN (" + strconv.Itoa(STATUSCODES["signedin"]) + "," + strconv.Itoa(STATUSCODES["riding"]) + ")"
 	}
 	DBH.Exec("UPDATE entrants SET " + sqlx)
 
 	fmt.Fprint(w, "ok")
 
-}
-
-const mockupFrontPage = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<title>ALYS</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-body {
-	margin: 0;
-	font-size: 14pt;
-	font-family				: Verdana, Arial, Helvetica, sans-serif; 
-
-}
-.topbar {
-	background-color: lightgray;
-	border none none solid 2px none;
-	width: 100%;
-	margin: 0;
-	padding: 5px;
-}
-.about {
-	float: right;
-	padding-right: 1em;
-	font-size: 10pt;
-	vertical-align: middle;
-	display: table-cell;
-}
-</style>
-</head>
-<body>
-`
-const homeIcon = `
-<input title="Return to main menu" style="padding:1px;" type="button" value=" 🏠 " onclick="window.location='admin.php'">`
-
-func central_dispatch(w http.ResponseWriter, r *http.Request) {
-
-	fmt.Fprint(w, mockupFrontPage)
-	fmt.Fprint(w, `<div class="topbar">`+homeIcon+` 12 Days Euro Rally<span class="about">About ALYS</span></div>`)
 }

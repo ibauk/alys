@@ -1,0 +1,66 @@
+body {
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+  font-size: calc(14pt + 1vmin);
+}
+main.frontmenu {
+  width: 30em;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+main.frontmenu button {
+  display: block;
+  border-radius: 6px;
+  font-size: calc(20pt + 3vmin);
+  width: 10em;
+  margin: 0 auto 1em auto;
+  padding: 0.2em;
+}
+main.frontmenu button:hover {
+  background-color: lightblue;
+  cursor: pointer;
+}
+#odolist {
+  display: table;
+}
+#odolist div {
+  display: table-row;
+}
+#odolist span {
+  display: table-cell;
+  padding-bottom: 0.2em;
+  padding-right: 0.2em;
+}
+#odolist span input {
+  vertical-align: middle;
+}
+
+button.nav {
+  display: block;
+  border-radius: 6px;
+  font-size: calc(14pt + 1vmin);
+  width: 8em;
+  margin: 0 1em 1em 0;
+  padding: 0.2em;
+}
+button.nav:hover {
+  background-color: lightblue;
+  cursor: pointer;
+}
+
+.odd {
+  background-color: lightgray;
+}
+.bignumber {
+  width: 6em;
+}
+input {
+  background-color: white;
+  font-weight: bold;
+}
+input.oi {
+  background-color: yellow;
+}
+input.oc {
+  background-color: lightgreen;
+}
