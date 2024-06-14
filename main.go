@@ -245,10 +245,19 @@ func show_odo(w http.ResponseWriter, r *http.Request, showstart bool) {
 
 	fmt.Fprint(w, `<div id="odohdr">`)
 
-	fmt.Fprintf(w, `<span id="timenow" data-time="%v" data-refresh="1000" data-pause="120000" data-paused="0"`, st)
-	fmt.Fprintf(w, ` data-mins="%v" data-xtra="%v"`, gap, xtra)
-	fmt.Fprint(w, ` onclick="clicktime();"></span>`)
+	if showstart {
+		fmt.Fprint(w, " Start")
+	} else {
+		fmt.Fprint(w, " Finish")
+	}
+	fmt.Fprintf(w, ` <span id="timenow" data-time="%v" data-refresh="1000" data-pause="120000" data-paused="0"`, st)
+	if showstart {
+		fmt.Fprintf(w, ` data-gap="%v" data-xtra="%v"`, gap, xtra)
+	}
+	fmt.Fprintf(w, ` onclick="clickTime();">%v</span>`, st[11:16])
 	fmt.Fprint(w, `</div>`)
+
+	fmt.Fprint(w, `<script>refreshTime(); timertick = setInterval(refreshTime,1000);</script>`)
 
 	fmt.Fprint(w, `<div id="odolist">`)
 	oe := true

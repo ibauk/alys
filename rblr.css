@@ -20,7 +20,19 @@ main.frontmenu button:hover {
   background-color: lightblue;
   cursor: pointer;
 }
+#odohdr {
+  position: sticky;
+  top: 0;
+  background-color: lightblue;
+  width: 100%;
+  padding: .5em 0 .5em 0;
+  text-align: center;
+}
+#timenow {
+  font-weight: bold;
+}
 #odolist {
+  margin: .5em auto 0 auto;
   display: table;
 }
 #odolist div {

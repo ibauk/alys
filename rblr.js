@@ -1,6 +1,28 @@
 "use strict";
 
 const myStackItem = "odoStack";
+var timertick;
+
+
+
+function clickTime() {
+  let timeDisplay = document.querySelector('#timenow');
+  console.log('Clicking time');
+  clearInterval(timertick);
+  if (timeDisplay.getAttribute('data-paused') != 0) {
+      timeDisplay.setAttribute('data-paused',0);
+      timertick = setInterval(refreshTime,timeDisplay.getAttribute('data-refresh'));
+      timeDisplay.classList.remove('held');
+  } else {
+      timeDisplay.setAttribute('data-paused',1);
+      timertick = setInterval(clickTime,timeDisplay.getAttribute('data-pause'));
+      timeDisplay.classList.add('held');
+  }
+  console.log('Time clicked');
+}
+
+
+
 
 function loadPage(x) {
 
@@ -24,6 +46,60 @@ function oi(obj) {
 function oc(obj) {
   saveOdo(obj);
 }
+
+function fix2(n) {
+
+  if (n < 10) {
+    return "0"+n;
+  }
+  return n;
+}
+function getRallyTime(dt) {
+
+  let yy = dt.getFullYear();
+  let mm = dt.getMonth() + 1;
+  let dd = dt.getDate();
+  let dateString = yy+'-'+fix2(mm)+'-'+fix2(dd)+"T"+dt.toLocaleTimeString('en-GB');
+  return dateString.substring(0,16);
+}
+
+function parseDatetime(dt) {
+
+  let yy = parseInt(dt.substring(0,4));
+  let mm = parseInt(dt.substring(5,7)) - 1;
+  let dd = parseInt(dt.substring(8,10));
+  let hh = parseInt(dt.substring(11,13));
+  let mn = parseInt(dt.substring(14,16));
+  return new Date(yy,mm,dd,hh,mn);
+}
+
+function refreshTime() {
+  let timeDisplay = document.querySelector('#timenow');
+  let dt = new Date();
+  let gap = parseInt(timeDisplay.getAttribute("data-gap"));
+  let xtra = parseInt(timeDisplay.getAttribute("data-xtra"));
+  let newdt = getRallyTime(dt);
+  let curdt = timeDisplay.getAttribute("data-time");
+  console.log("Comparing "+curdt+" > "+newdt+"; xtra="+xtra+"("+gap+")");
+  if (curdt >= newdt) {
+    return;
+  }
+if (xtra > 0 && gap > 0) {
+    dt = parseDatetime(curdt)
+    dt = new Date(dt.getFullYear(),dt.getMonth(),dt.getDate(),dt.getHours(),dt.getMinutes()+gap);
+    newdt = getRallyTime(dt);
+    console.log("Choosing next slot "+newdt);
+    xtra--;
+    timeDisplay.setAttribute("data-xtra",xtra)
+  }
+  timeDisplay.setAttribute('data-time', newdt);
+  let dateString = dt.toLocaleString('en-GB',{hour:"2-digit",minute:"2-digit"});
+  let formattedString = dateString.replace(", ", " - ");
+  timeDisplay.innerHTML = formattedString;
+}
+
+
+
 
 function saveOdo(obj) {
 

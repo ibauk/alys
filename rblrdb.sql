@@ -1,6 +1,9 @@
 BEGIN TRANSACTION;
 CREATE TABLE IF NOT EXISTS "config" (
-	"DBInitialised"	INTEGER NOT NULL DEFAULT 1
+	"DBInitialised"	INTEGER NOT NULL DEFAULT 1,
+	"StartTime"	TEXT NOT NULL DEFAULT '05:00',
+	"StartCohortMins"	INTEGER NOT NULL DEFAULT 10,
+	"ExtraCohorts"	INTEGER NOT NULL DEFAULT 3
 );
 CREATE TABLE IF NOT EXISTS "entrants" (
 	"EntrantID"	INTEGER,
@@ -30,6 +33,12 @@ CREATE TABLE IF NOT EXISTS "entrants" (
 	"NoKRelation"	TEXT,
 	"NoKPhone"	TEXT,
 	"Cohort"	INTEGER NOT NULL DEFAULT 0,
+	"EntryDonation"	NUMERIC,
+	"SquiresCheque"	NUMERIC,
+	"SquiresCash"	NUMERIC,
+	"RBLRAccount"	NUMERIC,
+	"JustGivingAmt"	NUMERIC,
+	"JustGivingURL"	TEXT,
 	PRIMARY KEY("EntrantID")
 );
 COMMIT;
