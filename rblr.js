@@ -74,6 +74,7 @@ function parseDatetime(dt) {
 }
 
 function refreshTime() {
+  sendTransactions();
   let timeDisplay = document.querySelector('#timenow');
   let dt = new Date();
   let gap = parseInt(timeDisplay.getAttribute("data-gap"));
@@ -107,9 +108,12 @@ function saveOdo(obj) {
     clearTimeout(obj.timer);
   }
 
-  let ent = obj.getAttribute("data-e");
-  let url = "/setodo?e=" + ent + "&f=" + obj.name + "&v=" + obj.value;
+  let timeDisplay = document.querySelector('#timenow');
 
+  let ent = obj.getAttribute("data-e");
+  let url = "putodo?e=" + ent + "&f=" + obj.name + "&v=" + obj.value + "&t="+timeDisplay.getAttribute("data-time");
+
+  console.log(url);
   let newTrans = {};
   newTrans.url = url;
   newTrans.obj = obj.id;
@@ -160,6 +164,7 @@ function sendTransactions() {
         }
       }
     };
+    console.log("url=="+stack[i].url);
     xhttp.open("GET", stack[i].url, true);
     xhttp.send();
   }

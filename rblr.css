@@ -2,6 +2,11 @@ body {
   font-family: Verdana, Arial, Helvetica, sans-serif;
   font-size: calc(14pt + 1vmin);
 }
+main.stats {
+  width: 20em;
+  margin: 0 auto 0 auto;
+  font-size: calc(20pt + 3vmin);
+}
 main.frontmenu {
   width: 30em;
   margin-left: auto;
@@ -66,13 +71,21 @@ button.nav:hover {
 .bignumber {
   width: 6em;
 }
+.val {
+  font-weight: bold;
+  text-align: right;
+}
 input {
   background-color: white;
   font-weight: bold;
+  border-radius: 6px;
 }
 input.oi {
   background-color: yellow;
 }
 input.oc {
   background-color: lightgreen;
+}
+#ticker {
+  visibility: hidden;
 }

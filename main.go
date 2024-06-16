@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	_ "embed"
@@ -35,6 +36,16 @@ var my_js string
 
 //go:embed rblr.css
 var my_css string
+
+const timerticker = `var img = document.getElementById('ticker');
+
+var interval = window.setInterval(function(){
+    if(img.style.visibility == 'hidden'){
+        img.style.visibility = 'visible';
+    }else{
+        img.style.visibility = 'hidden';
+    }
+}, 1000);`
 
 func init() {
 	STATUSCODES = make(map[string]int)
@@ -106,6 +117,7 @@ func main() {
 	http.HandleFunc("/menu", show_menu)
 	http.HandleFunc("/about", about_alys)
 	http.HandleFunc("/stats", show_stats)
+	http.HandleFunc("/signin", show_signin)
 	http.HandleFunc("/checkin", check_in)
 	http.HandleFunc("/checkout", check_out)
 	http.HandleFunc("/putodo", update_odo)
@@ -122,12 +134,84 @@ func check_in(w http.ResponseWriter, r *http.Request) {
 func check_out(w http.ResponseWriter, r *http.Request) {
 	show_odo(w, r, true)
 }
+
+func format_money(moneyamt string) string {
+
+	res := moneyamt
+	dotix := strings.Index(res, ".")
+	if dotix < 0 {
+		res += ".00"
+	}
+	// 123456.44
+	// 012345678
+	ix := dotix - 3
+	if ix > 1 {
+		res = res[0:ix] + "," + res[ix:]
+	}
+	return res
+}
+
+func show_signin(w http.ResponseWriter, r *http.Request) {
+
+	var refresher = `<!DOCTYPE html>
+	<html lang="en">
+	<head><title>Stats</title>
+	<style>` + my_css + `</style>
+	<script>` + my_js + `</script>
+	</head><body>`
+
+	sqlx := "SELECT EntrantID,RiderFirst,RiderLast,ifnull(RiderIBA,''),ifnull(RiderRBLR,''),ifnull(Email,''),ifnull(Phone,''),ifnull(RiderAddress,'')"
+	sqlx += ",ifnull(PillionFirst,''),ifnull(PillionLast,''),ifnull(PillionIBA,''),ifnull(PillionRBLR,''),ifnull(PillionEmail,''),ifnull(PillionPhone,''),ifnull(PillionAddress,'')"
+	sqlx += ",ifnull(Bike,'motorbike'),ifnull(BikeReg,'')"
+	sqlx += ",ifnull(NokName,''),ifnull(NokRelation,''),ifnull(NokPhone,'')"
+	sqlx += ",ifnull(OdoStart,''),ifnull(StartTime,''),ifnull(OdoFinish,''),ifnull(FinishTime,''),EntrantStatus,OdoKms,ifnull(Route,'')"
+	sqlx += ",ifnull(EntryDonation,''),ifnull(SquiresCash,''),ifnull(SquiresCheque,''),ifnull(RBLRAccount,''),ifnull(JustGivingAmt,'')"
+	sqlx += " FROM entrants"
+	sqlx += " WHERE EntrantStatus IN (" + strconv.Itoa(STATUSCODES["DNS"]) + "," + strconv.Itoa(STATUSCODES["confirmedDNS"]) + ")"
+	sqlx += " ORDER BY RiderLast,RiderFirst"
+
+	fmt.Println(sqlx)
+	rows, err := DBH.Query(sqlx)
+	if err != nil {
+		fmt.Println(sqlx)
+		panic(err)
+	}
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	fmt.Fprint(w, refresher)
+	fmt.Fprint(w, `<main class="signin">`)
+
+	fmt.Fprint(w, `<h1>rblr1000 signing in</h1>`)
+
+	fmt.Fprint(w, `<table>`)
+	n := 0
+	for rows.Next() {
+		var e Entrant
+		err := rows.Scan(&e.EntrantID, &e.Rider.First, &e.Rider.Last, &e.Rider.IBA, &e.Rider.RBLR, &e.Rider.Email, &e.Rider.Phone, &e.Rider.Address, &e.Pillion.First, &e.Pillion.Last, &e.Pillion.IBA, &e.Pillion.RBLR, &e.Pillion.Email, &e.Pillion.Phone, &e.Pillion.Address, &e.Bike, &e.BikeReg, &e.NokName, &e.NokRelation, &e.NokPhone, &e.OdoStart, &e.StartTime, &e.OdoFinish, &e.FinishTime, &e.EntrantStatus, &e.OdoKms, &e.Route, &e.FundsRaised.EntryDonation, &e.FundsRaised.SquiresCash, &e.FundsRaised.SquiresCheque, &e.FundsRaised.RBLRAccount, &e.FundsRaised.JustGivingAmt)
+
+		if err != nil {
+			panic(err)
+		}
+
+		//fmt.Printf(`<tr><td>%v</td><td>--%v</td><td>%v</td></tr>`, e.EntrantID, e.Rider.First, e.Rider.Last)
+		fmt.Fprintf(w, `<tr><td>%v</td><td>--%v</td><td>%v</td></tr>`, e.EntrantID, e.Rider.First, e.Rider.Last)
+		n++
+	}
+	fmt.Fprint(w, `</table>`)
+	fmt.Fprint(w, `</main></body></html>`)
+	fmt.Printf("Showed %v lines\n", n)
+}
+
 func show_stats(w http.ResponseWriter, r *http.Request) {
 
-	const showzero = true
-	const refresher = `<!DOCTYPE html>
+	const showzero = false
+	var refresher = `<!DOCTYPE html>
 	<html lang="en">
-	<head><title>Stats</title></head><body>
+	<head><title>Stats</title>
+	<style>` + my_css + `</style>
+	<script>` + my_js + `</script>
+	</head><body>
 	<script>setTimeout(function() { window.location=window.location;},15000);</script>`
 
 	registered := getIntegerFromDB("SELECT count(*) FROM entrants", 0)
@@ -142,15 +226,22 @@ func show_stats(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	fmt.Fprint(w, refresher)
-	fmt.Fprint(w, `<table>`)
-	fmt.Fprintf(w, `<tr><td>registered</td><td>%v</td></tr>`, registered)
+	fmt.Fprint(w, `<main class="stats">`)
+	fmt.Fprint(w, `<button class="nav" onclick="loadPage('menu');">Main menu</button>`)
+
+	fmt.Fprint(w, `<h2>Live numbers  <span id="ticker">&diams;</span></h2>`)
+	fmt.Fprint(w, `<script>`+timerticker+`</script>`)
+	fmt.Fprintf(w, `<table><tr><td>registered<br></td><td class="val">%v<br></td></tr>`, registered)
 	sort.Ints(indexes)
 	for _, sc := range indexes {
 		if showzero || counts[codedescs[sc]] != 0 {
-			fmt.Fprintf(w, `<tr><td>%v</td><td>%v</td></tr>`, codedescs[sc], counts[codedescs[sc]])
+			fmt.Fprintf(w, `<tr><td>%v</td><td class="val">%v</td></tr>`, codedescs[sc], counts[codedescs[sc]])
 		}
 	}
-	fmt.Fprint(w, `</table>`)
+	totfunds := getStringFromDB("SELECT SUM(ifnull(EntryDonation,0)+ifnull(SquiresCheque,0)+ifnull(SquiresCash,0)+ifnull(RBLRAccount,0)+ifnull(JustGivingAmt,0)) AS funds  FROM entrants;", "0.00")
+	fmt.Fprintf(w, `<tr><td><br>Funds raised</td><td class="val"><br>&pound;%v</td></tr>`, format_money(totfunds))
+	fmt.Fprint(w, `</table></main>`)
+
 	fmt.Fprint(w, `</body><html>`)
 }
 
@@ -211,7 +302,7 @@ func show_menu(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, `<button onclick="loadPage('checkout');">CHECK-OUT(start)</button>`)
 	fmt.Fprint(w, `<button onclick="loadPage('checkin');">CHECK-IN(finish)</button>`)
 	fmt.Fprint(w, `<button onclick="loadPage('stats');">show stats</button>`)
-	fmt.Fprint(w, `<button>SIGN IN(start)</button>`)
+	fmt.Fprint(w, `<button onclick="loadPage('signin');">SIGN IN(start)</button>`)
 	fmt.Fprint(w, `<button>administration</button>`)
 	fmt.Fprint(w, `</main>`)
 }
@@ -235,8 +326,9 @@ func show_odo(w http.ResponseWriter, r *http.Request, showstart bool) {
 	} else {
 		sclist = strconv.Itoa(STATUSCODES["riding"]) + "," + strconv.Itoa(STATUSCODES["DNF"])
 	}
-	sqlx += " EntrantStatus IN (" + sclist + ",8)"
+	sqlx += " EntrantStatus IN (" + sclist + ")"
 	sqlx += " ORDER BY RiderLast,RiderFirst"
+	//fmt.Println(sqlx)
 	rows, _ := DBH.Query(sqlx)
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -245,16 +337,23 @@ func show_odo(w http.ResponseWriter, r *http.Request, showstart bool) {
 
 	fmt.Fprint(w, `<div id="odohdr">`)
 
+	odoname := ""
 	if showstart {
-		fmt.Fprint(w, " Start")
+		fmt.Fprint(w, " START")
+		odoname = "s"
 	} else {
-		fmt.Fprint(w, " Finish")
+		fmt.Fprint(w, " FINISH")
+		odoname = "f"
 	}
 	fmt.Fprintf(w, ` <span id="timenow" data-time="%v" data-refresh="1000" data-pause="120000" data-paused="0"`, st)
 	if showstart {
 		fmt.Fprintf(w, ` data-gap="%v" data-xtra="%v"`, gap, xtra)
 	}
 	fmt.Fprintf(w, ` onclick="clickTime();">%v</span>`, st[11:16])
+
+	fmt.Fprint(w, ` <span id="ticker">&diams;</span>`)
+	fmt.Fprint(w, `<script>`+timerticker+`</script>`)
+
 	fmt.Fprint(w, `</div>`)
 
 	fmt.Fprint(w, `<script>refreshTime(); timertick = setInterval(refreshTime,1000);</script>`)
@@ -267,7 +366,7 @@ func show_odo(w http.ResponseWriter, r *http.Request, showstart bool) {
 		var RiderFirst, RiderLast, OdoStart, StartTime, OdoFinish, FinishTime string
 		var EntrantStatus int
 		var OdoKms int
-		rows.Scan(&EntrantID, &RiderFirst, &RiderLast, &OdoStart, &StartTime, &OdoFinish, &FinishTime, EntrantStatus, &OdoKms)
+		rows.Scan(&EntrantID, &RiderFirst, &RiderLast, &OdoStart, &StartTime, &OdoFinish, &FinishTime, &EntrantStatus, &OdoKms)
 		itemno++
 		fmt.Fprint(w, `<div class="odorow `)
 		if oe {
@@ -285,15 +384,16 @@ func show_odo(w http.ResponseWriter, r *http.Request, showstart bool) {
 			pch = "start"
 			val = OdoStart
 		}
-		fmt.Fprintf(w, `<span><input id="%v" data-e="%v" type="number" class="bignumber" oninput="oi(this);" onchange="oc(this);" min="0" placeholder="%v" value="%v"></span>`, itemno, EntrantID, pch, val)
+		fmt.Fprintf(w, `<span><input id="%v" data-e="%v" name="%v" type="number" class="bignumber" oninput="oi(this);" onchange="oc(this);" min="0" placeholder="%v" value="%v"></span>`, itemno, EntrantID, odoname, pch, val)
 		fmt.Fprint(w, `</div>`)
 
 	}
-	fmt.Fprint(w, `</div><hr><button class="nav" onclick="loadPage('menu');">Main menu</button></body></html`)
+	fmt.Fprint(w, `</div><hr><button class="nav" onclick="loadPage('menu');">Main menu</button></body></html>`)
 }
 
 func update_odo(w http.ResponseWriter, r *http.Request) {
 
+	fmt.Println("Here we go")
 	if r.FormValue("e") == "" || r.FormValue("f") == "" || r.FormValue("v") == "" {
 		fmt.Fprint(w, "ok")
 		return
@@ -324,6 +424,7 @@ func update_odo(w http.ResponseWriter, r *http.Request) {
 		sqlx += " WHERE EntrantID=" + r.FormValue("e")
 		sqlx += " AND EntrantStatus IN (" + strconv.Itoa(STATUSCODES["signedin"]) + "," + strconv.Itoa(STATUSCODES["riding"]) + ")"
 	}
+	fmt.Println(sqlx)
 	DBH.Exec("UPDATE entrants SET " + sqlx)
 
 	fmt.Fprint(w, "ok")
