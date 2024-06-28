@@ -97,6 +97,17 @@ const SigninScreenSingle = `
 <div class="field"><label for="PillionPhone">Mobile</label> <input id="PillionPhone" name="PillionPhone" class="PillionPhone" value="{{.Pillion.Phone}}"></div>
 <div class="field"><label for="PillionAddress">Address</label> <input id="PillionAddress" name="PillionAddress" class="PillionAddress" value="{{.Pillion.Address}}"></div>
 </fieldset>
+<fieldset class="tabContent" id="tab_money"><legend>Money</legend>
+<div class="field"><label for="PillionLast">Last name</label> <input id="PillionLast" name="PillionLast" class="PillionLast" value="{{.Pillion.Last}}"></div>
+<div class="field"><label for="PillionFirst">First name</label> <input id="PillionFirst" name="PillionFirst" class="PillionFirst" value="{{.Pillion.First}}"></div>
+<div class="field"><label for="PillionIBA">IBA #</label> <input id="PillionIBA" name="PillionIBA" class="PillionIBA" value="{{.Pillion.IBA}}"></div>
+<div class="field"><label for="PillionRBLR">RBL Member</label> <input id="PillionRBLR" name="PillionRBLR" class="PillionRBLR" value="{{.Pillion.RBLR}}"></div>
+<div class="field"><label for="PillionEmail">Email</label> <input id="PillionEmail" name="PillionEmail" class="PillionEmail" value="{{.Pillion.Email}}"></div>
+<div class="field"><label for="PillionPhone">Mobile</label> <input id="PillionPhone" name="PillionPhone" class="PillionPhone" value="{{.Pillion.Phone}}"></div>
+<div class="field"><label for="PillionAddress">Address</label> <input id="PillionAddress" name="PillionAddress" class="PillionAddress" value="{{.Pillion.Address}}"></div>
+</fieldset>
+
+
 
 </div>
 `
