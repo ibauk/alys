@@ -2,6 +2,11 @@ body {
   font-family: Verdana, Arial, Helvetica, sans-serif;
   font-size: calc(14pt + 1vmin);
 }
+main.signin {
+  margin: 0 auto 0 auto;
+  width: 30em;
+
+}
 main.stats {
   width: 20em;
   margin: 0 auto 0 auto;
@@ -32,6 +37,7 @@ main.frontmenu button:hover {
   width: 100%;
   padding: .5em 0 .5em 0;
   text-align: center;
+  margin: 0;
 }
 #timenow {
   font-weight: bold;
@@ -45,11 +51,22 @@ main.frontmenu button:hover {
 }
 #odolist span {
   display: table-cell;
-  padding-bottom: 0.2em;
-  padding-right: 0.2em;
+  padding: 0 .2em .2em .1em;
 }
 #odolist span input {
   vertical-align: middle;
+}
+
+#signinlist {
+  display: table;
+}
+
+#signinlist div {
+  display: table-row;
+}
+#signinlist span {
+  display: table-cell;
+  padding: 0 .2em .2em .1em;
 }
 
 button.nav {
@@ -88,4 +105,46 @@ input.oc {
 }
 #ticker {
   visibility: hidden;
+}
+
+
+.SigninScreenSingle {
+  max-width: 50em;
+  margin: auto;
+}
+
+.field {
+  float: none;
+  display: inline-block;
+  vertical-align: middle;
+}
+fieldset label, fieldset .label {
+  font-size: 14pt;
+}
+fieldset input {
+  font-size: 16pt;
+}
+
+.RiderIBA, .PillionIBA {
+  width: 5em;
+}
+
+.RiderRBLR, .PillionRBLR {
+  width: 5em;
+}
+
+.RiderEmail, .PillionEmail {
+  width: 20em;
+}
+
+.BikeReg {
+  width: 6em;
+}
+
+.OdoStart, .OdoFinish {
+  width: 5em;
+}
+
+.RiderAddress, .PillionAddress {
+  width: 30em;
 }
