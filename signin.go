@@ -21,13 +21,17 @@ func edit_entrant(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sqlx := "SELECT EntrantID,RiderFirst,RiderLast,ifnull(RiderIBA,''),ifnull(RiderRBLR,''),ifnull(Email,''),ifnull(Phone,''),ifnull(RiderAddress,'')"
-	sqlx += ",ifnull(PillionFirst,''),ifnull(PillionLast,''),ifnull(PillionIBA,''),ifnull(PillionRBLR,''),ifnull(PillionEmail,''),ifnull(PillionPhone,''),ifnull(PillionAddress,'')"
-	sqlx += ",ifnull(Bike,'motorbike'),ifnull(BikeReg,'')"
-	sqlx += ",ifnull(NokName,''),ifnull(NokRelation,''),ifnull(NokPhone,'')"
-	sqlx += ",ifnull(OdoStart,''),ifnull(StartTime,''),ifnull(OdoFinish,''),ifnull(FinishTime,''),EntrantStatus,OdoKms,ifnull(Route,'')"
-	sqlx += ",ifnull(EntryDonation,''),ifnull(SquiresCash,''),ifnull(SquiresCheque,''),ifnull(RBLRAccount,''),ifnull(JustGivingAmt,'')"
-	sqlx += " FROM entrants"
+	/*
+		sqlx := "SELECT EntrantID,RiderFirst,RiderLast,ifnull(RiderIBA,''),ifnull(RiderRBLR,''),ifnull(Email,''),ifnull(Phone,''),ifnull(RiderAddress,'')"
+		sqlx += ",ifnull(PillionFirst,''),ifnull(PillionLast,''),ifnull(PillionIBA,''),ifnull(PillionRBLR,''),ifnull(PillionEmail,''),ifnull(PillionPhone,''),ifnull(PillionAddress,'')"
+		sqlx += ",ifnull(Bike,'motorbike'),ifnull(BikeReg,'')"
+		sqlx += ",ifnull(NokName,''),ifnull(NokRelation,''),ifnull(NokPhone,'')"
+		sqlx += ",ifnull(OdoStart,''),ifnull(StartTime,''),ifnull(OdoFinish,''),ifnull(FinishTime,''),EntrantStatus,OdoKms,ifnull(Route,'')"
+		sqlx += ",ifnull(EntryDonation,''),ifnull(SquiresCash,''),ifnull(SquiresCheque,''),ifnull(RBLRAccount,''),ifnull(JustGivingAmt,'')"
+		sqlx += " FROM entrants"
+	*/
+
+	sqlx := EntrantSQL
 	sqlx += " WHERE EntrantID=" + entrant
 
 	rows, err := DBH.Query(sqlx)
@@ -40,8 +44,9 @@ func edit_entrant(w http.ResponseWriter, r *http.Request) {
 
 		var e Entrant
 
-		err := rows.Scan(&e.EntrantID, &e.Rider.First, &e.Rider.Last, &e.Rider.IBA, &e.Rider.RBLR, &e.Rider.Email, &e.Rider.Phone, &e.Rider.Address, &e.Pillion.First, &e.Pillion.Last, &e.Pillion.IBA, &e.Pillion.RBLR, &e.Pillion.Email, &e.Pillion.Phone, &e.Pillion.Address, &e.Bike, &e.BikeReg, &e.NokName, &e.NokRelation, &e.NokPhone, &e.OdoStart, &e.StartTime, &e.OdoFinish, &e.FinishTime, &e.EntrantStatus, &e.OdoKms, &e.Route, &e.FundsRaised.EntryDonation, &e.FundsRaised.SquiresCash, &e.FundsRaised.SquiresCheque, &e.FundsRaised.RBLRAccount, &e.FundsRaised.JustGivingAmt)
-		checkerr(err)
+		//err := rows.Scan(&e.EntrantID, &e.Rider.First, &e.Rider.Last, &e.Rider.IBA, &e.Rider.RBLR, &e.Rider.Email, &e.Rider.Phone, &e.Rider.Address, &e.Pillion.First, &e.Pillion.Last, &e.Pillion.IBA, &e.Pillion.RBLR, &e.Pillion.Email, &e.Pillion.Phone, &e.Pillion.Address, &e.Bike, &e.BikeReg, &e.NokName, &e.NokRelation, &e.NokPhone, &e.OdoStart, &e.StartTime, &e.OdoFinish, &e.FinishTime, &e.EntrantStatus, &e.OdoKms, &e.Route, &e.FundsRaised.EntryDonation, &e.FundsRaised.SquiresCash, &e.FundsRaised.SquiresCheque, &e.FundsRaised.RBLRAccount, &e.FundsRaised.JustGivingAmt)
+		//checkerr(err)
+		ScanEntrant(rows, &e)
 		err = sss.Execute(w, e)
 		checkerr(err)
 

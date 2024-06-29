@@ -1,3 +1,36 @@
+@page {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+:root {
+  --regular-background: #ccffcc;
+  --regular-text: black;
+  --button-background: #006600;
+  --button-text: white;
+  --button-back-disabled: #339966;
+  --button-text-disabled: lightgray;
+  --bright-background: #ffff00;
+  --bright-text: red;
+  --form-background: #ccffcc;
+  --input-text: #000;
+  --input-background: inherited;
+  --hover-background: lightgray;
+  --hover-text: black;
+  --tabs-background: #dedbde;
+  --tabs-text: #42454a;
+  --via-background: white;
+  --via-text: black;
+  --solid-border: #c9c3ba;
+  --header-background: lightgray;
+  --scorex-background: #66d2ff;
+  --rejected-background: red;
+  --rejected-text: white;
+  --checked-background: #31ad16;
+  --checked-text: white;
+  --error-background: red;
+  --error-text: white;
+}
 body {
   font-family: Verdana, Arial, Helvetica, sans-serif;
   font-size: calc(14pt + 1vmin);
@@ -5,7 +38,6 @@ body {
 main.signin {
   margin: 0 auto 0 auto;
   width: 30em;
-
 }
 main.stats {
   width: 20em;
@@ -35,7 +67,7 @@ main.frontmenu button:hover {
   top: 0;
   background-color: lightblue;
   width: 100%;
-  padding: .5em 0 .5em 0;
+  padding: 0.5em 0 0.5em 0;
   text-align: center;
   margin: 0;
 }
@@ -43,7 +75,7 @@ main.frontmenu button:hover {
   font-weight: bold;
 }
 #odolist {
-  margin: .5em auto 0 auto;
+  margin: 0.5em auto 0 auto;
   display: table;
 }
 #odolist div {
@@ -51,7 +83,7 @@ main.frontmenu button:hover {
 }
 #odolist span {
   display: table-cell;
-  padding: 0 .2em .2em .1em;
+  padding: 0 0.2em 0.2em 0.1em;
 }
 #odolist span input {
   vertical-align: middle;
@@ -66,7 +98,7 @@ main.frontmenu button:hover {
 }
 #signinlist span {
   display: table-cell;
-  padding: 0 .2em .2em .1em;
+  padding: 0 0.2em 0.2em 0.1em;
 }
 
 button.nav {
@@ -107,7 +139,6 @@ input.oc {
   visibility: hidden;
 }
 
-
 .SigninScreenSingle {
   max-width: 50em;
   margin: auto;
@@ -118,22 +149,36 @@ input.oc {
   display: inline-block;
   vertical-align: middle;
 }
-fieldset label, fieldset .label {
+fieldset label,
+fieldset .label {
   font-size: 14pt;
 }
 fieldset input {
   font-size: 16pt;
 }
 
-.RiderIBA, .PillionIBA {
+input[type="checkbox"] {
+  width: 1em;
+  margin-right: 1em;
+}
+
+input[type="radio"] {
+  width: 1em;
+  margin-left: 1em;
+}
+
+.RiderIBA,
+.PillionIBA {
   width: 5em;
 }
 
-.RiderRBLR, .PillionRBLR {
+.RiderRBLR,
+.PillionRBLR {
   width: 5em;
 }
 
-.RiderEmail, .PillionEmail {
+.RiderEmail,
+.PillionEmail {
   width: 20em;
 }
 
@@ -141,10 +186,48 @@ fieldset input {
   width: 6em;
 }
 
-.OdoStart, .OdoFinish {
+.OdoStart,
+.OdoFinish {
   width: 5em;
 }
 
-.RiderAddress, .PillionAddress {
+.RiderAddress,
+.PillionAddress {
   width: 30em;
+}
+
+.RiderPostcode,
+.PillionPostcode {
+  width: 5em;
+}
+
+.Patches {
+  width: 2em;
+}
+
+.EntryDonation,
+.SquiresCheque,
+.SquiresCash,
+.RBLRAccount,
+.JustGivingAmt {
+  width: 5em;
+}
+.small {
+  font-size: 14pt;
+}
+
+.tabContent {
+  border: 10px solid var(--solid-border);
+  background-color: var(--form-background);
+  padding: 0.5em;
+  display: inherit;
+  overflow: auto;
+}
+
+.tabContenthide {
+  display: none;
+}
+
+#tabs_area {
+  display: inherit;
 }
