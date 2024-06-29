@@ -2,7 +2,11 @@ package main
 
 import (
 	"database/sql"
+	_ "embed"
 )
+
+//go:embed tabs.js
+var my_tabs_js string
 
 type Person = struct {
 	First    string
@@ -62,7 +66,7 @@ const EntrantSQL = `SELECT EntrantID,RiderFirst,RiderLast,ifnull(RiderIBA,''),if
 	 FROM entrants
 `
 
-const SigninScreenSingle = `
+var SigninScreenSingle = `
 <div class="SigninScreenSingle">
 <fieldset class="tabContent" id="tab_rider"><legend>Rider</legend>
 <div class="field"><div class="field"><label for="RiderLast">Last name</label> <input id="RiderLast" name="RiderLast" class="RiderLast" value="{{.Rider.Last}}"></div>
@@ -71,6 +75,7 @@ const SigninScreenSingle = `
 <div class="field"><label for="RiderRBLR">RBL Member</label> <input type="checkbox" id="RiderRBLR" name="RiderRBLR" class="RiderRBLR" value="RiderRBLR"{{if ne .Rider.RBLR ""}} checked{{end}}></div>
 <div class="field"><label for="RiderEmail">Email</label> <input id="RiderEmail" name="RiderEmail" class="RiderEmail" value="{{.Rider.Email}}"></div>
 <div class="field"><label for="RiderPhone">Mobile</label> <input id="RiderPhone" name="RiderPhone" class="RiderPhone" value="{{.Rider.Phone}}"></div>
+<br>
 <div class="field"> <fieldset><legend class="small">Address</legend>
     <input id="RiderAddress1" name="RiderAddress1" class="RiderAddress1"  value="{{.Rider.Address1}}"><br>
     <input id="RiderAddress2" name="RiderAddress2" class="RiderAddress2"  value="{{.Rider.Address2}}"><br>
@@ -79,11 +84,13 @@ const SigninScreenSingle = `
 	<input id="RiderPostcode" name="RiderPostcode" class="RiderPostcode" placeholder="postcode" value="{{.Rider.Postcode}}">
     <input id="RiderCountry" name="RiderCountry" class="RiderCountry" placeholder="country" value="{{.Rider.Country}}">
 	</fieldset></div>
+<fieldset class="flex field">
 <div class="field">
 	<label for="FreeCamping">Camping</label>
 	<input type="checkbox" id="FreeCamping" name="FreeCamping" class="FreeCamping" value="FreeCamping"{{if ne .FreeCamping ""}} checked{{end}}>
 </div>
 <div class="field">
+
     <label for="Route">Route</label> 
 	<select id="Route" name="Route">
 	    <option value="A-NCW"{{if eq .Route "A-NCW"}} selected{{end}}>North clockwise</option>
@@ -93,9 +100,11 @@ const SigninScreenSingle = `
 	    <option value="E-500CW"{{if eq .Route "E-500CW"}} selected{{end}}>500 clockwise</option>
 	    <option value="F-500AC"{{if eq .Route "F-500AC"}} selected{{end}}>500 anticlockwise</option>
 	</select>
+
 </div>
 <div class="field">
-    <label for="EntrantStatus" name="EntrantStatus">Status</label>
+    
+	<label for="EntrantStatus" name="EntrantStatus">Status</label>
 	<select id="EntrantStatus" name="EntrantStatus">
 	    <option value="0"{{if eq .EntrantStatus 0}} selected{{end}}>not signed in</option>
 	    <option value="1"{{if eq .EntrantStatus 1}} selected{{end}}>withdrawn</option>
@@ -105,7 +114,36 @@ const SigninScreenSingle = `
 	    <option value="8"{{if eq .EntrantStatus 8}} selected{{end}}>Finisher</option>
 	    <option value="10"{{if eq .EntrantStatus 10}} selected{{end}}>Late finisher</option>
 	</select>
+
 </div>
+<br><br>
+<div class="field"><label for="Tshirt1">T-shirt 1</label> 
+
+	<select id="Tshirt1" name="Tshirt1" class="Tshirt1">
+		<option value=""{{if eq .Tshirt1 ""}} selected{{end}}>no thanks</option>
+		<option value=""{{if eq .Tshirt1 "S"}} selected{{end}}>Small</option>
+		<option value=""{{if eq .Tshirt1 "M"}} selected{{end}}>Medium</option>
+		<option value=""{{if eq .Tshirt1 "L"}} selected{{end}}>Large</option>
+		<option value=""{{if eq .Tshirt1 "XL"}} selected{{end}}>X-Large</option>
+		<option value=""{{if eq .Tshirt1 "XXL"}} selected{{end}}>XX-Large</option>
+	</select>	
+
+</div>
+<div class="field"><label for="Tshirt2">T-shirt 2</label> 
+
+	<select id="Tshirt2" name="Tshirt2" class="Tshirt2">
+		<option value=""{{if eq .Tshirt2 ""}} selected{{end}}>no thanks</option>
+		<option value=""{{if eq .Tshirt2 "S"}} selected{{end}}>Small</option>
+		<option value=""{{if eq .Tshirt2 "M"}} selected{{end}}>Medium</option>
+		<option value=""{{if eq .Tshirt2 "L"}} selected{{end}}>Large</option>
+		<option value=""{{if eq .Tshirt2 "XL"}} selected{{end}}>X-Large</option>
+		<option value=""{{if eq .Tshirt2 "XXL"}} selected{{end}}>XX-Large</option>
+	</select>	
+
+</div>
+<div class="field"> <label for="Patches">Patches</label> <input type="number" min="0" max="2" id="Patches" name="Patches" class="Patches" value="{{.Patches}}"> </div>
+
+</fieldset>
 </fieldset>
 
 
@@ -128,6 +166,7 @@ const SigninScreenSingle = `
 	<input type="radio" id="OdoKms1" name="OdoKms" value="1"{{if eq .OdoKms 1}} checked{{end}}> <label for="OdoKms1">kms</label>
 	</fieldset>
 </div>
+<br>
 <div class="field"><label for="OdoStart">Odo @ start</label> <input id="OdoStart" name="OdoStart" class="OdoStart" value="{{.OdoStart}}"></div>
 <div class="field"><label for="OdoFinish">Odo @ finish</label> <input id="OdoFinish" name="OdoFinish" class="OdoFinish" value="{{.OdoFinish}}"></div>
 </fieldset>
@@ -152,28 +191,7 @@ const SigninScreenSingle = `
 <div class="field">
 	<label for="JustGivingAmt">Just giving</label> <input id="JustGivingAmt" name="JustGivingAmt" class="JustGivingAmt" value="{{.FundsRaised.JustGivingAmt}}">
 </div>
-<hr>
-<div class="field"><label for="Tshirt1">T-shirt 1</label> 
-	<select id="Tshirt1" name="Tshirt1" class="Tshirt1">
-		<option value=""{{if eq .Tshirt1 ""}} selected{{end}}>no thanks</option>
-		<option value=""{{if eq .Tshirt1 "S"}} selected{{end}}>Small</option>
-		<option value=""{{if eq .Tshirt1 "M"}} selected{{end}}>Medium</option>
-		<option value=""{{if eq .Tshirt1 "L"}} selected{{end}}>Large</option>
-		<option value=""{{if eq .Tshirt1 "XL"}} selected{{end}}>X-Large</option>
-		<option value=""{{if eq .Tshirt1 "XXL"}} selected{{end}}>XX-Large</option>
-	</select>	
-</div>
-<div class="field"><label for="Tshirt2">T-shirt 2</label> 
-	<select id="Tshirt2" name="Tshirt2" class="Tshirt2">
-		<option value=""{{if eq .Tshirt2 ""}} selected{{end}}>no thanks</option>
-		<option value=""{{if eq .Tshirt2 "S"}} selected{{end}}>Small</option>
-		<option value=""{{if eq .Tshirt2 "M"}} selected{{end}}>Medium</option>
-		<option value=""{{if eq .Tshirt2 "L"}} selected{{end}}>Large</option>
-		<option value=""{{if eq .Tshirt2 "XL"}} selected{{end}}>X-Large</option>
-		<option value=""{{if eq .Tshirt2 "XXL"}} selected{{end}}>XX-Large</option>
-	</select>	
-</div>
-<div class="field"><label for="Patches">Patches</label> <input type="number" min="0" max="2" id="Patches" name="Patches" class="Patches" value="{{.Patches}}">
+
 </fieldset>
 <fieldset class="tabContent" id="tab_pillion"><legend>Pillion</legend>
 <div class="field"><label for="PillionLast">Last name</label> <input id="PillionLast" name="PillionLast" class="PillionLast" value="{{.Pillion.Last}}"></div>
@@ -188,7 +206,7 @@ const SigninScreenSingle = `
 
 
 </div>
-<script>setupTabs();</script>
+<script>` + my_tabs_js + ` setupTabs();</script>
 `
 
 func ScanEntrant(rows *sql.Rows, e *Entrant) {

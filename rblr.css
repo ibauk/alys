@@ -148,6 +148,7 @@ input.oc {
   float: none;
   display: inline-block;
   vertical-align: middle;
+  margin-bottom: .5em;
 }
 fieldset label,
 fieldset .label {
@@ -217,9 +218,10 @@ input[type="radio"] {
 }
 
 .tabContent {
-  border: 10px solid var(--solid-border);
+  border: 5px solid var(--solid-border);
+  border-radius: 5px;
   background-color: var(--form-background);
-  padding: 0.5em;
+  padding: 0.2em;
   display: inherit;
   overflow: auto;
 }
@@ -228,6 +230,45 @@ input[type="radio"] {
   display: none;
 }
 
-#tabs_area {
-  display: inherit;
+.tabs_area {
+  display: block;
+  margin: 1em 0 0 0;
+  padding: 0;
+}
+.tabs_area ul {
+  margin: 1em 0 0 0;
+}
+.tabs_area li {
+  display: inline-block;
+  list-style: none;
+}
+
+ul#tabs li a {
+  background-color: var(--tabs-background);
+  color: var(--tabs-text);
+  text-decoration: none;
+  font-size: smaller;
+  text-transform: lowercase;
+  border-top-style: solid;
+  border-right-style: solid;
+  border-bottom-style: none;
+  border-left-style: solid;
+  border-radius: 5px;
+  padding: 0em 0.3em 0 0.3em;
+}
+ul#tabs li a:hover {
+  font-weight: bold;
+  color: var(--tabs-text);
+}
+ul#tabs li a.selected {
+  font-weight: bold;
+  font-size: larger;
+  text-transform: uppercase;
+  background-color: var(--bright-background);
+}
+
+.flex {
+  display: inline-block;
+  width: 25em;
+  border: none;
 }
