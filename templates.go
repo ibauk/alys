@@ -30,6 +30,7 @@ type Money = struct {
 	SquiresCash   string
 	RBLRAccount   string
 	JustGivingAmt string
+	JustGivingURL string
 }
 
 type Entrant = struct {
@@ -150,9 +151,9 @@ var SigninScreenSingle = `
 <div class="tabs_area">
 	<ul id="tabs">
 		<li><a href="#tab_bike">Bike</a></li>
-		<li><a href="#tab_nok">Emergency contact</a></li>
-		<li><a href="#tab_money">Money</a></li>
-		<li><a href="#tab_pillion">Pillion</a></li>
+		<li><a href="#tab_nok">Emergency</a></li>
+		<li><a href="#tab_money">Donations <span id="showmoney"></span></a></li>
+		<li><a href="#tab_pillion">Pillion <span id="showpillion"></span></a></li>
 	</ul>
 </div>
 
@@ -170,43 +171,54 @@ var SigninScreenSingle = `
 <div class="field"><label for="OdoStart">Odo @ start</label> <input id="OdoStart" name="OdoStart" class="OdoStart" value="{{.OdoStart}}"></div>
 <div class="field"><label for="OdoFinish">Odo @ finish</label> <input id="OdoFinish" name="OdoFinish" class="OdoFinish" value="{{.OdoFinish}}"></div>
 </fieldset>
-<fieldset class="tabContent" id="tab_nok"><legend>Emergency contact</legend>
+<fieldset class="tabContent" id="tab_money"><legend>Money</legend>
+<div class="field">
+	<label for="EntryDonation">@ entry</label> <input id="EntryDonation" name="EntryDonation" class="EntryDonation money" value="{{.FundsRaised.EntryDonation}}" oninput="showMoneyAmt();">
+</div>
+<div class="field">
+	<label for="SquiresCheque">Cheque</label> <input id="SquiresCheque" name="SquiresCheque" class="SquiresCheque money" value="{{.FundsRaised.SquiresCheque}}" oninput="showMoneyAmt();">
+</div>
+<div class="field">
+	<label for="SquiresCash">Cash</label> <input id="SquiresCash" name="SquiresCash" class="SquiresCash money" value="{{.FundsRaised.SquiresCash}}" oninput="showMoneyAmt();">
+</div>
+<div class="field">
+	<label for="RBLRAccount">RBLR Account</label> <input id="RBLRAccount" name="RBLRAccount" class="RBLRAccount money" value="{{.FundsRaised.RBLRAccount}}" oninput="showMoneyAmt();">
+</div>
+<div class="field">
+	<label for="JustGivingAmt">Just giving</label> <input id="JustGivingAmt" name="JustGivingAmt" class="JustGivingAmt money" value="{{.FundsRaised.JustGivingAmt}}" oninput="showMoneyAmt();">
+</div>
+<div class="field">
+	<label for="JustGivingURL">Just giving URL</label> <input id="JustGivingURL" name="JustGivingURL" class="JustGivingURL" value="{{.FundsRaised.JustGivingURL}}">
+</div>
+
+</fieldset>
+<fieldset class="tabContent" id="tab_nok"><legend>Emergency</legend>
 <div class="field"><label for="NokName">Contact name</label> <input id="NokName" name="NokName" class="NokName" value="{{.NokName}}"></div>
 <div class="field"><label for="NokRelation">Relationship</label> <input id="NokRelation" name="NokRelation" class="NokRelation" value="{{.NokRelation}}"></div>
 <div class="field"><label for="NokPhone">Contact phone</label> <input id="NokPhone" name="NokPhone" class="NokPhone" value="{{.NokPhone}}"></div>
 </fieldset>
-<fieldset class="tabContent" id="tab_money"><legend>Money</legend>
-<div class="field">
-	<label for="EntryDonation">@ entry</label> <input id="EntryDonation" name="EntryDonation" class="EntryDonation" value="{{.FundsRaised.EntryDonation}}">
-</div>
-<div class="field">
-	<label for="SquiresCheque">Cheque</label> <input id="SquiresCheque" name="SquiresCheque" class="SquiresCheque" value="{{.FundsRaised.SquiresCheque}}">
-</div>
-<div class="field">
-	<label for="SquiresCash">Cash</label> <input id="SquiresCash" name="SquiresCash" class="SquiresCash" value="{{.FundsRaised.SquiresCash}}">
-</div>
-<div class="field">
-	<label for="RBLRAccount">RBLR Account</label> <input id="RBLRAccount" name="RBLRAccount" class="RBLRAccount" value="{{.FundsRaised.RBLRAccount}}">
-</div>
-<div class="field">
-	<label for="JustGivingAmt">Just giving</label> <input id="JustGivingAmt" name="JustGivingAmt" class="JustGivingAmt" value="{{.FundsRaised.JustGivingAmt}}">
-</div>
-
-</fieldset>
 <fieldset class="tabContent" id="tab_pillion"><legend>Pillion</legend>
-<div class="field"><label for="PillionLast">Last name</label> <input id="PillionLast" name="PillionLast" class="PillionLast" value="{{.Pillion.Last}}"></div>
-<div class="field"><label for="PillionFirst">First name</label> <input id="PillionFirst" name="PillionFirst" class="PillionFirst" value="{{.Pillion.First}}"></div>
-<div class="field"><label for="PillionIBA">IBA #</label> <input id="PillionIBA" name="PillionIBA" class="PillionIBA" value="{{.Pillion.IBA}}"></div>
-<div class="field"><label for="PillionRBLR">RBL Member</label> <input id="PillionRBLR" name="PillionRBLR" class="PillionRBLR" value="{{.Pillion.RBLR}}"></div>
+<div class="field"><label for="PillionLast">Last name</label> <input id="PillionLast" name="PillionLast" class="PillionLast" value="{{.Pillion.Last}}" oninput="showPillionPresent();"></div>
+<div class="field"><label for="PillionFirst">First name</label> <input id="PillionFirst" name="PillionFirst" class="PillionFirst" value="{{.Pillion.First}}" oninput="showPillionPresent();"></div>
+<div class="field"><label for="PillionIBA">IBA member</label> <input type="checkbox" id="PillionIBA" name="PillionIBA" class="PillionIBA" value="PillionIBA"{{if ne .Pillion.IBA ""}} checked{{end}}></div>
+<div class="field"><label for="PillionRBLR">RBL Member</label> <input type="checkbox" id="PillionRBLR" name="PillionRBLR" class="PillionRBLR" value="PillionRBLR"{{if ne .Pillion.RBLR ""}} checked{{end}}></div>
 <div class="field"><label for="PillionEmail">Email</label> <input id="PillionEmail" name="PillionEmail" class="PillionEmail" value="{{.Pillion.Email}}"></div>
 <div class="field"><label for="PillionPhone">Mobile</label> <input id="PillionPhone" name="PillionPhone" class="PillionPhone" value="{{.Pillion.Phone}}"></div>
-<div class="field"><label for="PillionAddress">Address</label> <input id="PillionAddress" name="PillionAddress" class="PillionAddress" value="{{.Pillion.Address}}"></div>
+<br>
+<div class="field"> <fieldset><legend class="small">Address</legend>
+    <input id="PillionAddress1" name="PillionAddress1" class="PillionAddress1"  value="{{.Pillion.Address1}}"><br>
+    <input id="PillionAddress2" name="PillionAddress2" class="PillionAddress2"  value="{{.Pillion.Address2}}"><br>
+    <input id="PillionTown" name="PillionTown" class="PillionTown" placeholder="town" value="{{.Pillion.Town}}"><br>
+    <input id="PillionCounty" name="PillionCounty" class="PillionCounty" placeholder="county" value="{{.Pillion.County}}"><br>
+	<input id="PillionPostcode" name="PillionPostcode" class="PillionPostcode" placeholder="postcode" value="{{.Pillion.Postcode}}">
+    <input id="PillionCountry" name="PillionCountry" class="PillionCountry" placeholder="country" value="{{.Pillion.Country}}">
+	</fieldset></div>
 </fieldset>
 
 
 
 </div>
-<script>` + my_tabs_js + ` setupTabs();</script>
+<script>` + my_tabs_js + ` setupTabs();showMoneyAmt();showPillionPresent();</script>
 `
 
 func ScanEntrant(rows *sql.Rows, e *Entrant) {

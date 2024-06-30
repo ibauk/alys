@@ -213,6 +213,9 @@ input[type="radio"] {
 .JustGivingAmt {
   width: 5em;
 }
+.JustGivingURL {
+  width: 30em;
+}
 .small {
   font-size: 14pt;
 }

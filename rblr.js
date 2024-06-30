@@ -3,6 +3,37 @@
 const myStackItem = "odoStack";
 var timertick;
 
+function addMoney() {
+  let monies = document.getElementsByClassName("money");
+  let money = 0.0;
+  for (let i = 0; i < monies.length; i++) {
+    let amt = parseFloat(monies[i].value);
+    if (!isNaN(amt)) {
+      money += amt;
+    }
+  }
+  return money;
+}
+
+function showMoneyAmt() {
+  let amt = addMoney();
+  let sf = document.getElementById("showmoney");
+  if (sf) {
+    sf.innerHTML = "£" + amt;
+  }
+}
+
+function showPillionPresent() {
+  let first = document.getElementById("PillionFirst");
+  let last = document.getElementById("PillionLast");
+  let present = first.value != "" && last.value != "";
+  let ps = document.getElementById("showpillion");
+  if (ps) {
+    ps.innerHTML = "";
+    if (present)
+      ps.innerHTML="&#9745;"
+  }
+}
 function clickTime() {
   let timeDisplay = document.querySelector("#timenow");
   console.log("Clicking time");
@@ -49,8 +80,6 @@ function fix2(n) {
   }
   return n;
 }
-
-
 
 function getRallyTime(dt) {
   let yy = dt.getFullYear();
@@ -180,4 +209,3 @@ function sendTransactions() {
     xhttp.send();
   }
 }
-
