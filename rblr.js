@@ -30,8 +30,7 @@ function showPillionPresent() {
   let ps = document.getElementById("showpillion");
   if (ps) {
     ps.innerHTML = "";
-    if (present)
-      ps.innerHTML="&#9745;"
+    if (present) ps.innerHTML = "&#9745;";
   }
 }
 function clickTime() {
@@ -69,9 +68,37 @@ function oi(obj) {
   obj.timer = setTimeout(saveOdo, 3000, obj);
 }
 
+function oic(obj) {
+  // Checkbox handler
+  obj.setAttribute("data-chg", "1");
+  // autosave handler
+  if (obj.timer) {
+    clearTimeout(obj.timer);
+  }
+  obj.timer = setTimeout(saveData, 1000, obj);
+}
+
+function oid(obj) {
+  obj.classList.remove("oc");
+  obj.classList.add("oi");
+  obj.setAttribute("data-chg", "1");
+  // autosave handler
+  if (obj.timer) {
+    clearTimeout(obj.timer);
+  }
+  obj.timer = setTimeout(saveData, 3000, obj);
+}
+
 // Called during Odo capture when input is complete
 function oc(obj) {
   saveOdo(obj);
+}
+
+function ocd(obj) {
+  if (obj.getAttribute("data-chg") == "1") {
+    console.log("ocd: " + obj.name);
+    saveData(obj);
+  }
 }
 
 function fix2(n) {
@@ -99,6 +126,10 @@ function parseDatetime(dt) {
   return new Date(yy, mm, dd, hh, mn);
 }
 
+function moneyChg(obj) {
+  oic(obj);
+  showMoneyAmt();
+}
 function refreshTime() {
   sendTransactions();
   let timeDisplay = document.querySelector("#timenow");
@@ -136,6 +167,39 @@ function refreshTime() {
   timeDisplay.innerHTML = formattedString;
 }
 
+function saveData(obj) {
+  if (obj.getAttribute("data-static") == "") obj.setAttribute("data-chg", "");
+  console.log("saveData: " + obj.name);
+  if (obj.timer) {
+    clearTimeout(obj.timer);
+  }
+
+  let ent = document.getElementById("EntrantID").value;
+  let val = obj.value;
+  switch (obj.name) {
+    case "RiderPostcode":
+    case "PillionPostcode":
+    case "BikeReg":
+    case "RiderCountry":
+    case "PillionCountry":
+      val = val.toUpperCase();
+      break;
+
+    case "RiderIBA":
+    case "PillionIBA":
+    case "RiderRBLR":
+    case "PillionRBLR":
+    case "FreeCamping":
+      val = "N";
+      if (obj.checked) val = "Y";
+      break;
+  }
+
+  let url = encodeURI(
+    "putentrant?EntrantID=" + ent + "&" + obj.name + "=" + val
+  );
+  stackTransaction(url, obj);
+}
 function saveOdo(obj) {
   if (obj.timer) {
     clearTimeout(obj.timer);
@@ -154,6 +218,10 @@ function saveOdo(obj) {
     "&t=" +
     timeDisplay.getAttribute("data-time");
 
+  stackTransaction(url, obj);
+}
+
+function stackTransaction(url, obj) {
   console.log(url);
   let newTrans = {};
   newTrans.url = url;
@@ -170,8 +238,50 @@ function saveOdo(obj) {
   obj.classList.remove("oi");
   obj.classList.add("oc");
 }
+
+function pumpTransactions() {
+  let stackx = sessionStorage.getItem(myStackItem);
+  if (stackx == null) return;
+
+  let stack = JSON.parse(stackx);
+
+  //console.log(stack);
+
+  while (stack.length > 0) {
+    let itm = stack[0];
+    stack.splice(0, 1);
+    sessionStorage.setItem(myStackItem, JSON.stringify(stack));
+    console.log("Sending: " + itm.url);
+
+    fetch(itm.url)
+      .then((response) => {
+        if (!response.ok) {
+          // Handle HTTP errors
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        if (data.err) {
+          // Handle JSON error field
+          console.error(`Error: ${data.msg}`);
+        } else {
+          // Process the data if no error
+          console.log("Data:", data);
+          document.getElementById(itm.obj).classList.replace("oc", "ok");
+        }
+      })
+      .catch((error) => {
+        // Handle network or other errors
+        console.error("Fetch error:", error);
+      });
+  }
+}
 // Called periodically to send outstanding updates to backend server
 function sendTransactions() {
+  pumpTransactions();
+  return;
+
   let stackx = sessionStorage.getItem(myStackItem);
   if (stackx == null) return;
 

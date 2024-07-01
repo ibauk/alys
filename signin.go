@@ -71,13 +71,7 @@ func show_signin(w http.ResponseWriter, r *http.Request) {
 	<script>` + my_js + `</script>
 	</head><body>`
 
-	sqlx := "SELECT EntrantID,RiderFirst,RiderLast,ifnull(RiderIBA,''),ifnull(RiderRBLR,''),ifnull(Email,''),ifnull(Phone,''),ifnull(RiderAddress,'')"
-	sqlx += ",ifnull(PillionFirst,''),ifnull(PillionLast,''),ifnull(PillionIBA,''),ifnull(PillionRBLR,''),ifnull(PillionEmail,''),ifnull(PillionPhone,''),ifnull(PillionAddress,'')"
-	sqlx += ",ifnull(Bike,'motorbike'),ifnull(BikeReg,'')"
-	sqlx += ",ifnull(NokName,''),ifnull(NokRelation,''),ifnull(NokPhone,'')"
-	sqlx += ",ifnull(OdoStart,''),ifnull(StartTime,''),ifnull(OdoFinish,''),ifnull(FinishTime,''),EntrantStatus,OdoKms,ifnull(Route,'')"
-	sqlx += ",ifnull(EntryDonation,''),ifnull(SquiresCash,''),ifnull(SquiresCheque,''),ifnull(RBLRAccount,''),ifnull(JustGivingAmt,'')"
-	sqlx += " FROM entrants"
+	sqlx := EntrantSQL
 	sqlx += " WHERE EntrantStatus IN (" + strconv.Itoa(STATUSCODES["DNS"]) + "," + strconv.Itoa(STATUSCODES["confirmedDNS"])
 	showSignedin := r.FormValue("all") != ""
 	if showSignedin {
@@ -86,7 +80,7 @@ func show_signin(w http.ResponseWriter, r *http.Request) {
 	sqlx += ")"
 	sqlx += " ORDER BY RiderLast,RiderFirst"
 
-	fmt.Println(sqlx)
+	//fmt.Println(sqlx)
 	rows, err := DBH.Query(sqlx)
 	if err != nil {
 		fmt.Println(sqlx)
@@ -105,9 +99,8 @@ func show_signin(w http.ResponseWriter, r *http.Request) {
 	oe := true
 	for rows.Next() {
 		var e Entrant
-		err := rows.Scan(&e.EntrantID, &e.Rider.First, &e.Rider.Last, &e.Rider.IBA, &e.Rider.RBLR, &e.Rider.Email, &e.Rider.Phone, &e.Rider.Address, &e.Pillion.First, &e.Pillion.Last, &e.Pillion.IBA, &e.Pillion.RBLR, &e.Pillion.Email, &e.Pillion.Phone, &e.Pillion.Address, &e.Bike, &e.BikeReg, &e.NokName, &e.NokRelation, &e.NokPhone, &e.OdoStart, &e.StartTime, &e.OdoFinish, &e.FinishTime, &e.EntrantStatus, &e.OdoKms, &e.Route, &e.FundsRaised.EntryDonation, &e.FundsRaised.SquiresCash, &e.FundsRaised.SquiresCheque, &e.FundsRaised.RBLRAccount, &e.FundsRaised.JustGivingAmt)
 
-		checkerr(err)
+		ScanEntrant(rows, &e)
 
 		//fmt.Printf(`<tr><td>%v</td><td>--%v</td><td>%v</td></tr>`, e.EntrantID, e.Rider.First, e.Rider.Last)
 		//fmt.Fprintf(w, `<tr><td>%v</td><td>--%v</td><td>%v</td></tr>`, e.EntrantID, e.Rider.First, e.Rider.Last)

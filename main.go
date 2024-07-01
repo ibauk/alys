@@ -122,6 +122,7 @@ func main() {
 	http.HandleFunc("/checkin", check_in)
 	http.HandleFunc("/checkout", check_out)
 	http.HandleFunc("/putodo", update_odo)
+	http.HandleFunc("/putentrant", update_entrant)
 	http.ListenAndServe(":"+*HTTPPort, nil)
 }
 
@@ -345,11 +346,48 @@ func show_odo(w http.ResponseWriter, r *http.Request, showstart bool) {
 	fmt.Fprint(w, `</div><hr><button class="nav" onclick="loadPage('menu');">Main menu</button></body></html>`)
 }
 
+func update_entrant(w http.ResponseWriter, r *http.Request) {
+
+	err := r.ParseForm()
+	checkerr(err)
+	e := ""
+	v := make(map[string]string, 0)
+	for key, val := range r.Form {
+		if key == "EntrantID" {
+			e = val[0]
+		} else {
+			v[key] = val[0]
+		}
+	}
+	if e == "" {
+		fmt.Fprint(w, `{"err": true,"msg":"no entrant"}`)
+		return
+	}
+	if len(v) == 0 {
+		fmt.Fprint(w, `{"err":true,"msg":"no data field"}`)
+		return
+	}
+	sqlx := "UPDATE entrants SET "
+	comma := false
+	for key, val := range v {
+		if comma {
+			sqlx += ","
+		}
+		sqlx += key + "='" + val + "'"
+		comma = true
+	}
+	sqlx += " WHERE EntrantID=" + e
+	fmt.Println(sqlx)
+	_, err = DBH.Exec(sqlx)
+	checkerr(err)
+	fmt.Fprint(w, `{"err":false,"msg":"ok"}`)
+}
+
 func update_odo(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("Here we go")
 	if r.FormValue("e") == "" || r.FormValue("f") == "" || r.FormValue("v") == "" {
-		fmt.Fprint(w, "ok")
+		fmt.Fprint(w, `{"err":false,"msg":"ok"}`)
 		return
 	}
 
@@ -381,6 +419,6 @@ func update_odo(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(sqlx)
 	DBH.Exec("UPDATE entrants SET " + sqlx)
 
-	fmt.Fprint(w, "ok")
+	fmt.Fprint(w, `{"err":false,"msg":"ok"}`)
 
 }

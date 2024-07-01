@@ -140,7 +140,7 @@ input.oc {
 }
 
 .SigninScreenSingle {
-  max-width: 50em;
+  max-width: 45em;
   margin: auto;
 }
 
@@ -148,7 +148,7 @@ input.oc {
   float: none;
   display: inline-block;
   vertical-align: middle;
-  margin-bottom: .5em;
+  margin-bottom: 0.5em;
 }
 fieldset label,
 fieldset .label {
@@ -200,8 +200,13 @@ input[type="radio"] {
 .RiderPostcode,
 .PillionPostcode {
   width: 5em;
+  text-transform: uppercase;
 }
 
+.RiderCountry,
+.PillionCountry {
+  width: 10em;
+}
 .Patches {
   width: 2em;
 }

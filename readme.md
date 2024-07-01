@@ -2,6 +2,15 @@
 
 Derived from but independent of ScoreMaster.
 
+## ENTRANT STATUS
+- **registered** (aka 'not signed in') - expected but not at Squires yet
+- **withdrawn** (before signing in, aka 'DNS') - not expected at Squires
+- **signed** in at Squires
+- **checked out** - still out riding
+- **finisher** - checked in at Squires within 24 hours
+- **late finisher** - checked in at Squires after 24 hours
+- **DNF** - ride is abandoned, not returning to Squires
+
 ## CHECK-OUT (START)
 The check-out process involves capturing odo readings and changing a rider's status to 'riding'.
 
