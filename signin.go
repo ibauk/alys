@@ -21,15 +21,10 @@ func edit_entrant(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	/*
-		sqlx := "SELECT EntrantID,RiderFirst,RiderLast,ifnull(RiderIBA,''),ifnull(RiderRBLR,''),ifnull(Email,''),ifnull(Phone,''),ifnull(RiderAddress,'')"
-		sqlx += ",ifnull(PillionFirst,''),ifnull(PillionLast,''),ifnull(PillionIBA,''),ifnull(PillionRBLR,''),ifnull(PillionEmail,''),ifnull(PillionPhone,''),ifnull(PillionAddress,'')"
-		sqlx += ",ifnull(Bike,'motorbike'),ifnull(BikeReg,'')"
-		sqlx += ",ifnull(NokName,''),ifnull(NokRelation,''),ifnull(NokPhone,'')"
-		sqlx += ",ifnull(OdoStart,''),ifnull(StartTime,''),ifnull(OdoFinish,''),ifnull(FinishTime,''),EntrantStatus,OdoKms,ifnull(Route,'')"
-		sqlx += ",ifnull(EntryDonation,''),ifnull(SquiresCash,''),ifnull(SquiresCheque,''),ifnull(RBLRAccount,''),ifnull(JustGivingAmt,'')"
-		sqlx += " FROM entrants"
-	*/
+	mode := r.FormValue("m")
+	if mode == "" {
+		mode = "signin"
+	}
 
 	sqlx := EntrantSQL
 	sqlx += " WHERE EntrantID=" + entrant
@@ -38,19 +33,28 @@ func edit_entrant(w http.ResponseWriter, r *http.Request) {
 	checkerr(err)
 
 	fmt.Fprint(w, refresher)
+
 	sss, err := template.New("SigninScreenSingle").Parse(SigninScreenSingle)
 	checkerr(err)
 	for rows.Next() {
 
 		var e Entrant
 
-		//err := rows.Scan(&e.EntrantID, &e.Rider.First, &e.Rider.Last, &e.Rider.IBA, &e.Rider.RBLR, &e.Rider.Email, &e.Rider.Phone, &e.Rider.Address, &e.Pillion.First, &e.Pillion.Last, &e.Pillion.IBA, &e.Pillion.RBLR, &e.Pillion.Email, &e.Pillion.Phone, &e.Pillion.Address, &e.Bike, &e.BikeReg, &e.NokName, &e.NokRelation, &e.NokPhone, &e.OdoStart, &e.StartTime, &e.OdoFinish, &e.FinishTime, &e.EntrantStatus, &e.OdoKms, &e.Route, &e.FundsRaised.EntryDonation, &e.FundsRaised.SquiresCash, &e.FundsRaised.SquiresCheque, &e.FundsRaised.RBLRAccount, &e.FundsRaised.JustGivingAmt)
-		//checkerr(err)
 		ScanEntrant(rows, &e)
+		e.EditMode = mode
 		err = sss.Execute(w, e)
 		checkerr(err)
 
 	}
+
+	fmt.Fprint(w, "<nav>")
+	if mode == "signin" {
+		fmt.Fprint(w, `<button class="nav" onclick="loadPage('signin');">back to list</button>`)
+		fmt.Fprint(w, `<script>document.onkeydown=function(e){if(e.keyCode==27) {e.preventDefault();loadPage('signin');}}</script>`)
+	}
+	fmt.Fprint(w, ` <button class="nav" onclick="loadPage('menu');">Main menu</button>`)
+	fmt.Fprint(w, "</nav")
+
 }
 
 func show_signin(w http.ResponseWriter, r *http.Request) {
@@ -90,9 +94,9 @@ func show_signin(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	fmt.Fprint(w, refresher)
-	fmt.Fprint(w, `<main class="signin">`)
 
-	fmt.Fprint(w, `<h2>RBLR1000 - Signing-in</h2>`)
+	fmt.Fprint(w, `<div class="top"><h2>RBLR1000 - Signing-in</h2></div>`)
+	fmt.Fprint(w, `<main class="signin">`)
 
 	fmt.Fprint(w, `<div id="signinlist">`)
 	n := 0
@@ -112,7 +116,7 @@ func show_signin(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, "even")
 		}
 		oe = !oe
-		fmt.Fprint(w, `">`)
+		fmt.Fprintf(w, `" onclick="signin(%v);">`, e.EntrantID)
 
 		val, ok := scv[e.EntrantStatus]
 		if !ok {

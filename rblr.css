@@ -15,8 +15,8 @@
   --form-background: #ccffcc;
   --input-text: #000;
   --input-background: inherited;
-  --hover-background: lightgray;
-  --hover-text: black;
+  --hover-background: lightgreen;
+  --hover-text: brown;
   --tabs-background: #dedbde;
   --tabs-text: #42454a;
   --via-background: white;
@@ -38,6 +38,10 @@ body {
 main.signin {
   margin: 0 auto 0 auto;
   width: 30em;
+}
+div.top {
+  margin: auto;
+  text-align: center;
 }
 main.stats {
   width: 20em;
@@ -279,4 +283,31 @@ ul#tabs li a.selected {
   display: inline-block;
   width: 25em;
   border: none;
+}
+.signinrow {
+  cursor: pointer;
+}
+
+.signinrow:hover {
+  background-color: var(--hover-background);
+  color: var(--hover-text);
+  font-size: larger;
+}
+
+.special {
+  font-size: larger;
+  border: solid;
+  border-radius: 8px;
+  margin-left: 1em;
+  padding: 0.1em 0.5em 0.5em 0.5em;
+}
+
+.link:hover {
+  cursor: pointer;
+}
+
+nav {
+  display: flex;
+  width: 100%;
+  justify-content: center;
 }

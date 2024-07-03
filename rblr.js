@@ -193,6 +193,10 @@ function saveData(obj) {
       val = "N";
       if (obj.checked) val = "Y";
       break;
+
+    case "EntrantStatus":
+      setTimeout(endEditEntrant,1000);
+      break;
   }
 
   let url = encodeURI(
@@ -317,5 +321,18 @@ function sendTransactions() {
     console.log("url==" + stack[i].url);
     xhttp.open("GET", stack[i].url, true);
     xhttp.send();
+  }
+}
+
+function signin(e) {
+  window.location = "/edit?m=signin&e=" + e;
+}
+
+function endEditEntrant() {
+  let mode = document.getElementById("EditMode").value;
+  switch(mode) {
+    case "signin":
+      window.location = "/signin";
+      break;
   }
 }

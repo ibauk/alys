@@ -54,6 +54,7 @@ type Entrant = struct {
 	Tshirt1       string
 	Tshirt2       string
 	Patches       int
+	EditMode      string
 }
 
 const EntrantSQL = `SELECT EntrantID,RiderFirst,RiderLast,ifnull(RiderIBA,''),ifnull(RiderRBLR,''),ifnull(RiderEmail,''),ifnull(RiderPhone,'')
@@ -71,6 +72,7 @@ const EntrantSQL = `SELECT EntrantID,RiderFirst,RiderLast,ifnull(RiderIBA,''),if
 var SigninScreenSingle = `
 <div class="SigninScreenSingle">
 <input type="hidden" id="EntrantID" name="EntrantID" value="{{.EntrantID}}">
+<input type="hidden" id="EditMode" name="EditMode" value="{{.EditMode}}">
 <fieldset class="tabContent" id="tab_rider"><legend>Rider</legend>
 <div class="field"><div class="field"><label for="RiderLast">Last name</label> <input id="RiderLast" name="RiderLast" class="RiderLast" value="{{.Rider.Last}}" oninput="oid(this);" onchange="ocd(this);"></div>
 <div class="field"><label for="RiderFirst">First name</label> <input id="RiderFirst" name="RiderFirst" class="RiderFirst" value="{{.Rider.First}}" oninput="oid(this);" onchange="ocd(this);"></div>
@@ -105,9 +107,9 @@ var SigninScreenSingle = `
 	</select>
 
 </div>
-<div class="field">
+<div class="field special" title="Changing status closes the form">
     
-	<label for="EntrantStatus" name="EntrantStatus">Status</label>
+	<label for="EntrantStatus">Status</label>
 	<select id="EntrantStatus" name="EntrantStatus"   data-chg="1" data-static="1" onchange="ocd(this);">
 	    <option value="0"{{if eq .EntrantStatus 0}} selected{{end}}>not signed in</option>
 	    <option value="2"{{if eq .EntrantStatus 2}} selected{{end}}>signed in</option>
