@@ -23,7 +23,7 @@
   --via-text: black;
   --solid-border: #c9c3ba;
   --header-background: lightgray;
-  --scorex-background: #66d2ff;
+  --topbar-background: lightblue;
   --rejected-background: red;
   --rejected-text: white;
   --checked-background: #31ad16;
@@ -41,7 +41,10 @@ main.signin {
 }
 div.top {
   margin: auto;
+  background-color: var(--topbar-background);
   text-align: center;
+  position: sticky;
+  top: 0;
 }
 main.stats {
   width: 20em;
@@ -69,7 +72,7 @@ main.frontmenu button:hover {
 #odohdr {
   position: sticky;
   top: 0;
-  background-color: lightblue;
+  background-color: var(--topbar-background);
   width: 100%;
   padding: 0.5em 0 0.5em 0;
   text-align: center;
@@ -95,6 +98,7 @@ main.frontmenu button:hover {
 
 #signinlist {
   display: table;
+  overflow: hidden;
 }
 
 #signinlist div {
@@ -311,3 +315,4 @@ nav {
   width: 100%;
   justify-content: center;
 }
+

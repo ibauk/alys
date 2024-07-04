@@ -222,7 +222,7 @@ var SigninScreenSingle = `
 
 
 </div>
-<script>` + my_tabs_js + ` setupTabs();showMoneyAmt();showPillionPresent();setInterval(pumpTransactions,1000);</script>
+<script>` + my_tabs_js + ` setupTabs();showMoneyAmt();showPillionPresent();setInterval(sendTransactions,1000);</script>
 `
 
 func ScanEntrant(rows *sql.Rows, e *Entrant) {

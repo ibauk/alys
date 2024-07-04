@@ -15,6 +15,10 @@ function addMoney() {
   return money;
 }
 
+function bumpStartTime() {
+
+}
+
 function showMoneyAmt() {
   let amt = addMoney();
   let sf = document.getElementById("showmoney");
@@ -243,7 +247,7 @@ function stackTransaction(url, obj) {
   obj.classList.add("oc");
 }
 
-function pumpTransactions() {
+function sendTransactions() {
   let stackx = sessionStorage.getItem(myStackItem);
   if (stackx == null) return;
 
@@ -279,48 +283,6 @@ function pumpTransactions() {
         // Handle network or other errors
         console.error("Fetch error:", error);
       });
-  }
-}
-// Called periodically to send outstanding updates to backend server
-function sendTransactions() {
-  pumpTransactions();
-  return;
-
-  let stackx = sessionStorage.getItem(myStackItem);
-  if (stackx == null) return;
-
-  let stack = JSON.parse(stackx);
-
-  let N = stack.length;
-
-  if (N < 1) return;
-
-  for (let i = 0; i < N; i++) {
-    if (stack[i].sent) continue;
-
-    console.log(stack[i].url);
-
-    let xhttp = new XMLHttpRequest();
-    xhttp.onerror = function () {
-      return; // Probably means the network's not available
-    };
-    xhttp.onload = function () {
-      let ok = new RegExp("\\W*ok\\W*");
-      if (xhttp.status == 200) {
-        console.log("{" + this.responseText.substring(0, 30) + "}");
-        if (!ok.test(this.responseText)) {
-          console.log("UPDATE_FAILED");
-          return;
-        } else {
-          stack[i].sent = true;
-          sessionStorage.setItem(myStackItem, JSON.stringify(stack));
-          document.getElementById(stack[i].obj).classList.replace("oc", "ok");
-        }
-      }
-    };
-    console.log("url==" + stack[i].url);
-    xhttp.open("GET", stack[i].url, true);
-    xhttp.send();
   }
 }
 
