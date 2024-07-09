@@ -19,6 +19,25 @@ function bumpStartTime() {
 
 }
 
+
+function calcMileage() {
+
+  let mlgdiv = document.getElementById("OdoMileage");
+  if (!mlgdiv) return;
+  let km = document.getElementById("OdoCountsK").checked;
+  let units = parseInt(document.getElementById("OdoFinish").value) - parseInt(document.getElementById("OdoStart").value);
+  if (units < 1) {
+    mlgdiv.innerHTML = "";
+    return;
+  }
+  if (km) {
+    const KmsPerMile = 1.60934;
+    units = parseInt(units / KmsPerMile);
+  }
+  mlgdiv.innerHTML = " "+units+" miles";
+
+}
+
 function showMoneyAmt() {
   let amt = addMoney();
   let sf = document.getElementById("showmoney");
@@ -93,6 +112,17 @@ function oid(obj) {
   obj.timer = setTimeout(saveData, 3000, obj);
 }
 
+function oidcfg(obj) {
+  obj.classList.remove("oc");
+  obj.classList.add("oi");
+  obj.setAttribute("data-chg", "1");
+  // autosave handler
+  if (obj.timer) {
+    clearTimeout(obj.timer);
+  }
+  obj.timer = setTimeout(saveConfig, 3000, obj);
+}
+
 // Called during Odo capture when input is complete
 function oc(obj) {
   saveOdo(obj);
@@ -102,6 +132,13 @@ function ocd(obj) {
   if (obj.getAttribute("data-chg") == "1") {
     console.log("ocd: " + obj.name);
     saveData(obj);
+  }
+}
+
+function ocdcfg(obj) {
+  if (obj.getAttribute("data-chg") == "1") {
+    console.log("ocd: " + obj.name);
+    saveConfig(obj);
   }
 }
 
@@ -171,6 +208,28 @@ function refreshTime() {
   timeDisplay.innerHTML = formattedString;
 }
 
+
+function saveConfig(obj) {
+  if (obj.getAttribute("data-static") == "") obj.setAttribute("data-chg", "");
+  console.log("saveConfig: " + obj.name);
+  if (obj.timer) {
+    clearTimeout(obj.timer);
+  }
+
+  let val = obj.value;
+
+  let url = encodeURI(
+    "config?"  + obj.name + "=" + val
+  );
+  stackTransaction(url, obj);
+
+  sendTransactions();
+  
+}
+
+
+
+
 function saveData(obj) {
   if (obj.getAttribute("data-static") == "") obj.setAttribute("data-chg", "");
   console.log("saveData: " + obj.name);
@@ -201,12 +260,22 @@ function saveData(obj) {
     case "EntrantStatus":
       setTimeout(endEditEntrant,1000);
       break;
+
+    case "OdoStart":
+    case "OdoFinish":
+    case "OdoKms":
+    case "OdoCounts":
+      calcMileage();
+      break;
+
   }
 
   let url = encodeURI(
     "putentrant?EntrantID=" + ent + "&" + obj.name + "=" + val
   );
   stackTransaction(url, obj);
+
+  validate_entrant();
 }
 function saveOdo(obj) {
   if (obj.timer) {
@@ -297,4 +366,19 @@ function endEditEntrant() {
       window.location = "/signin";
       break;
   }
+}
+
+function validate_entrant() {
+
+  let mustFields = ['RiderFirst','RiderLast','RiderEmail','RiderPhone','Bike','NokName','NokRelation','NokPhone'];
+
+  mustFields.forEach(fld => { 
+    let f = document.getElementById(fld); 
+    f.setAttribute('placeholder','must not be blank');
+    if (f.value=='') 
+      f.classList.add('notblank'); 
+    else 
+    f.classList.remove('notblank');
+  });
+
 }

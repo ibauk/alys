@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"text/template"
 	"time"
 
 	_ "embed"
@@ -122,13 +123,27 @@ func main() {
 	http.HandleFunc("/edit", edit_entrant)
 	http.HandleFunc("/checkin", check_in)
 	http.HandleFunc("/checkout", check_out)
+	http.HandleFunc("/config", show_config)
 	http.HandleFunc("/putodo", update_odo)
 	http.HandleFunc("/putentrant", update_entrant)
 	http.ListenAndServe(":"+*HTTPPort, nil)
 }
 
 func about_this_program(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Hello there, I say, I say")
+
+	var refresher = `<!DOCTYPE html>
+	<html lang="en">
+	<head><title>About Alys</title>
+	<style>` + my_css + `</style>
+	<script>` + my_js + `</script>
+	</head><body>`
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	fmt.Fprint(w, refresher)
+
+	fmt.Fprint(w, `<p class="legal">`+PROGRAMVERSION+"</p>")
+	fmt.Fprint(w, "<p>I handle administration for the RBLR1000</p>")
 }
 
 func check_in(w http.ResponseWriter, r *http.Request) {
@@ -198,6 +213,7 @@ func show_stats(w http.ResponseWriter, r *http.Request) {
 	totfunds := getStringFromDB("SELECT SUM(ifnull(EntryDonation,0)+ifnull(SquiresCheque,0)+ifnull(SquiresCash,0)+ifnull(RBLRAccount,0)+ifnull(JustGivingAmt,0)) AS funds  FROM entrants;", "0.00")
 	fmt.Fprintf(w, `<tr><td><br>Funds raised</td><td class="val"><br>&pound;%v</td></tr>`, format_money(totfunds))
 	fmt.Fprint(w, `</table></main>`)
+	fmt.Fprint(w, `<script>document.onkeydown=function(e){if(e.keyCode==27) {e.preventDefault();loadPage('menu');}}</script>`)
 
 	fmt.Fprint(w, `</body><html>`)
 }
@@ -206,6 +222,62 @@ func storeTimeDB(t time.Time) string {
 
 	res := t.Local().Format(timefmt)
 	return res
+}
+
+func show_config(w http.ResponseWriter, r *http.Request) {
+
+	err := r.ParseForm()
+	checkerr(err)
+
+	v := make(map[string]string, 0)
+	updt := false
+	for key, val := range r.Form {
+		v[key] = val[0]
+		updt = true
+	}
+
+	if updt {
+		sqlx := "UPDATE config SET "
+		comma := false
+		for key, val := range v {
+			if comma {
+				sqlx += ","
+			}
+			sqlx += key + "='" + val + "'"
+			comma = true
+		}
+		fmt.Println(sqlx)
+		_, err := DBH.Exec(sqlx)
+		checkerr(err)
+		fmt.Fprint(w, `{"err":false,"msg":"ok"}`)
+		return
+	}
+
+	var refresher = `<!DOCTYPE html>
+	<html lang="en">
+	<head><title>Config</title>
+	<style>` + my_css + `</style>
+	<script>` + my_js + `</script>
+	</head><body>`
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	fmt.Fprint(w, refresher)
+
+	sss, err := template.New("ConfigScreen").Parse(ConfigScreen)
+	checkerr(err)
+
+	sqlx := ConfigSQL
+	rows, err := DBH.Query(sqlx)
+	checkerr(err)
+	defer rows.Close()
+	if rows.Next() {
+		var c ConfigRecord
+		err = rows.Scan(&c.StartTime, &c.StartCohortMins, &c.ExtraCohorts, &c.RallyStatus)
+		checkerr(err)
+		err = sss.Execute(w, c)
+		checkerr(err)
+	}
 }
 
 func beyond24(starttime, finishtime string) bool {

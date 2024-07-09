@@ -35,7 +35,7 @@ func show_odo(w http.ResponseWriter, r *http.Request, showstart bool) {
 	<script>` + my_js + `</script>
 	</head><body>`
 
-	sqlx := "SELECT EntrantID,RiderFirst,RiderLast,ifnull(OdoStart,''),ifnull(StartTime,''),ifnull(OdoFinish,''),ifnull(FinishTime,''),EntrantStatus,OdoKms"
+	sqlx := "SELECT EntrantID,RiderFirst,RiderLast,ifnull(OdoStart,''),ifnull(StartTime,''),ifnull(OdoFinish,''),ifnull(FinishTime,''),EntrantStatus,OdoCounts"
 	sqlx += " FROM entrants WHERE "
 	st, gap, xtra := get_odolist_start_time(showstart)
 	sclist := ""
@@ -83,8 +83,8 @@ func show_odo(w http.ResponseWriter, r *http.Request, showstart bool) {
 		var EntrantID int
 		var RiderFirst, RiderLast, OdoStart, StartTime, OdoFinish, FinishTime string
 		var EntrantStatus int
-		var OdoKms int
-		rows.Scan(&EntrantID, &RiderFirst, &RiderLast, &OdoStart, &StartTime, &OdoFinish, &FinishTime, &EntrantStatus, &OdoKms)
+		var OdoCounts string
+		rows.Scan(&EntrantID, &RiderFirst, &RiderLast, &OdoStart, &StartTime, &OdoFinish, &FinishTime, &EntrantStatus, &OdoCounts)
 		itemno++
 		fmt.Fprint(w, `<div class="odorow `)
 		if oe {
@@ -106,6 +106,8 @@ func show_odo(w http.ResponseWriter, r *http.Request, showstart bool) {
 		fmt.Fprint(w, `</div>`)
 
 	}
+	fmt.Fprint(w, `<script>document.onkeydown=function(e){if(e.keyCode==27) {e.preventDefault();loadPage('menu');}}</script>`)
+
 	fmt.Fprint(w, `</div><hr><button class="nav" onclick="loadPage('menu');">Main menu</button></body></html>`)
 }
 

@@ -34,6 +34,7 @@
 body {
   font-family: Verdana, Arial, Helvetica, sans-serif;
   font-size: calc(14pt + 1vmin);
+  max-width: 100vw;
 }
 main.signin {
   margin: 0 auto 0 auto;
@@ -87,18 +88,22 @@ main.frontmenu button:hover {
 }
 #odolist div {
   display: table-row;
+  width: 100%;
 }
 #odolist span {
   display: table-cell;
+  font-size: 2em;
   padding: 0 0.2em 0.2em 0.1em;
 }
 #odolist span input {
   vertical-align: middle;
+  font-size: 0.9em;
 }
 
 #signinlist {
   display: table;
   overflow: hidden;
+  font-size: 1.5em;
 }
 
 #signinlist div {
@@ -110,7 +115,7 @@ main.frontmenu button:hover {
 }
 
 button.nav {
-  display: block;
+  display: inline-block;
   border-radius: 6px;
   font-size: calc(14pt + 1vmin);
   width: 8em;
@@ -316,3 +321,31 @@ nav {
   justify-content: center;
 }
 
+#OdoMileage {
+  font-size: 10pt;
+  font-style: italic;
+}
+
+.legal {
+  font-size: 10pt;
+}
+
+.notblank {
+ background-color: var(--bright-background); 
+}
+
+.ConfigScreen .field {
+  display: block;
+  margin: 0 0 1em 0;
+}
+.ConfigScreen input {
+  font-size: .9em;
+}
+
+input.StartCohortMins {
+  width: 2em;
+}
+
+input.ExtraCohorts {
+  width: 2em;
+}

@@ -7,6 +7,23 @@ import (
 	"text/template"
 )
 
+func create_new_entrant() string {
+
+	sqlx := "SELECT max(EntrantID) FROM entrants"
+
+	e := getIntegerFromDB(sqlx, -1) + 1
+	if e < 1 {
+		return "0"
+	}
+	res := strconv.Itoa(e)
+	sqlx = "INSERT INTO entrants(EntrantID) VALUES(" + res + ")"
+	_, err := DBH.Exec(sqlx)
+	if err != nil {
+		return "0"
+	}
+	return res
+}
+
 func edit_entrant(w http.ResponseWriter, r *http.Request) {
 
 	var refresher = `<!DOCTYPE html>
@@ -26,11 +43,20 @@ func edit_entrant(w http.ResponseWriter, r *http.Request) {
 		mode = "signin"
 	}
 
+	if r.FormValue("e") < "1" {
+		entrant = create_new_entrant()
+		if entrant < "1" {
+			fmt.Fprint(w, `<p>ERROR - can't insert new record!</p>`)
+			return
+		}
+	}
 	sqlx := EntrantSQL
 	sqlx += " WHERE EntrantID=" + entrant
 
 	rows, err := DBH.Query(sqlx)
 	checkerr(err)
+
+	defer rows.Close()
 
 	fmt.Fprint(w, refresher)
 
@@ -129,7 +155,8 @@ func show_signin(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, `</div>`)
 	}
 	fmt.Fprint(w, `</div>`)
-	fmt.Fprint(w, `<hr><button class="nav" onclick="loadPage('menu');">Main menu</button>`)
+	fmt.Fprint(w, `<hr><button class="nav" onclick="loadPage('menu');">Main menu</button>  <button class="nav" title="Enter unregistered entrant details" onclick="loadPage('edit?e=0');">New Entrant</button>`)
+	fmt.Fprint(w, `<script>document.onkeydown=function(e){if(e.keyCode==27) {e.preventDefault();loadPage('menu');}}</script>`)
 
 	fmt.Fprint(w, `</main></body></html>`)
 	fmt.Printf("Showed %v lines\n", n)

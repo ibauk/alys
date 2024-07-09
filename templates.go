@@ -8,6 +8,39 @@ import (
 //go:embed tabs.js
 var my_tabs_js string
 
+type ConfigRecord struct {
+	StartTime       string
+	StartCohortMins int
+	ExtraCohorts    int
+	RallyStatus     string
+}
+
+const ConfigSQL = `SELECT ifnull(StartTime,'05:00'),ifnull(StartCohortMins,10),ifnull(ExtraCohorts,3),ifnull(RallyStatus,'S') FROM config`
+
+const ConfigScreen = `
+<div class="ConfigScreen">
+	<div class="field">
+		<label for="StartTime">Earliest start time</label> 
+		<input type="time" class="StartTime" id="StartTime" name="StartTime" value="{{.StartTime}}" oninput="oidcfg(this);" onchange="ocdcfg(this);">
+	</div>
+	<div class="field">
+		<label for="StartCohortMins">Minutes between cohorts</label> 
+		<input type="number" min="1" max="40" class="StartCohortMins" id="StartCohortMins" name="StartCohortMins" value="{{.StartCohortMins}}" oninput="oidcfg(this);" onchange="ocdcfg(this);">
+	</div>
+	<div class="field">
+		<label for="ExtraCohorts">Number of extra cohorts</label> 
+		<input type="number" min="0" max="10" class="ExtraCohorts" id="ExtraCohorts" name="ExtraCohorts" value="{{.ExtraCohorts}}" oninput="oidcfg(this);" onchange="ocdcfg(this);">
+	</div>
+	<div class="field">
+		<span class="label">State of play: </span>
+		<input type="radio" id="RallyStatusS" class="RallyStatus" name="RallyStatus" value="S" {{if ne .RallyStatus "F"}} checked{{end}} data-chg="1" data-static="1" onchange="ocdcfg(this);">
+		<label for="RallyStatusS">Signin and start</label>
+		<input type="radio" id="RallyStatusF" class="RallyStatus" name="RallyStatus" value="F" {{if eq .RallyStatus "F"}} checked{{end}} data-chg="1" data-static="1" onchange="ocdcfg(this);">
+		<label for="RallyStatusF">Check back in and finish</label>
+	</div>
+</div>
+`
+
 type Person = struct {
 	First    string
 	Last     string
@@ -34,38 +67,39 @@ type Money = struct {
 }
 
 type Entrant = struct {
-	EntrantID     int
-	EntrantStatus int
-	Rider         Person
-	Pillion       Person
-	NokName       string
-	NokRelation   string
-	NokPhone      string
-	Bike          string
-	BikeReg       string
-	Route         string
-	OdoStart      string
-	OdoFinish     string
-	OdoKms        int
-	StartTime     string
-	FinishTime    string
-	FundsRaised   Money
-	FreeCamping   string
-	Tshirt1       string
-	Tshirt2       string
-	Patches       int
-	EditMode      string
+	EntrantID            int
+	EntrantStatus        int
+	Rider                Person
+	Pillion              Person
+	NokName              string
+	NokRelation          string
+	NokPhone             string
+	Bike                 string
+	BikeReg              string
+	Route                string
+	OdoStart             string
+	OdoFinish            string
+	OdoCounts            string
+	StartTime            string
+	FinishTime           string
+	FundsRaised          Money
+	FreeCamping          string
+	CertificateDelivered string
+	Tshirt1              string
+	Tshirt2              string
+	Patches              int
+	EditMode             string
 }
 
-const EntrantSQL = `SELECT EntrantID,RiderFirst,RiderLast,ifnull(RiderIBA,''),ifnull(RiderRBLR,''),ifnull(RiderEmail,''),ifnull(RiderPhone,'')
+const EntrantSQL = `SELECT EntrantID,ifnull(RiderFirst,''),ifnull(RiderLast,''),ifnull(RiderIBA,''),ifnull(RiderRBLR,''),ifnull(RiderEmail,''),ifnull(RiderPhone,'')
     ,ifnull(RiderAddress1,''),ifnull(RiderAddress2,''),ifnull(RiderTown,''),ifnull(RiderCounty,''),ifnull(RiderPostcode,''),ifnull(RiderCountry,'')
 	,ifnull(PillionFirst,''),ifnull(PillionLast,''),ifnull(PillionIBA,''),ifnull(PillionRBLR,''),ifnull(PillionEmail,''),ifnull(PillionPhone,'')
     ,ifnull(PillionAddress1,''),ifnull(PillionAddress2,''),ifnull(PillionTown,''),ifnull(PillionCounty,''),ifnull(PillionPostcode,''),ifnull(PillionCountry,'')
 	,ifnull(Bike,'motorbike'),ifnull(BikeReg,'')
 	,ifnull(NokName,''),ifnull(NokRelation,''),ifnull(NokPhone,'')
-	,ifnull(OdoStart,''),ifnull(StartTime,''),ifnull(OdoFinish,''),ifnull(FinishTime,''),EntrantStatus,OdoKms,ifnull(Route,'')
+	,ifnull(OdoStart,''),ifnull(StartTime,''),ifnull(OdoFinish,''),ifnull(FinishTime,''),EntrantStatus,ifnull(OdoCounts,'M'),ifnull(Route,'')
 	,ifnull(EntryDonation,''),ifnull(SquiresCash,''),ifnull(SquiresCheque,''),ifnull(RBLRAccount,''),ifnull(JustGivingAmt,'')
-	,ifnull(Tshirt1,''),ifnull(Tshirt2,''),ifnull(Patches,0)
+	,ifnull(Tshirt1,''),ifnull(Tshirt2,''),ifnull(Patches,0),ifnull(FreeCamping,''),ifnull(CertificateDelivered,'')
 	 FROM entrants
 `
 
@@ -74,7 +108,7 @@ var SigninScreenSingle = `
 <input type="hidden" id="EntrantID" name="EntrantID" value="{{.EntrantID}}">
 <input type="hidden" id="EditMode" name="EditMode" value="{{.EditMode}}">
 <fieldset class="tabContent" id="tab_rider"><legend>Rider</legend>
-<div class="field"><div class="field"><label for="RiderLast">Last name</label> <input id="RiderLast" name="RiderLast" class="RiderLast" value="{{.Rider.Last}}" oninput="oid(this);" onchange="ocd(this);"></div>
+<div class="field"><div class="field"><label for="RiderLast">Last name</label> <input autofocus id="RiderLast" name="RiderLast" class="RiderLast" value="{{.Rider.Last}}" oninput="oid(this);" onchange="ocd(this);"></div>
 <div class="field"><label for="RiderFirst">First name</label> <input id="RiderFirst" name="RiderFirst" class="RiderFirst" value="{{.Rider.First}}" oninput="oid(this);" onchange="ocd(this);"></div>
 <div class="field"><label for="RiderIBA">IBA member</label> <input type="checkbox" id="RiderIBA" name="RiderIBA" class="RiderIBA" value="RiderIBA"{{if ne .Rider.IBA ""}} checked{{end}} onchange="oic(this);"></div>
 <div class="field"><label for="RiderRBLR">RBL Member</label> <input type="checkbox" id="RiderRBLR" name="RiderRBLR" class="RiderRBLR" value="RiderRBLR"{{if ne .Rider.RBLR ""}} checked{{end}} onchange="oic(this);"></div>
@@ -92,7 +126,7 @@ var SigninScreenSingle = `
 <fieldset class="flex field">
 <div class="field">
 	<label for="FreeCamping">Camping</label>
-	<input type="checkbox" id="FreeCamping" name="FreeCamping" class="FreeCamping" value="FreeCamping"{{if ne .FreeCamping ""}} checked{{end}} onchange="oic(this);">
+	<input type="checkbox" id="FreeCamping" name="FreeCamping" class="FreeCamping" value="FreeCamping"{{if eq .FreeCamping "Y"}} checked{{end}} onchange="oic(this);">
 </div>
 <div class="field">
 
@@ -162,18 +196,25 @@ var SigninScreenSingle = `
 </div>
 
 <fieldset class="tabContent" id="tab_bike"><legend>Bike</legend>
-<div class="field"><label for="Bike">Bike</label> <input id="Bike" name="Bike" class="Bike" value="{{.Bike}}" oninput="oid(this);" onchange="ocd(this);"></div>
-<div class="field"><label for="BikeReg">Registration</label> <input id="BikeReg" name="BikeReg" class="BikeReg" value="{{.BikeReg}}" oninput="oid(this);" onchange="ocd(this);"></div>
+<div class="field">
+	<label for="Bike">Bike</label> 
+	<input id="Bike" name="Bike" class="Bike" value="{{.Bike}}" oninput="oid(this);" onchange="ocd(this);">
+</div>
+<div class="field">
+	<label for="BikeReg">Registration</label> 
+	<input id="BikeReg" name="BikeReg" class="BikeReg" value="{{.BikeReg}}" oninput="oid(this);" onchange="ocd(this);">
+</div>
 <div class="field">
 	<fieldset>
     <span class="label">Odo counts:</span>
-	<input type="radio" id="OdoKms0" name="OdoKms" value="0"{{if ne .OdoKms 1}} checked{{end}} data-chg="1" data-static="1" onchange="ocd(this);"> <label for="OdoKms0">miles</label> 
-	<input type="radio" id="OdoKms1" name="OdoKms" value="1"{{if eq .OdoKms 1}} checked{{end}}  data-chg="1" data-static="1" onchange="ocd(this);"> <label for="OdoKms1">kms</label>
+	<input type="radio" id="OdoCountsM" name="OdoCounts" value="M"{{if ne .OdoCounts "K"}} checked{{end}} data-chg="1" data-static="1" onchange="ocd(this);"> <label for="OdoCountsM">miles</label> 
+	<input type="radio" id="OdoCountsK" name="OdoCounts" value="K"{{if eq .OdoCounts "K"}} checked{{end}}  data-chg="1" data-static="1" onchange="ocd(this);"> <label for="OdoCountsK">kms</label>
 	</fieldset>
 </div>
 <br>
 <div class="field"><label for="OdoStart">Odo @ start</label> <input id="OdoStart" name="OdoStart" class="OdoStart" value="{{.OdoStart}}" oninput="oid(this);" onchange="ocd(this);"></div>
 <div class="field"><label for="OdoFinish">Odo @ finish</label> <input id="OdoFinish" name="OdoFinish" class="OdoFinish" value="{{.OdoFinish}}" oninput="oid(this);" onchange="ocd(this);"></div>
+<div class="field" id="OdoMileage"></div>
 </fieldset>
 <fieldset class="tabContent" id="tab_money"><legend>Money</legend>
 <div class="field">
@@ -222,12 +263,12 @@ var SigninScreenSingle = `
 
 
 </div>
-<script>` + my_tabs_js + ` setupTabs();showMoneyAmt();showPillionPresent();setInterval(sendTransactions,1000);</script>
+<script>` + my_tabs_js + ` setupTabs();showMoneyAmt();showPillionPresent();calcMileage();validate_entrant();setInterval(sendTransactions,1000);</script>
 `
 
 func ScanEntrant(rows *sql.Rows, e *Entrant) {
 
-	err := rows.Scan(&e.EntrantID, &e.Rider.First, &e.Rider.Last, &e.Rider.IBA, &e.Rider.RBLR, &e.Rider.Email, &e.Rider.Phone, &e.Rider.Address1, &e.Rider.Address2, &e.Rider.Town, &e.Rider.County, &e.Rider.Postcode, &e.Rider.Country, &e.Pillion.First, &e.Pillion.Last, &e.Pillion.IBA, &e.Pillion.RBLR, &e.Pillion.Email, &e.Pillion.Phone, &e.Pillion.Address1, &e.Pillion.Address2, &e.Pillion.Town, &e.Pillion.County, &e.Pillion.Postcode, &e.Pillion.Country, &e.Bike, &e.BikeReg, &e.NokName, &e.NokRelation, &e.NokPhone, &e.OdoStart, &e.StartTime, &e.OdoFinish, &e.FinishTime, &e.EntrantStatus, &e.OdoKms, &e.Route, &e.FundsRaised.EntryDonation, &e.FundsRaised.SquiresCash, &e.FundsRaised.SquiresCheque, &e.FundsRaised.RBLRAccount, &e.FundsRaised.JustGivingAmt, &e.Tshirt1, &e.Tshirt2, &e.Patches)
+	err := rows.Scan(&e.EntrantID, &e.Rider.First, &e.Rider.Last, &e.Rider.IBA, &e.Rider.RBLR, &e.Rider.Email, &e.Rider.Phone, &e.Rider.Address1, &e.Rider.Address2, &e.Rider.Town, &e.Rider.County, &e.Rider.Postcode, &e.Rider.Country, &e.Pillion.First, &e.Pillion.Last, &e.Pillion.IBA, &e.Pillion.RBLR, &e.Pillion.Email, &e.Pillion.Phone, &e.Pillion.Address1, &e.Pillion.Address2, &e.Pillion.Town, &e.Pillion.County, &e.Pillion.Postcode, &e.Pillion.Country, &e.Bike, &e.BikeReg, &e.NokName, &e.NokRelation, &e.NokPhone, &e.OdoStart, &e.StartTime, &e.OdoFinish, &e.FinishTime, &e.EntrantStatus, &e.OdoCounts, &e.Route, &e.FundsRaised.EntryDonation, &e.FundsRaised.SquiresCash, &e.FundsRaised.SquiresCheque, &e.FundsRaised.RBLRAccount, &e.FundsRaised.JustGivingAmt, &e.Tshirt1, &e.Tshirt2, &e.Patches, &e.FreeCamping, &e.CertificateDelivered)
 	checkerr(err)
 
 }

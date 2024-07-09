@@ -11,8 +11,11 @@ Derived from but independent of ScoreMaster.
 - **late finisher** - checked in at Squires after 24 hours
 - **DNF** - ride is abandoned, not returning to Squires
 
+## SIGNING-IN (START)
+Riders are registered online via Wufoo forms but on arrival at Squires they are signed in by staff who will check and confirm their details, make any amendments necessary and take charge of any cash or cheques handed in.
+
 ## CHECK-OUT (START)
-The check-out process involves capturing odo readings and changing a rider's status to 'riding'.
+The check-out process involves capturing odo readings and thereby changing a rider's status to 'riding'.
 
 Riders are released initially in cohorts starting at 0500, then at 10 minute intervals until 0530 or some other predetermined time after which the timestamp changes each minute.
 
