@@ -118,9 +118,11 @@ func main() {
 	http.HandleFunc("/", show_menu)
 	http.HandleFunc("/menu", show_menu)
 	http.HandleFunc("/about", about_this_program)
+	http.HandleFunc("/admin", show_admin)
 	http.HandleFunc("/stats", show_stats)
 	http.HandleFunc("/signin", show_signin)
 	http.HandleFunc("/edit", edit_entrant)
+	http.HandleFunc("/export", export_finishers)
 	http.HandleFunc("/checkin", check_in)
 	http.HandleFunc("/checkout", check_out)
 	http.HandleFunc("/config", show_config)
@@ -144,6 +146,9 @@ func about_this_program(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprint(w, `<p class="legal">`+PROGRAMVERSION+"</p>")
 	fmt.Fprint(w, "<p>I handle administration for the RBLR1000</p>")
+	fp, err := filepath.Abs(*DBNAME)
+	checkerr(err)
+	fmt.Fprintf(w, `<p>The database is stored in <strong>%v</strong></p>`, fp)
 }
 
 func check_in(w http.ResponseWriter, r *http.Request) {
@@ -246,7 +251,7 @@ func show_config(w http.ResponseWriter, r *http.Request) {
 			sqlx += key + "='" + val + "'"
 			comma = true
 		}
-		fmt.Println(sqlx)
+		//fmt.Println(sqlx)
 		_, err := DBH.Exec(sqlx)
 		checkerr(err)
 		fmt.Fprint(w, `{"err":false,"msg":"ok"}`)
@@ -297,7 +302,7 @@ func beyond24(starttime, finishtime string) bool {
 	return hrs > 24 || !ok
 }
 
-func show_menu(w http.ResponseWriter, r *http.Request) {
+func show_admin(w http.ResponseWriter, r *http.Request) {
 
 	var refresher = `<!DOCTYPE html>
 	<html lang="en">
@@ -308,12 +313,36 @@ func show_menu(w http.ResponseWriter, r *http.Request) {
 	`
 
 	fmt.Fprint(w, refresher+`<main class="frontmenu">`)
+	fmt.Fprint(w, `<h1>RBLR1000 ADMINISTRATION</h1>`)
+	fmt.Fprint(w, `<button onclick="loadPage('config');">Configuration</button>`)
+	fmt.Fprint(w, `<button onclick="loadPage('about');">About Alys</button>`)
+	fmt.Fprint(w, `<button onclick="this.disabled=true;loadPage('export');">Export results for IBA database</button>`)
+	fmt.Fprint(w, `<button onclick="loadPage('menu');">Main menu</button>`)
+	fmt.Fprint(w, `</main>`)
+}
+
+func show_menu(w http.ResponseWriter, r *http.Request) {
+
+	var refresher = `<!DOCTYPE html>
+	<html lang="en">
+	<head><title>RBLR1000</title>
+	<style>` + my_css + `</style>
+	<script>` + my_js + `</script>
+	</head><body>
+	`
+
+	RallyStatus := getStringFromDB("SELECT RallyStatus FROM config", "S")
+
+	fmt.Fprint(w, refresher+`<main class="frontmenu">`)
 	fmt.Fprint(w, `<h1>RBLR1000</h1>`)
-	fmt.Fprint(w, `<button onclick="loadPage('checkout');">CHECK-OUT(start)</button>`)
-	fmt.Fprint(w, `<button onclick="loadPage('checkin');">CHECK-IN(finish)</button>`)
+	if RallyStatus != "F" {
+		fmt.Fprint(w, `<button onclick="loadPage('checkout');">CHECK-OUT(start)</button>`)
+		fmt.Fprint(w, `<button class="bigscreen" onclick="loadPage('signin');">SIGN IN(start)</button>`)
+	} else {
+		fmt.Fprint(w, `<button onclick="loadPage('checkin');">CHECK-IN(finish)</button>`)
+	}
 	fmt.Fprint(w, `<button onclick="loadPage('stats');">show stats</button>`)
-	fmt.Fprint(w, `<button class="bigscreen" onclick="loadPage('signin');">SIGN IN(start)</button>`)
-	fmt.Fprint(w, `<button class="bigscreen">administration</button>`)
+	fmt.Fprint(w, `<button class="bigscreen" onclick="loadPage('admin');">administration</button>`)
 	fmt.Fprint(w, `</main>`)
 }
 

@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	_ "embed"
+	"regexp"
 )
 
 //go:embed tabs.js
@@ -24,37 +25,38 @@ const ConfigScreen = `
 		<input type="time" class="StartTime" id="StartTime" name="StartTime" value="{{.StartTime}}" oninput="oidcfg(this);" onchange="ocdcfg(this);">
 	</div>
 	<div class="field">
-		<label for="StartCohortMins">Minutes between cohorts</label> 
-		<input type="number" min="1" max="40" class="StartCohortMins" id="StartCohortMins" name="StartCohortMins" value="{{.StartCohortMins}}" oninput="oidcfg(this);" onchange="ocdcfg(this);">
-	</div>
-	<div class="field">
 		<label for="ExtraCohorts">Number of extra cohorts</label> 
 		<input type="number" min="0" max="10" class="ExtraCohorts" id="ExtraCohorts" name="ExtraCohorts" value="{{.ExtraCohorts}}" oninput="oidcfg(this);" onchange="ocdcfg(this);">
 	</div>
 	<div class="field">
+		<label for="StartCohortMins">Minutes between cohorts</label> 
+		<input type="number" min="1" max="40" class="StartCohortMins" id="StartCohortMins" name="StartCohortMins" value="{{.StartCohortMins}}" oninput="oidcfg(this);" onchange="ocdcfg(this);">
+	</div>
+	<div class="field">
 		<span class="label">State of play: </span>
 		<input type="radio" id="RallyStatusS" class="RallyStatus" name="RallyStatus" value="S" {{if ne .RallyStatus "F"}} checked{{end}} data-chg="1" data-static="1" onchange="ocdcfg(this);">
-		<label for="RallyStatusS">Signin and start</label>
+		<label for="RallyStatusS">Signing-in and start before the ride</label>
 		<input type="radio" id="RallyStatusF" class="RallyStatus" name="RallyStatus" value="F" {{if eq .RallyStatus "F"}} checked{{end}} data-chg="1" data-static="1" onchange="ocdcfg(this);">
-		<label for="RallyStatusF">Check back in and finish</label>
+		<label for="RallyStatusF">Check back in and finish after the ride</label>
 	</div>
 </div>
 `
 
 type Person = struct {
-	First    string
-	Last     string
-	IBA      string
-	RBLR     string
-	Email    string
-	Phone    string
-	Address  string
-	Address1 string
-	Address2 string
-	Town     string
-	County   string
-	Postcode string
-	Country  string
+	First        string
+	Last         string
+	IBA          string
+	HasIBANumber bool
+	RBLR         string
+	Email        string
+	Phone        string
+	Address      string
+	Address1     string
+	Address2     string
+	Town         string
+	County       string
+	Postcode     string
+	Country      string
 }
 
 type Money = struct {
@@ -84,6 +86,7 @@ type Entrant = struct {
 	FinishTime           string
 	FundsRaised          Money
 	FreeCamping          string
+	CertificateAvailable string
 	CertificateDelivered string
 	Tshirt1              string
 	Tshirt2              string
@@ -99,7 +102,7 @@ const EntrantSQL = `SELECT EntrantID,ifnull(RiderFirst,''),ifnull(RiderLast,''),
 	,ifnull(NokName,''),ifnull(NokRelation,''),ifnull(NokPhone,'')
 	,ifnull(OdoStart,''),ifnull(StartTime,''),ifnull(OdoFinish,''),ifnull(FinishTime,''),EntrantStatus,ifnull(OdoCounts,'M'),ifnull(Route,'')
 	,ifnull(EntryDonation,''),ifnull(SquiresCash,''),ifnull(SquiresCheque,''),ifnull(RBLRAccount,''),ifnull(JustGivingAmt,'')
-	,ifnull(Tshirt1,''),ifnull(Tshirt2,''),ifnull(Patches,0),ifnull(FreeCamping,''),ifnull(CertificateDelivered,'')
+	,ifnull(Tshirt1,''),ifnull(Tshirt2,''),ifnull(Patches,0),ifnull(FreeCamping,''),ifnull(CertificateDelivered,''),ifnull(CertificateAvailable,'')
 	 FROM entrants
 `
 
@@ -110,7 +113,14 @@ var SigninScreenSingle = `
 <fieldset class="tabContent" id="tab_rider"><legend>Rider</legend>
 <div class="field"><div class="field"><label for="RiderLast">Last name</label> <input autofocus id="RiderLast" name="RiderLast" class="RiderLast" value="{{.Rider.Last}}" oninput="oid(this);" onchange="ocd(this);"></div>
 <div class="field"><label for="RiderFirst">First name</label> <input id="RiderFirst" name="RiderFirst" class="RiderFirst" value="{{.Rider.First}}" oninput="oid(this);" onchange="ocd(this);"></div>
-<div class="field"><label for="RiderIBA">IBA member</label> <input type="checkbox" id="RiderIBA" name="RiderIBA" class="RiderIBA" value="RiderIBA"{{if ne .Rider.IBA ""}} checked{{end}} onchange="oic(this);"></div>
+<div class="field">
+	<label for="RiderIBA">IBA member</label> 
+	{{if .Rider.HasIBANumber}}
+	<input type="number" id="RiderIBA" name="RiderIBA" class="RiderIBA" value="{{.Rider.IBA}}" readonly tabindex="-1">
+	{{else}}
+	<input type="checkbox" id="RiderIBA" name="RiderIBA" class="RiderIBA" value="RiderIBA"{{if ne .Rider.IBA ""}} checked{{end}} onchange="oic(this);">
+	{{end}}
+</div>
 <div class="field"><label for="RiderRBLR">RBL Member</label> <input type="checkbox" id="RiderRBLR" name="RiderRBLR" class="RiderRBLR" value="RiderRBLR"{{if ne .Rider.RBLR ""}} checked{{end}} onchange="oic(this);"></div>
 <div class="field"><label for="RiderEmail">Email</label> <input id="RiderEmail" name="RiderEmail" class="RiderEmail" value="{{.Rider.Email}}" oninput="oid(this);" onchange="ocd(this);"></div>
 <div class="field"><label for="RiderPhone">Mobile</label> <input id="RiderPhone" name="RiderPhone" class="RiderPhone" value="{{.Rider.Phone}}" oninput="oid(this);" onchange="ocd(this);"></div>
@@ -182,6 +192,16 @@ var SigninScreenSingle = `
 </div>
 <div class="field"> <label for="Patches">Patches</label> <input type="number" min="0" max="2" id="Patches" name="Patches" class="Patches" value="{{.Patches}}" oninput="oid(this);" onchange="ocd(this);"> </div>
 
+<div class="field">
+	<label for="CertificateAvailable">Certificate available</label>
+	<input type="checkbox" id="CertificateAvailable" name="CertificateAvailable" class="CertificateAvailable" value="Y"{{if eq .CertificateAvailable "Y"}} checked{{end}} onchange="oic(this);">
+</div>
+
+<div class="field">
+	<label for="CertificateDelivered">Certificate delivered</label>
+	<input type="checkbox" id="CertificateDelivered" name="CertificateDelivered" class="CertificateDelivered" value="Y"{{if eq .CertificateDelivered "Y"}} checked{{end}} onchange="oic(this);">
+</div>
+
 </fieldset>
 </fieldset>
 
@@ -245,7 +265,14 @@ var SigninScreenSingle = `
 <fieldset class="tabContent" id="tab_pillion"><legend>Pillion</legend>
 <div class="field"><label for="PillionLast">Last name</label> <input id="PillionLast" name="PillionLast" class="PillionLast" value="{{.Pillion.Last}}" oninput="showPillionPresent();" onchange="ocd(this);"></div>
 <div class="field"><label for="PillionFirst">First name</label> <input id="PillionFirst" name="PillionFirst" class="PillionFirst" value="{{.Pillion.First}}" oninput="showPillionPresent();" onchange="ocd(this);"></div>
-<div class="field"><label for="PillionIBA">IBA member</label> <input type="checkbox" id="PillionIBA" name="PillionIBA" class="PillionIBA" value="PillionIBA"{{if ne .Pillion.IBA ""}} checked{{end}} onchange="oic(this);"></div>
+<div class="field">
+	<label for="PillionIBA">IBA member</label> 
+	{{if .Pillion.HasIBANumber}}
+	<input type="number" id="PillionIBA" name="PillionIBA" class="PillionIBA" value="{{.Pillion.IBA}}" readonly tabindex="-1">
+	{{else}}
+	<input type="checkbox" id="PillionIBA" name="PillionIBA" class="PillionIBA" value="PillionIBA"{{if ne .Pillion.IBA ""}} checked{{end}} onchange="oic(this);">
+	{{end}}
+</div>
 <div class="field"><label for="PillionRBLR">RBL Member</label> <input type="checkbox" id="PillionRBLR" name="PillionRBLR" class="PillionRBLR" value="PillionRBLR"{{if ne .Pillion.RBLR ""}} checked{{end}} onchange="oic(this);"></div>
 <div class="field"><label for="PillionEmail">Email</label> <input id="PillionEmail" name="PillionEmail" class="PillionEmail" value="{{.Pillion.Email}}" oninput="oid(this);" onchange="ocd(this);"></div>
 <div class="field"><label for="PillionPhone">Mobile</label> <input id="PillionPhone" name="PillionPhone" class="PillionPhone" value="{{.Pillion.Phone}}" oninput="oid(this);" onchange="ocd(this);"></div>
@@ -268,7 +295,10 @@ var SigninScreenSingle = `
 
 func ScanEntrant(rows *sql.Rows, e *Entrant) {
 
-	err := rows.Scan(&e.EntrantID, &e.Rider.First, &e.Rider.Last, &e.Rider.IBA, &e.Rider.RBLR, &e.Rider.Email, &e.Rider.Phone, &e.Rider.Address1, &e.Rider.Address2, &e.Rider.Town, &e.Rider.County, &e.Rider.Postcode, &e.Rider.Country, &e.Pillion.First, &e.Pillion.Last, &e.Pillion.IBA, &e.Pillion.RBLR, &e.Pillion.Email, &e.Pillion.Phone, &e.Pillion.Address1, &e.Pillion.Address2, &e.Pillion.Town, &e.Pillion.County, &e.Pillion.Postcode, &e.Pillion.Country, &e.Bike, &e.BikeReg, &e.NokName, &e.NokRelation, &e.NokPhone, &e.OdoStart, &e.StartTime, &e.OdoFinish, &e.FinishTime, &e.EntrantStatus, &e.OdoCounts, &e.Route, &e.FundsRaised.EntryDonation, &e.FundsRaised.SquiresCash, &e.FundsRaised.SquiresCheque, &e.FundsRaised.RBLRAccount, &e.FundsRaised.JustGivingAmt, &e.Tshirt1, &e.Tshirt2, &e.Patches, &e.FreeCamping, &e.CertificateDelivered)
+	err := rows.Scan(&e.EntrantID, &e.Rider.First, &e.Rider.Last, &e.Rider.IBA, &e.Rider.RBLR, &e.Rider.Email, &e.Rider.Phone, &e.Rider.Address1, &e.Rider.Address2, &e.Rider.Town, &e.Rider.County, &e.Rider.Postcode, &e.Rider.Country, &e.Pillion.First, &e.Pillion.Last, &e.Pillion.IBA, &e.Pillion.RBLR, &e.Pillion.Email, &e.Pillion.Phone, &e.Pillion.Address1, &e.Pillion.Address2, &e.Pillion.Town, &e.Pillion.County, &e.Pillion.Postcode, &e.Pillion.Country, &e.Bike, &e.BikeReg, &e.NokName, &e.NokRelation, &e.NokPhone, &e.OdoStart, &e.StartTime, &e.OdoFinish, &e.FinishTime, &e.EntrantStatus, &e.OdoCounts, &e.Route, &e.FundsRaised.EntryDonation, &e.FundsRaised.SquiresCash, &e.FundsRaised.SquiresCheque, &e.FundsRaised.RBLRAccount, &e.FundsRaised.JustGivingAmt, &e.Tshirt1, &e.Tshirt2, &e.Patches, &e.FreeCamping, &e.CertificateDelivered, &e.CertificateAvailable)
 	checkerr(err)
+
+	e.Rider.HasIBANumber, _ = regexp.Match(`\d{1,6}`, []byte(e.Rider.IBA))
+	e.Pillion.HasIBANumber, _ = regexp.Match(`\d{1,6}`, []byte(e.Pillion.IBA))
 
 }

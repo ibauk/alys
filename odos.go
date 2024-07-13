@@ -113,7 +113,7 @@ func show_odo(w http.ResponseWriter, r *http.Request, showstart bool) {
 
 func update_odo(w http.ResponseWriter, r *http.Request) {
 
-	fmt.Println("Here we go")
+	//fmt.Println("Here we go")
 	if r.FormValue("e") == "" || r.FormValue("f") == "" || r.FormValue("v") == "" {
 		fmt.Fprint(w, `{"err":false,"msg":"ok"}`)
 		return
@@ -144,7 +144,7 @@ func update_odo(w http.ResponseWriter, r *http.Request) {
 		sqlx += " WHERE EntrantID=" + r.FormValue("e")
 		sqlx += " AND EntrantStatus IN (" + strconv.Itoa(STATUSCODES["signedin"]) + "," + strconv.Itoa(STATUSCODES["riding"]) + ")"
 	}
-	fmt.Println(sqlx)
+	//fmt.Println(sqlx)
 	DBH.Exec("UPDATE entrants SET " + sqlx)
 
 	fmt.Fprint(w, `{"err":false,"msg":"ok"}`)

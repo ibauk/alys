@@ -15,18 +15,16 @@ function addMoney() {
   return money;
 }
 
-function bumpStartTime() {
-
-}
-
+function bumpStartTime() {}
 
 function calcMileage() {
-
   let mlgdiv = document.getElementById("OdoMileage");
   if (!mlgdiv) return;
   let km = document.getElementById("OdoCountsK").checked;
-  let units = parseInt(document.getElementById("OdoFinish").value) - parseInt(document.getElementById("OdoStart").value);
-  if (units < 1) {
+  let units =
+    parseInt(document.getElementById("OdoFinish").value) -
+    parseInt(document.getElementById("OdoStart").value);
+  if (isNaN(units) || units < 1) {
     mlgdiv.innerHTML = "";
     return;
   }
@@ -34,8 +32,7 @@ function calcMileage() {
     const KmsPerMile = 1.60934;
     units = parseInt(units / KmsPerMile);
   }
-  mlgdiv.innerHTML = " "+units+" miles";
-
+  mlgdiv.innerHTML = " " + units + " miles";
 }
 
 function showMoneyAmt() {
@@ -208,7 +205,6 @@ function refreshTime() {
   timeDisplay.innerHTML = formattedString;
 }
 
-
 function saveConfig(obj) {
   if (obj.getAttribute("data-static") == "") obj.setAttribute("data-chg", "");
   console.log("saveConfig: " + obj.name);
@@ -218,17 +214,11 @@ function saveConfig(obj) {
 
   let val = obj.value;
 
-  let url = encodeURI(
-    "config?"  + obj.name + "=" + val
-  );
+  let url = encodeURI("config?" + obj.name + "=" + val);
   stackTransaction(url, obj);
 
   sendTransactions();
-  
 }
-
-
-
 
 function saveData(obj) {
   if (obj.getAttribute("data-static") == "") obj.setAttribute("data-chg", "");
@@ -253,12 +243,14 @@ function saveData(obj) {
     case "RiderRBLR":
     case "PillionRBLR":
     case "FreeCamping":
+    case "CertificateAvailable":
+    case "CertificateDelivered":
       val = "N";
       if (obj.checked) val = "Y";
       break;
 
     case "EntrantStatus":
-      setTimeout(endEditEntrant,1000);
+      setTimeout(endEditEntrant, 1000);
       break;
 
     case "OdoStart":
@@ -267,7 +259,6 @@ function saveData(obj) {
     case "OdoCounts":
       calcMileage();
       break;
-
   }
 
   let url = encodeURI(
@@ -361,7 +352,7 @@ function signin(e) {
 
 function endEditEntrant() {
   let mode = document.getElementById("EditMode").value;
-  switch(mode) {
+  switch (mode) {
     case "signin":
       window.location = "/signin";
       break;
@@ -369,16 +360,21 @@ function endEditEntrant() {
 }
 
 function validate_entrant() {
+  let mustFields = [
+    "RiderFirst",
+    "RiderLast",
+    "RiderEmail",
+    "RiderPhone",
+    "Bike",
+    "NokName",
+    "NokRelation",
+    "NokPhone",
+  ];
 
-  let mustFields = ['RiderFirst','RiderLast','RiderEmail','RiderPhone','Bike','NokName','NokRelation','NokPhone'];
-
-  mustFields.forEach(fld => { 
-    let f = document.getElementById(fld); 
-    f.setAttribute('placeholder','must not be blank');
-    if (f.value=='') 
-      f.classList.add('notblank'); 
-    else 
-    f.classList.remove('notblank');
+  mustFields.forEach((fld) => {
+    let f = document.getElementById(fld);
+    f.setAttribute("placeholder", "must not be blank");
+    if (f.value == "") f.classList.add("notblank");
+    else f.classList.remove("notblank");
   });
-
 }

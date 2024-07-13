@@ -3,10 +3,11 @@ CREATE TABLE IF NOT EXISTS "config" (
 	"DBInitialised"	INTEGER NOT NULL DEFAULT 1,
 	"StartTime"	TEXT NOT NULL DEFAULT '05:00',
 	"StartCohortMins"	INTEGER NOT NULL DEFAULT 10,
-	"ExtraCohorts"	INTEGER NOT NULL DEFAULT 3
+	"ExtraCohorts"	INTEGER NOT NULL DEFAULT 3,
+	"RallyStatus"	TEXT NOT NULL DEFAULT 'S'
 );
 CREATE TABLE IF NOT EXISTS "entrants" (
-	"EntrantID"	INTEGER,
+	"EntrantID"	INTEGER NOT NULL,
 	"Bike"	TEXT,
 	"BikeReg"	INTEGER,
 	"RiderFirst"	TEXT,
@@ -16,7 +17,7 @@ CREATE TABLE IF NOT EXISTS "entrants" (
 	"RiderTown"	TEXT,
 	"RiderCounty"	TEXT,
 	"RiderPostcode"	TEXT,
-	"RiderCountry"	TEXT,
+	"RiderCountry"	TEXT DEFAULT 'United Kingdom',
 	"RiderIBA"	TEXT,
 	"RiderPhone"	TEXT,
 	"RiderEmail"	TEXT,
@@ -27,9 +28,9 @@ CREATE TABLE IF NOT EXISTS "entrants" (
 	"PillionTown"	TEXT,
 	"PillionCounty"	TEXT,
 	"PillionPostcode"	TEXT,
-	"PillionCountry"	INTEGER,
+	"PillionCountry"	INTEGER DEFAULT 'United Kingdom',
 	"PillionIBA"	TEXT,
-	"OdoKms"	INTEGER NOT NULL DEFAULT 0,
+	"OdoCounts"	TEXT NOT NULL DEFAULT 'M',
 	"OdoStart"	INTEGER,
 	"OdoFinish"	INTEGER,
 	"CorrectedMiles"	TEXT DEFAULT 0,
@@ -45,9 +46,7 @@ CREATE TABLE IF NOT EXISTS "entrants" (
 	"RBLRAccount"	TEXT,
 	"JustGivingAmt"	TEXT,
 	"JustGivingURL"	TEXT,
-	"Route"	TEXT,
-	"RiderAddress"	TEXT,
-	"PillionAddress"	TEXT,
+	"Route"	TEXT DEFAULT 'A-NCW',
 	"PillionEmail"	TEXT,
 	"PillionPhone"	TEXT,
 	"RiderRBLR"	TEXT,
@@ -55,7 +54,9 @@ CREATE TABLE IF NOT EXISTS "entrants" (
 	"Tshirt1"	TEXT,
 	"Tshirt2"	TEXT,
 	"Patches"	INTEGER DEFAULT 0,
-	"FreeCamping"	TEXT DEFAULT 0,
+	"FreeCamping"	TEXT NOT NULL DEFAULT 'N',
+	"CertificateDelivered"	TEXT NOT NULL DEFAULT 'N',
+	"CertificateAvailable"	TEXT NOT NULL DEFAULT 'N',
 	PRIMARY KEY("EntrantID")
 );
 COMMIT;

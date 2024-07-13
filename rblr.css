@@ -4,7 +4,7 @@
 }
 
 :root {
-  --regular-background: #ccffcc;
+  --regular-background: aliceblue;
   --regular-text: black;
   --button-background: #006600;
   --button-text: white;
@@ -12,13 +12,14 @@
   --button-text-disabled: lightgray;
   --bright-background: #ffff00;
   --bright-text: red;
-  --form-background: #ccffcc;
+  --form-background: whitesmoke;
   --input-text: #000;
   --input-background: inherited;
   --hover-background: lightgreen;
   --hover-text: brown;
   --tabs-background: #dedbde;
   --tabs-text: #42454a;
+  --tabs-selected: lightgray;
   --via-background: white;
   --via-text: black;
   --solid-border: #c9c3ba;
@@ -35,6 +36,8 @@ body {
   font-family: Verdana, Arial, Helvetica, sans-serif;
   font-size: calc(14pt + 1vmin);
   max-width: 100vw;
+  background-color: var(--regular-background);
+  color: var(--regular-text);
 }
 main.signin {
   margin: 0 auto 0 auto;
@@ -285,7 +288,7 @@ ul#tabs li a.selected {
   font-weight: bold;
   font-size: larger;
   text-transform: uppercase;
-  background-color: var(--bright-background);
+  background-color: var(--tabs-selected);
 }
 
 .flex {
@@ -331,7 +334,7 @@ nav {
 }
 
 .notblank {
- background-color: var(--bright-background); 
+  background-color: var(--bright-background);
 }
 
 .ConfigScreen .field {
@@ -339,7 +342,7 @@ nav {
   margin: 0 0 1em 0;
 }
 .ConfigScreen input {
-  font-size: .9em;
+  font-size: 0.9em;
 }
 
 input.StartCohortMins {
@@ -348,4 +351,9 @@ input.StartCohortMins {
 
 input.ExtraCohorts {
   width: 2em;
+}
+
+input:read-only {
+  background-color: inherit;
+  border: none;
 }
