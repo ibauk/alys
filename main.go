@@ -113,8 +113,6 @@ func main() {
 		return
 	}
 
-	//	fmt.Printf("Beyond24? - %v\n", beyond24("", "2024-06-09T19:31"))
-
 	http.HandleFunc("/", show_menu)
 	http.HandleFunc("/menu", show_menu)
 	http.HandleFunc("/about", about_this_program)
@@ -144,11 +142,14 @@ func about_this_program(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprint(w, refresher)
 
+	fmt.Fprint(w, `<main>`)
 	fmt.Fprint(w, `<p class="legal">`+PROGRAMVERSION+"</p>")
 	fmt.Fprint(w, "<p>I handle administration for the RBLR1000</p>")
 	fp, err := filepath.Abs(*DBNAME)
 	checkerr(err)
 	fmt.Fprintf(w, `<p>The database is stored in <strong>%v</strong></p>`, fp)
+	fmt.Fprint(w, `<hr><p>This program is written in Go, CSS, HTML and JavaScript and the full source is available at <a href="https://github.com/ibauk/alys">https://github.com/ibauk/alys</a></p>`)
+	fmt.Fprint(w, `</main>`)
 }
 
 func check_in(w http.ResponseWriter, r *http.Request) {
@@ -269,6 +270,7 @@ func show_config(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprint(w, refresher)
 
+	fmt.Fprint(w, `<main>`)
 	sss, err := template.New("ConfigScreen").Parse(ConfigScreen)
 	checkerr(err)
 
@@ -283,6 +285,7 @@ func show_config(w http.ResponseWriter, r *http.Request) {
 		err = sss.Execute(w, c)
 		checkerr(err)
 	}
+	fmt.Fprint(w, `</main>`)
 }
 
 func beyond24(starttime, finishtime string) bool {

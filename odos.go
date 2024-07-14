@@ -108,7 +108,7 @@ func show_odo(w http.ResponseWriter, r *http.Request, showstart bool) {
 	}
 	fmt.Fprint(w, `<script>document.onkeydown=function(e){if(e.keyCode==27) {e.preventDefault();loadPage('menu');}}</script>`)
 
-	fmt.Fprint(w, `</div><hr><button class="nav" onclick="loadPage('menu');">Main menu</button></body></html>`)
+	fmt.Fprint(w, `</div><footer><button class="nav" onclick="loadPage('menu');">Main menu</button></footer></body></html>`)
 }
 
 func update_odo(w http.ResponseWriter, r *http.Request) {

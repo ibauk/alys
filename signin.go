@@ -151,13 +151,14 @@ func show_signin(w http.ResponseWriter, r *http.Request) {
 		n++
 		fmt.Fprint(w, `</div>`)
 	}
-	fmt.Fprint(w, `</div>`)
-	fmt.Fprint(w, `<hr><button class="nav" onclick="loadPage('menu');">Main menu</button>  `)
+	fmt.Fprint(w, `</div></main>`)
+	fmt.Fprint(w, `<footer><button class="nav" onclick="loadPage('menu');">Main menu</button>  `)
 	fmt.Fprint(w, ` <input type="checkbox" title="Enable new entrants" onchange="document.getElementById('newentrant').disabled=!this.checked;">`)
 	fmt.Fprint(w, ` <button id="newentrant" disabled class="nav" title="Enter unregistered entrant details" onclick="loadPage('edit?e=0');">New Entrant</button>`)
+	fmt.Fprint(w, `</footer>`)
 	fmt.Fprint(w, `<script>document.onkeydown=function(e){if(e.keyCode==27) {e.preventDefault();loadPage('menu');}}</script>`)
 
-	fmt.Fprint(w, `</main></body></html>`)
+	fmt.Fprint(w, `</body></html>`)
 	//fmt.Printf("Showed %v lines\n", n)
 }
 
