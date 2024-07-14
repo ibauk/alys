@@ -41,13 +41,19 @@ body {
   padding: 0;
   margin: 0;
 }
-div {
+* {
   margin: 0;
   padding: 0;
 }
+p, h1, h2, h3, h4, h5, h6 {
+  margin: 0 0 1em 0;
+}
+main {
+  padding: 5px;
+}
 main.signin {
-  margin: 0 auto 0 auto;
-  width: 30em;
+  display: grid;
+  justify-content: space-around;
 }
 div.top {
   margin: 0 auto 5px auto;
@@ -61,8 +67,8 @@ div.top h2 {
   margin: 0;
 }
 main.stats {
-  width: 20em;
-  margin: 0 auto 0 auto;
+  display: grid;
+  justify-content: space-around;
   font-size: calc(20pt + 3vmin);
 }
 main.frontmenu {
@@ -370,6 +376,12 @@ input:read-only {
   border: none;
 }
 
+header {
+  position: sticky;
+  top: 0;
+  background-color: var(--topbar-background);
+  width: 100%;
+}
 footer {
   position: fixed;
   bottom: 0;

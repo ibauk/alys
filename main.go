@@ -41,7 +41,8 @@ var my_css string
 const timerticker = `var img = document.getElementById('ticker');
 
 var interval = window.setInterval(function(){
-    let paused = document.getElementById('timenow').getAttribute('data-paused')=='1';
+    let paused = document.getElementById('timenow');
+	if(paused) {paused = paused.getAttribute('data-paused')=='1';}
     if(!paused && img.style.visibility == 'hidden'){
         img.style.visibility = 'visible';
     }else{
@@ -150,6 +151,11 @@ func about_this_program(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, `<p>The database is stored in <strong>%v</strong></p>`, fp)
 	fmt.Fprint(w, `<hr><p>This program is written in Go, CSS, HTML and JavaScript and the full source is available at <a href="https://github.com/ibauk/alys">https://github.com/ibauk/alys</a></p>`)
 	fmt.Fprint(w, `</main>`)
+
+	fmt.Fprint(w, `<footer>`)
+	fmt.Fprint(w, ` <button class="nav" onclick="loadPage('menu');">Main menu</button>`)
+	fmt.Fprint(w, "</footer>")
+
 }
 
 func check_in(w http.ResponseWriter, r *http.Request) {
@@ -204,8 +210,8 @@ func show_stats(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	fmt.Fprint(w, refresher)
+
 	fmt.Fprint(w, `<main class="stats">`)
-	fmt.Fprint(w, `<button class="nav" onclick="loadPage('menu');">Main menu</button>`)
 
 	fmt.Fprint(w, `<h2>Live numbers  <span id="ticker">&diams;</span></h2>`)
 	fmt.Fprint(w, `<script>`+timerticker+`</script>`)
@@ -220,6 +226,9 @@ func show_stats(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, `<tr><td><br>Funds raised</td><td class="val"><br>&pound;%v</td></tr>`, format_money(totfunds))
 	fmt.Fprint(w, `</table></main>`)
 	fmt.Fprint(w, `<script>document.onkeydown=function(e){if(e.keyCode==27) {e.preventDefault();loadPage('menu');}}</script>`)
+	fmt.Fprint(w, `<footer>`)
+	fmt.Fprint(w, `<button class="nav" onclick="loadPage('menu');">Main menu</button>`)
+	fmt.Fprint(w, `</footer>`)
 
 	fmt.Fprint(w, `</body><html>`)
 }
@@ -286,6 +295,11 @@ func show_config(w http.ResponseWriter, r *http.Request) {
 		checkerr(err)
 	}
 	fmt.Fprint(w, `</main>`)
+
+	fmt.Fprint(w, `<footer>`)
+	fmt.Fprint(w, ` <button class="nav" onclick="loadPage('menu');">Main menu</button>`)
+	fmt.Fprint(w, "</footer>")
+
 }
 
 func beyond24(starttime, finishtime string) bool {
