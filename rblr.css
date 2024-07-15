@@ -13,7 +13,7 @@
   --bright-background: #ffff00;
   --bright-text: red;
   --form-background: whitesmoke;
-  --input-text: #000;
+  --input-text: blue;
   --input-background: inherited;
   --hover-background: lightgreen;
   --hover-text: brown;
@@ -32,6 +32,11 @@
   --error-background: red;
   --error-text: white;
 }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 body {
   font-family: Verdana, Arial, Helvetica, sans-serif;
   font-size: calc(14pt + 1vmin);
@@ -41,12 +46,15 @@ body {
   padding: 0;
   margin: 0;
 }
-* {
-  margin: 0;
-  padding: 0;
-}
-p, h1, h2, h3, h4, h5, h6 {
-  margin: 0 0 1em 0;
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0 0 1rem 0;
+  font-size: 1em;
 }
 main {
   padding: 5px;
@@ -69,22 +77,24 @@ div.top h2 {
 main.stats {
   display: grid;
   justify-content: space-around;
-  font-size: calc(20pt + 3vmin);
+  grid-template-rows: 15% 80%;
 }
 main.frontmenu {
   display: grid;
-  grid-gap: 1%;
-  width: 30em;
-  margin-left: auto;
-  margin-right: auto;
+  grid-gap: 10%;
+  justify-content: space-around;
   text-align: center;
+  grid-template-rows: 15% 80%;
+}
+main.frontmenu h1 {
+  display: block;
+  font-size: 1.1em;
+  padding: 5px;
 }
 main.frontmenu button {
   border-radius: 6px;
-  font-size: calc(20pt + 3vmin);
-  width: 10em;
-  margin: 0 auto 1em auto;
-  padding: 0.2em;
+  font-size: 1.1em;
+  padding: 0.2rem;
 }
 main.frontmenu button:hover {
   background-color: lightblue;
@@ -113,7 +123,6 @@ main.frontmenu button:hover {
 }
 #odolist span {
   display: table-cell;
-  font-size: 2em;
   padding: 0 0.2em 0.2em 0.1em;
 }
 #odolist span input {
@@ -140,7 +149,7 @@ button.nav {
   border-radius: 6px;
   font-size: calc(14pt + 1vmin);
   width: 8em;
-  margin: .5em .5em .5em .5em;
+  margin: 0.5em 0.5em 0.5em 0.5em;
   padding: 0.2em;
 }
 button.nav:hover {
@@ -182,14 +191,17 @@ input.oc {
   float: none;
   display: inline-block;
   vertical-align: middle;
-  margin-bottom: 0.5em;
+  margin-bottom: 0.5rem;
 }
 fieldset label,
 fieldset .label {
   font-size: 14pt;
 }
-fieldset input {
+fieldset input,
+fieldset select {
   font-size: 16pt;
+  font-weight: bold;
+  color: var(--input-text);
 }
 
 input[type="checkbox"] {
@@ -234,7 +246,6 @@ input[type="radio"] {
 .RiderPostcode,
 .PillionPostcode {
   width: 5em;
-  text-transform: uppercase;
 }
 
 .RiderCountry,
@@ -311,7 +322,7 @@ ul#tabs li a.selected {
 
 .flex {
   display: inline-block;
-  width: 25em;
+  width: 28em;
   border: none;
 }
 .signinrow {
@@ -325,7 +336,6 @@ ul#tabs li a.selected {
 }
 
 .special {
-  font-size: larger;
   border: solid;
   border-radius: 8px;
   margin-left: 1em;

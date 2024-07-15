@@ -27,8 +27,11 @@ func create_new_entrant() string {
 func edit_entrant(w http.ResponseWriter, r *http.Request) {
 
 	var refresher = `<!DOCTYPE html>
-		<html lang="en">
-		<head><title>Signin</title>
+	<html lang="en">
+	<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>rblr1000</title>
 		<style>` + my_css + `</style>
 		<script>` + my_js + `</script>
 		</head><body>`
@@ -96,7 +99,10 @@ func show_signin(w http.ResponseWriter, r *http.Request) {
 
 	var refresher = `<!DOCTYPE html>
 	<html lang="en">
-	<head><title>Signin</title>
+	<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>rblr1000</title>
 	<style>` + my_css + `</style>
 	<script>` + my_js + `</script>
 	</head><body>`
@@ -175,7 +181,10 @@ func show_finals(w http.ResponseWriter, r *http.Request) {
 
 	var refresher = `<!DOCTYPE html>
 	<html lang="en">
-	<head><title>Final checks</title>
+	<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>rblr1000</title>
 	<style>` + my_css + `</style>
 	<script>` + my_js + `</script>
 	</head><body>`

@@ -178,7 +178,8 @@ var SigninScreenSingle = `
 	</select>	
 
 </div>
-<div class="field"><label for="Tshirt2">T-shirt 2</label> 
+
+<div class="field"><label for="Tshirt2">&nbsp; T-shirt 2</label> 
 
 	<select id="Tshirt2" name="Tshirt2" class="Tshirt2"   data-chg="1" data-static="1" onchange="ocd(this);">
 		<option value=""{{if eq .Tshirt2 ""}} selected{{end}}>no thanks</option>
@@ -190,7 +191,7 @@ var SigninScreenSingle = `
 	</select>	
 
 </div>
-<div class="field"> <label for="Patches">Patches</label> <input type="number" min="0" max="2" id="Patches" name="Patches" class="Patches" value="{{.Patches}}" oninput="oid(this);" onchange="ocd(this);"> </div>
+<div class="field"> <label for="Patches">&nbsp; Patches</label> <input type="number" min="0" max="2" id="Patches" name="Patches" class="Patches" value="{{.Patches}}" oninput="oid(this);" onchange="ocd(this);"> </div>
 
 <div class="field">
 	<label for="CertificateAvailable">Certificate available</label>

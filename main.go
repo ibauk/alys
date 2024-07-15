@@ -134,7 +134,10 @@ func about_this_program(w http.ResponseWriter, r *http.Request) {
 
 	var refresher = `<!DOCTYPE html>
 	<html lang="en">
-	<head><title>About Alys</title>
+	<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>About Alys</title>
 	<style>` + my_css + `</style>
 	<script>` + my_js + `</script>
 	</head><body>`
@@ -192,7 +195,10 @@ func show_stats(w http.ResponseWriter, r *http.Request) {
 	const showzero = false
 	var refresher = `<!DOCTYPE html>
 	<html lang="en">
-	<head><title>Stats</title>
+	<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>rblr1000</title>
 	<style>` + my_css + `</style>
 	<script>` + my_js + `</script>
 	</head><body>
@@ -270,7 +276,10 @@ func show_config(w http.ResponseWriter, r *http.Request) {
 
 	var refresher = `<!DOCTYPE html>
 	<html lang="en">
-	<head><title>Config</title>
+	<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>rblr1000</title>
 	<style>` + my_css + `</style>
 	<script>` + my_js + `</script>
 	</head><body>`
@@ -323,7 +332,10 @@ func show_admin(w http.ResponseWriter, r *http.Request) {
 
 	var refresher = `<!DOCTYPE html>
 	<html lang="en">
-	<head><title>RBLR1000</title>
+	<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>rblr1000</title>
 	<style>` + my_css + `</style>
 	<script>` + my_js + `</script>
 	</head><body>
@@ -342,7 +354,10 @@ func show_menu(w http.ResponseWriter, r *http.Request) {
 
 	var refresher = `<!DOCTYPE html>
 	<html lang="en">
-	<head><title>RBLR1000</title>
+	<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>rblr1000</title>
 	<style>` + my_css + `</style>
 	<script>` + my_js + `</script>
 	</head><body>

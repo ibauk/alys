@@ -30,7 +30,10 @@ func show_odo(w http.ResponseWriter, r *http.Request, showstart bool) {
 
 	var refresher = `<!DOCTYPE html>
 	<html lang="en">
-	<head><title>Odo capture</title>
+	<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>rblr1000</title>
 	<style>` + my_css + `</style>
 	<script>` + my_js + `</script>
 	</head><body>`
