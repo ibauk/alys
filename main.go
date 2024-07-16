@@ -120,6 +120,7 @@ func main() {
 	http.HandleFunc("/admin", show_admin)
 	http.HandleFunc("/stats", show_stats)
 	http.HandleFunc("/signin", show_signin)
+	http.HandleFunc("/finals", show_finals)
 	http.HandleFunc("/edit", edit_entrant)
 	http.HandleFunc("/export", export_finishers)
 	http.HandleFunc("/checkin", check_in)
@@ -372,6 +373,7 @@ func show_menu(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, `<button class="bigscreen" onclick="loadPage('signin');">SIGN IN(start)</button>`)
 	} else {
 		fmt.Fprint(w, `<button onclick="loadPage('checkin');">CHECK-IN(finish)</button>`)
+		fmt.Fprint(w, `<button class="bigscreen" onclick="loadPage('finals');">Verification(finish)</button>`)
 	}
 	fmt.Fprint(w, `<button onclick="loadPage('stats');">show stats</button>`)
 	fmt.Fprint(w, `<button class="bigscreen" onclick="loadPage('admin');">administration</button>`)

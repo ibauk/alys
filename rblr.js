@@ -220,6 +220,21 @@ function saveConfig(obj) {
   sendTransactions();
 }
 
+function saveFinalStatus(obj) {
+
+  const FinisherOK = 8;
+
+  let ent = obj.getAttribute('data-e');
+  let val = obj.value;
+
+  let url =    "putentrant?EntrantID=" + ent + "&" + obj.name + "=" + val;
+  if (val!=FinisherOK) {
+    url += "&CertificateAvailable=N&CertificateDelivered=N";
+  }
+  
+  stackTransaction(encodeURI(url), obj);
+
+}
 function saveData(obj) {
   if (obj.getAttribute("data-static") == "") obj.setAttribute("data-chg", "");
   console.log("saveData: " + obj.name);

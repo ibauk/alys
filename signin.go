@@ -216,31 +216,63 @@ func show_finals(w http.ResponseWriter, r *http.Request) {
 
 		ScanEntrant(rows, &e)
 
-		fmt.Fprint(w, `<div class="signinrow `)
+		fmt.Fprint(w, `<div class="signinrow signout `)
 		if oe {
 			fmt.Fprint(w, "odd")
 		} else {
 			fmt.Fprint(w, "even")
 		}
 		oe = !oe
-		fmt.Fprintf(w, `" onclick="signin(%v);">`, e.EntrantID)
+		fmt.Fprint(w, `">`)
 
-		val, ok := scv[e.EntrantStatus]
-		if !ok {
-			val = "!" + strconv.Itoa(e.EntrantStatus)
+		fmt.Fprintf(w, `<span class="name"><strong>%v</strong>, %v</span> `, e.Rider.Last, e.Rider.First)
+
+		fmt.Fprintf(w, `<span class="Route">%v</span> `, e.Route)
+
+		fmt.Fprintf(w, `<span><select name="EntrantStatus" data-e="%v">`, e.EntrantID)
+		for k, v := range STATUSCODES {
+			fmt.Fprintf(w, `<option value="%v"`, v)
+			if e.EntrantStatus == v {
+				fmt.Fprint(w, ` selected`)
+			}
+			fmt.Fprintf(w, `>%v</option>`, k)
 		}
+		fmt.Fprint(w, `</select></span>`)
 
-		fmt.Fprintf(w, `<span class="name"><strong>%v</strong>, %v</span> <span class="status">%v</span>`, e.Rider.Last, e.Rider.First, val)
+		fmt.Fprintf(w, `<span class="field"><select name="CertificateAD" data-e="%v">`, e.EntrantID)
+
+		ca := e.CertificateAvailable != "N"
+		cd := e.CertificateDelivered != "N"
+		fmt.Fprint(w, `<option value="A-D"`)
+		if ca && !cd {
+			fmt.Fprint(w, ` selected`)
+		}
+		fmt.Fprint(w, `>Certificate available</option>`)
+
+		fmt.Fprint(w, `<option value="A+D"`)
+		if ca && cd {
+			fmt.Fprint(w, ` select`)
+		}
+		fmt.Fprint(w, `>Signed out &#10003;</option>`)
+
+		fmt.Fprint(w, `<option value="-A-D"`)
+		if !ca {
+			fmt.Fprint(w, ` selected`)
+		}
+		fmt.Fprint(w, `>Certificate NEEDED</option>`)
+
+		fmt.Fprint(w, `</select></span>`)
 
 		n++
 		fmt.Fprint(w, `</div>`)
 	}
-	fmt.Fprint(w, `</div>`)
-	fmt.Fprint(w, `<hr><button class="nav" onclick="loadPage('menu');">Main menu</button>  `)
+	fmt.Fprint(w, `</div></main>`)
+	fmt.Fprint(w, `<footer><button class="nav" onclick="loadPage('menu');">Main menu</button>  `)
 	fmt.Fprint(w, ` <input type="checkbox" title="Enable new entrants" onchange="document.getElementById('newentrant').disabled=!this.checked;">`)
 	fmt.Fprint(w, ` <button id="newentrant" disabled class="nav" title="Enter unregistered entrant details" onclick="loadPage('edit?e=0');">New Entrant</button>`)
+	fmt.Fprint(w, `</footer>`)
 	fmt.Fprint(w, `<script>document.onkeydown=function(e){if(e.keyCode==27) {e.preventDefault();loadPage('menu');}}</script>`)
 
-	fmt.Fprint(w, `</main></body></html>`)
+	fmt.Fprint(w, `</body></html>`)
 	//fmt.Printf("Showed %v lines\n", n)
 }

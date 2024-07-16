@@ -84,7 +84,7 @@ main.frontmenu {
   grid-gap: 10%;
   justify-content: space-around;
   text-align: center;
-  grid-template-rows: 15% 80%;
+  grid-template-rows: auto;
 }
 main.frontmenu h1 {
   display: block;
@@ -198,7 +198,8 @@ fieldset .label {
   font-size: 14pt;
 }
 fieldset input,
-fieldset select {
+fieldset select,
+.signinrow select {
   font-size: 16pt;
   font-weight: bold;
   color: var(--input-text);
@@ -335,6 +336,16 @@ ul#tabs li a.selected {
   font-size: larger;
 }
 
+.signout select {
+  background-color: inherit;
+  border: none;
+  color: var(--regular-text);
+  font-weight: bold;
+}
+.signout .Route {
+  font-size: .4em;
+  width: 5em;
+}
 .special {
   border: solid;
   border-radius: 8px;
