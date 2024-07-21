@@ -15,8 +15,6 @@ function addMoney() {
   return money;
 }
 
-function bumpStartTime() {}
-
 function calcMileage() {
   let mlgdiv = document.getElementById("OdoMileage");
   if (!mlgdiv) return;
@@ -35,24 +33,20 @@ function calcMileage() {
   mlgdiv.innerHTML = " " + units + " miles";
 }
 
-function showMoneyAmt() {
-  let amt = addMoney();
-  let sf = document.getElementById("showmoney");
-  if (sf) {
-    sf.innerHTML = "£" + amt;
+function changeFinalStatus(sel) {
+
+  sel.classList.add('oc');
+  let ent = sel.getAttribute('data-e');
+  let status = sel.value;
+  let url = "putentrant?EntrantID="+ent+"&EntrantStatus="+status;
+  
+  if (status != sel.getAttribute('data-fs')) {
+    url += "&CertificateAvailable=N";
   }
+  stackTransaction(encodeURI(url),sel.id);
+  sendTransactions();
 }
 
-function showPillionPresent() {
-  let first = document.getElementById("PillionFirst");
-  let last = document.getElementById("PillionLast");
-  let present = first.value != "" && last.value != "";
-  let ps = document.getElementById("showpillion");
-  if (ps) {
-    ps.innerHTML = "";
-    if (present) ps.innerHTML = "&#9745;";
-  }
-}
 function clickTime() {
   let timeDisplay = document.querySelector("#timenow");
   console.log("Clicking time");
@@ -72,8 +66,69 @@ function clickTime() {
   console.log("Time clicked");
 }
 
+function endEditEntrant() {
+  let mode = document.getElementById("EditMode").value;
+  switch (mode) {
+    case "signin":
+      window.location = "/signin";
+      break;
+  }
+}
+
+function fix2(n) {
+  if (n < 10) {
+    return "0" + n;
+  }
+  return n;
+}
+
+function getRallyTime(dt) {
+  let yy = dt.getFullYear();
+  let mm = dt.getMonth() + 1;
+  let dd = dt.getDate();
+  let dateString =
+    yy + "-" + fix2(mm) + "-" + fix2(dd) + "T" + dt.toLocaleTimeString("en-GB");
+  return dateString.substring(0, 16);
+}
+
 function loadPage(x) {
   window.location.href = x;
+}
+
+function moneyChg(obj) {
+  oic(obj);
+  showMoneyAmt();
+}
+
+function nextTimeSlot() {
+  let timeDisplay = document.querySelector("#timenow");
+  let dt = new Date();
+  let gap = parseInt(timeDisplay.getAttribute("data-gap"));
+  let xtra = parseInt(timeDisplay.getAttribute("data-xtra"));
+  let newdt = getRallyTime(dt);
+  let curdt = timeDisplay.getAttribute("data-time");
+
+  if (xtra > 0 && gap > 0) {
+    dt = parseDatetime(curdt);
+    dt = new Date(
+      dt.getFullYear(),
+      dt.getMonth(),
+      dt.getDate(),
+      dt.getHours(),
+      dt.getMinutes() + gap
+    );
+    newdt = getRallyTime(dt);
+    console.log("Choosing next slot " + newdt);
+    xtra--;
+    timeDisplay.setAttribute("data-xtra", xtra);
+  }
+  timeDisplay.setAttribute("data-time", newdt);
+  let dateString = dt.toLocaleString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  let formattedString = dateString.replace(", ", " - ");
+  timeDisplay.innerHTML = formattedString;
 }
 
 // Called during Odo capture when input is entered
@@ -139,22 +194,6 @@ function ocdcfg(obj) {
   }
 }
 
-function fix2(n) {
-  if (n < 10) {
-    return "0" + n;
-  }
-  return n;
-}
-
-function getRallyTime(dt) {
-  let yy = dt.getFullYear();
-  let mm = dt.getMonth() + 1;
-  let dd = dt.getDate();
-  let dateString =
-    yy + "-" + fix2(mm) + "-" + fix2(dd) + "T" + dt.toLocaleTimeString("en-GB");
-  return dateString.substring(0, 16);
-}
-
 function parseDatetime(dt) {
   let yy = parseInt(dt.substring(0, 4));
   let mm = parseInt(dt.substring(5, 7)) - 1;
@@ -164,10 +203,6 @@ function parseDatetime(dt) {
   return new Date(yy, mm, dd, hh, mn);
 }
 
-function moneyChg(obj) {
-  oic(obj);
-  showMoneyAmt();
-}
 function refreshTime() {
   sendTransactions();
   let timeDisplay = document.querySelector("#timenow");
@@ -182,27 +217,7 @@ function refreshTime() {
   if (curdt >= newdt) {
     return;
   }
-  if (xtra > 0 && gap > 0) {
-    dt = parseDatetime(curdt);
-    dt = new Date(
-      dt.getFullYear(),
-      dt.getMonth(),
-      dt.getDate(),
-      dt.getHours(),
-      dt.getMinutes() + gap
-    );
-    newdt = getRallyTime(dt);
-    console.log("Choosing next slot " + newdt);
-    xtra--;
-    timeDisplay.setAttribute("data-xtra", xtra);
-  }
-  timeDisplay.setAttribute("data-time", newdt);
-  let dateString = dt.toLocaleString("en-GB", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  let formattedString = dateString.replace(", ", " - ");
-  timeDisplay.innerHTML = formattedString;
+  nextTimeSlot();
 }
 
 function saveConfig(obj) {
@@ -220,21 +235,6 @@ function saveConfig(obj) {
   sendTransactions();
 }
 
-function saveFinalStatus(obj) {
-
-  const FinisherOK = 8;
-
-  let ent = obj.getAttribute('data-e');
-  let val = obj.value;
-
-  let url =    "putentrant?EntrantID=" + ent + "&" + obj.name + "=" + val;
-  if (val!=FinisherOK) {
-    url += "&CertificateAvailable=N&CertificateDelivered=N";
-  }
-  
-  stackTransaction(encodeURI(url), obj.id);
-
-}
 function saveData(obj) {
   if (obj.getAttribute("data-static") == "") obj.setAttribute("data-chg", "");
   console.log("saveData: " + obj.name);
@@ -283,6 +283,21 @@ function saveData(obj) {
 
   validate_entrant();
 }
+
+function saveFinalStatus(obj) {
+  const FinisherOK = 8;
+
+  let ent = obj.getAttribute("data-e");
+  let val = obj.value;
+
+  let url = "putentrant?EntrantID=" + ent + "&" + obj.name + "=" + val;
+  if (val != FinisherOK) {
+    url += "&CertificateAvailable=N&CertificateDelivered=N";
+  }
+
+  stackTransaction(encodeURI(url), obj.id);
+}
+
 function saveOdo(obj) {
   if (obj.timer) {
     clearTimeout(obj.timer);
@@ -304,26 +319,6 @@ function saveOdo(obj) {
   stackTransaction(url, obj.id);
 }
 
-function stackTransaction(url, objid) {
-  console.log(url);
-  let newTrans = {};
-  newTrans.url = url;
-  newTrans.objid = objid;
-  newTrans.sent = false;
-
-  const stackx = sessionStorage.getItem(myStackItem);
-  let stack = [];
-  if (stackx != null) {
-    stack = JSON.parse(stackx);
-  }
-  stack.push(newTrans);
-  sessionStorage.setItem(myStackItem, JSON.stringify(stack));
-  /*
-  obj.classList.remove("oi");
-  obj.classList.add("oc");
-  */
-}
-
 function sendTransactions() {
   let stackx = sessionStorage.getItem(myStackItem);
   if (stackx == null) return;
@@ -332,7 +327,7 @@ function sendTransactions() {
 
   //console.log(stack);
 
-  let errlog = document.getElementById('errlog')
+  let errlog = document.getElementById("errlog");
 
   while (stack.length > 0) {
     let itm = stack[0];
@@ -344,9 +339,9 @@ function sendTransactions() {
       .then((response) => {
         if (!response.ok) {
           // Handle HTTP errors
-          stackTransaction(itm.url,itm.objid)
+          stackTransaction(itm.url, itm.objid);
           //if (errlog){errlog.innerHTML=`HTTP error! Status: ${response.status}`}
-  
+
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
         return response.json();
@@ -365,10 +360,29 @@ function sendTransactions() {
       .catch((error) => {
         // Handle network or other errors
         //if (errlog) {errlog.innerHTML="ERROR CAUGHT"}
-        stackTransaction(itm.url,itm.objid)
+        stackTransaction(itm.url, itm.objid);
         console.error("Fetch error:", error);
-        return
+        return;
       });
+  }
+}
+
+function showMoneyAmt() {
+  let amt = addMoney();
+  let sf = document.getElementById("showmoney");
+  if (sf) {
+    sf.innerHTML = "£" + amt;
+  }
+}
+
+function showPillionPresent() {
+  let first = document.getElementById("PillionFirst");
+  let last = document.getElementById("PillionLast");
+  let present = first.value != "" && last.value != "";
+  let ps = document.getElementById("showpillion");
+  if (ps) {
+    ps.innerHTML = "";
+    if (present) ps.innerHTML = "&#9745;";
   }
 }
 
@@ -376,13 +390,24 @@ function signin(e) {
   window.location = "/edit?m=signin&e=" + e;
 }
 
-function endEditEntrant() {
-  let mode = document.getElementById("EditMode").value;
-  switch (mode) {
-    case "signin":
-      window.location = "/signin";
-      break;
+function stackTransaction(url, objid) {
+  console.log(url);
+  let newTrans = {};
+  newTrans.url = url;
+  newTrans.objid = objid;
+  newTrans.sent = false;
+
+  const stackx = sessionStorage.getItem(myStackItem);
+  let stack = [];
+  if (stackx != null) {
+    stack = JSON.parse(stackx);
   }
+  stack.push(newTrans);
+  sessionStorage.setItem(myStackItem, JSON.stringify(stack));
+  /*
+  obj.classList.remove("oi");
+  obj.classList.add("oc");
+  */
 }
 
 function validate_entrant() {

@@ -70,7 +70,7 @@ func show_odo(w http.ResponseWriter, r *http.Request, showstart bool) {
 	if showstart {
 		fmt.Fprintf(w, ` data-gap="%v" data-xtra="%v"`, gap, xtra)
 	}
-	fmt.Fprintf(w, ` onclick="clickTime();">%v</span>`, st[11:16])
+	fmt.Fprintf(w, ` onclick="clickTime();" ondblclick="nextTimeSlot();">%v</span>`, st[11:16])
 
 	fmt.Fprint(w, ` <span id="ticker">&diams;</span>`)
 	fmt.Fprint(w, `<script>`+timerticker+`</script>`)
@@ -130,17 +130,23 @@ func update_odo(w http.ResponseWriter, r *http.Request) {
 	sqlx := ""
 	switch r.FormValue("f") {
 	case "f":
+		sqlx = "OdoFinish=" + r.FormValue("v")
+
 		ns := STATUSCODES["finishedOK"]
-		if beyond24(r.FormValue("st"), dt) {
+		n, _ := strconv.Atoi(r.FormValue("v"))
+		if n < 1 {
+			ns = STATUSCODES["DNF"]
+			sqlx += ",CertificateAvailable='N'"
+		} else if beyond24(r.FormValue("st"), dt) {
 			ns = STATUSCODES["finished24+"]
+			sqlx += ",CertificateAvailable='N'"
 		}
 
-		sqlx = "OdoFinish=" + r.FormValue("v")
 		sqlx += ",FinishTime='" + dt + "'"
 		sqlx += ",EntrantStatus=" + strconv.Itoa(ns)
 		sqlx += " WHERE EntrantID=" + r.FormValue("e")
 		sqlx += " AND FinishTime IS NULL"
-		sqlx += " AND EntrantStatus IN (" + strconv.Itoa(STATUSCODES["riding"]) + strconv.Itoa(STATUSCODES["DNF"]) + ")"
+		sqlx += " AND EntrantStatus IN (" + strconv.Itoa(STATUSCODES["riding"]) + "," + strconv.Itoa(STATUSCODES["DNF"]) + ")"
 	case "s":
 		sqlx = "OdoStart=" + r.FormValue("v")
 		sqlx += ",StartTime='" + dt + "'"
@@ -148,7 +154,7 @@ func update_odo(w http.ResponseWriter, r *http.Request) {
 		sqlx += " WHERE EntrantID=" + r.FormValue("e")
 		sqlx += " AND EntrantStatus IN (" + strconv.Itoa(STATUSCODES["signedin"]) + "," + strconv.Itoa(STATUSCODES["riding"]) + ")"
 	}
-	//fmt.Println(sqlx)
+	fmt.Println(sqlx)
 	DBH.Exec("UPDATE entrants SET " + sqlx)
 
 	fmt.Fprint(w, `{"err":false,"msg":"ok"}`)

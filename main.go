@@ -63,6 +63,23 @@ func init() {
 	//fmt.Printf("Statuses:\n%v\n\n", STATUSCODES)
 }
 
+func beyond24(starttime, finishtime string) bool {
+
+	ok := true
+	st, err := time.Parse(timefmt, starttime)
+	if err != nil {
+		ok = false
+	}
+	ft, err := time.Parse(timefmt, finishtime)
+	if err != nil {
+		ok = false
+	}
+
+	hrs := ft.Sub(st).Hours()
+	//fmt.Printf("%v - %v == %v hours\n", finishtime, starttime, hrs)
+	return hrs > 24 || !ok
+}
+
 func getIntegerFromDB(sqlx string, defval int) int {
 
 	rows, err := DBH.Query(sqlx)
@@ -193,6 +210,15 @@ func format_money(moneyamt string) string {
 
 func show_stats(w http.ResponseWriter, r *http.Request) {
 
+	scv := make(map[int]string)
+	scv[STATUSCODES["DNS"]] = "not signed in"        // Registered online
+	scv[STATUSCODES["confirmedDNS"]] = "withdrawn"   // Confirmed by rider
+	scv[STATUSCODES["signedin"]] = "signed in"       // Signed in at Squires
+	scv[STATUSCODES["riding"]] = "checked-out"       // Checked-out at Squires
+	scv[STATUSCODES["DNF"]] = "DNF"                  // Ride aborted
+	scv[STATUSCODES["finishedOK"]] = "Finished OK"   // Finished inside 24 hours
+	scv[STATUSCODES["finished24+"]] = "Finished 24+" // Finished outside 24 hours
+
 	const showzero = false
 	var refresher = `<!DOCTYPE html>
 	<html lang="en">
@@ -214,6 +240,7 @@ func show_stats(w http.ResponseWriter, r *http.Request) {
 		codedescs[v] = i
 		indexes = append(indexes, v)
 	}
+
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	fmt.Fprint(w, refresher)
@@ -224,9 +251,10 @@ func show_stats(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, `<script>`+timerticker+`</script>`)
 	fmt.Fprintf(w, `<table><tr><td>registered<br>&nbsp;</td><td class="val">%v<br>&nbsp;</td></tr>`, registered)
 	sort.Ints(indexes)
+
 	for _, sc := range indexes {
 		if showzero || counts[codedescs[sc]] != 0 {
-			fmt.Fprintf(w, `<tr><td>%v</td><td class="val">%v</td></tr>`, codedescs[sc], counts[codedescs[sc]])
+			fmt.Fprintf(w, `<tr><td>%v</td><td class="val">%v</td></tr>`, scv[sc], counts[codedescs[sc]])
 		}
 	}
 	totfunds := getStringFromDB("SELECT SUM(ifnull(EntryDonation,0)+ifnull(SquiresCheque,0)+ifnull(SquiresCash,0)+ifnull(RBLRAccount,0)+ifnull(JustGivingAmt,0)) AS funds  FROM entrants;", "0.00")
@@ -310,23 +338,6 @@ func show_config(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, ` <button class="nav" onclick="loadPage('menu');">Main menu</button>`)
 	fmt.Fprint(w, "</footer>")
 
-}
-
-func beyond24(starttime, finishtime string) bool {
-
-	ok := true
-	st, err := time.Parse(timefmt, starttime)
-	if err != nil {
-		ok = false
-	}
-	ft, err := time.Parse(timefmt, finishtime)
-	if err != nil {
-		ok = false
-	}
-
-	hrs := ft.Sub(st).Hours()
-	fmt.Printf("%v - %v == %v hours\n", finishtime, starttime, hrs)
-	return hrs > 24 || !ok
 }
 
 func show_admin(w http.ResponseWriter, r *http.Request) {

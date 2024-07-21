@@ -211,11 +211,13 @@ func show_finals(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, `<div id="signinlist">`)
 	n := 0
 	oe := true
+	itemno := 0
 	for rows.Next() {
 		var e Entrant
 
 		ScanEntrant(rows, &e)
 
+		itemno++
 		fmt.Fprint(w, `<div class="signinrow signout `)
 		if oe {
 			fmt.Fprint(w, "odd")
@@ -229,7 +231,7 @@ func show_finals(w http.ResponseWriter, r *http.Request) {
 
 		fmt.Fprintf(w, `<span class="Route">%v</span> `, e.Route)
 
-		fmt.Fprintf(w, `<span><select name="EntrantStatus" data-e="%v">`, e.EntrantID)
+		fmt.Fprintf(w, `<span><select id="%ves" name="EntrantStatus" data-e="%v" data-fs="%v" data-dnf="%v" onchange="changeFinalStatus(this);">`, itemno, e.EntrantID, STATUSCODES["finishedOK"], STATUSCODES["DNF"])
 		for k, v := range STATUSCODES {
 			fmt.Fprintf(w, `<option value="%v"`, v)
 			if e.EntrantStatus == v {
@@ -243,23 +245,30 @@ func show_finals(w http.ResponseWriter, r *http.Request) {
 
 		ca := e.CertificateAvailable != "N"
 		cd := e.CertificateDelivered != "N"
+		dnf := e.EntrantStatus == STATUSCODES["DNF"]
 		fmt.Fprint(w, `<option value="A-D"`)
-		if ca && !cd {
+		if ca && !cd && !dnf {
 			fmt.Fprint(w, ` selected`)
 		}
 		fmt.Fprint(w, `>Certificate available</option>`)
 
 		fmt.Fprint(w, `<option value="A+D"`)
-		if ca && cd {
+		if ca && cd && !dnf {
 			fmt.Fprint(w, ` select`)
 		}
 		fmt.Fprint(w, `>Signed out &#10003;</option>`)
 
 		fmt.Fprint(w, `<option value="-A-D"`)
-		if !ca {
+		if !ca && !dnf {
 			fmt.Fprint(w, ` selected`)
 		}
 		fmt.Fprint(w, `>Certificate NEEDED</option>`)
+
+		fmt.Fprint(w, `<option value="dnf"`)
+		if dnf {
+			fmt.Fprint(w, ` selected`)
+		}
+		fmt.Fprint(w, `>Did Not Finish</option>`)
 
 		fmt.Fprint(w, `</select></span>`)
 

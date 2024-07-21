@@ -13,7 +13,7 @@
   --bright-background: #ffff00;
   --bright-text: red;
   --form-background: whitesmoke;
-  --input-text: blue;
+  --input-text: black;
   --input-background: inherited;
   --hover-background: lightgreen;
   --hover-text: brown;
@@ -166,6 +166,7 @@ button.nav:hover {
 .val {
   font-weight: bold;
   text-align: right;
+  padding-left: 1em;
 }
 input {
   background-color: white;
