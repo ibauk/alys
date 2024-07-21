@@ -75,6 +75,7 @@ func show_odo(w http.ResponseWriter, r *http.Request, showstart bool) {
 	fmt.Fprint(w, ` <span id="ticker">&diams;</span>`)
 	fmt.Fprint(w, `<script>`+timerticker+`</script>`)
 
+	fmt.Fprint(w, ` <span id="errlog"></span>`)
 	fmt.Fprint(w, `</div>`)
 
 	fmt.Fprint(w, `<script>refreshTime(); timertick = setInterval(refreshTime,1000);</script>`)

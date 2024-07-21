@@ -215,7 +215,7 @@ function saveConfig(obj) {
   let val = obj.value;
 
   let url = encodeURI("config?" + obj.name + "=" + val);
-  stackTransaction(url, obj);
+  stackTransaction(url, obj.id);
 
   sendTransactions();
 }
@@ -232,7 +232,7 @@ function saveFinalStatus(obj) {
     url += "&CertificateAvailable=N&CertificateDelivered=N";
   }
   
-  stackTransaction(encodeURI(url), obj);
+  stackTransaction(encodeURI(url), obj.id);
 
 }
 function saveData(obj) {
@@ -279,7 +279,7 @@ function saveData(obj) {
   let url = encodeURI(
     "putentrant?EntrantID=" + ent + "&" + obj.name + "=" + val
   );
-  stackTransaction(url, obj);
+  stackTransaction(url, obj.id);
 
   validate_entrant();
 }
@@ -301,14 +301,14 @@ function saveOdo(obj) {
     "&t=" +
     timeDisplay.getAttribute("data-time");
 
-  stackTransaction(url, obj);
+  stackTransaction(url, obj.id);
 }
 
-function stackTransaction(url, obj) {
+function stackTransaction(url, objid) {
   console.log(url);
   let newTrans = {};
   newTrans.url = url;
-  newTrans.obj = obj.id;
+  newTrans.objid = objid;
   newTrans.sent = false;
 
   const stackx = sessionStorage.getItem(myStackItem);
@@ -318,8 +318,10 @@ function stackTransaction(url, obj) {
   }
   stack.push(newTrans);
   sessionStorage.setItem(myStackItem, JSON.stringify(stack));
+  /*
   obj.classList.remove("oi");
   obj.classList.add("oc");
+  */
 }
 
 function sendTransactions() {
@@ -329,6 +331,8 @@ function sendTransactions() {
   let stack = JSON.parse(stackx);
 
   //console.log(stack);
+
+  let errlog = document.getElementById('errlog')
 
   while (stack.length > 0) {
     let itm = stack[0];
@@ -340,6 +344,9 @@ function sendTransactions() {
       .then((response) => {
         if (!response.ok) {
           // Handle HTTP errors
+          stackTransaction(itm.url,itm.objid)
+          //if (errlog){errlog.innerHTML=`HTTP error! Status: ${response.status}`}
+  
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
         return response.json();
@@ -350,13 +357,17 @@ function sendTransactions() {
           console.error(`Error: ${data.msg}`);
         } else {
           // Process the data if no error
+          //if (errlog){errlog.innerHTML="Hello sailor: "+JSON.stringify(data)}
           console.log("Data:", data);
-          document.getElementById(itm.obj).classList.replace("oc", "ok");
+          document.getElementById(itm.objid).classList.replace("oi", "ok");
         }
       })
       .catch((error) => {
         // Handle network or other errors
+        //if (errlog) {errlog.innerHTML="ERROR CAUGHT"}
+        stackTransaction(itm.url,itm.objid)
         console.error("Fetch error:", error);
+        return
       });
   }
 }

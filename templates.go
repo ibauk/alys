@@ -47,10 +47,9 @@ type Person = struct {
 	Last         string
 	IBA          string
 	HasIBANumber bool
-	RBLR         string
+	RBL          string
 	Email        string
 	Phone        string
-	Address      string
 	Address1     string
 	Address2     string
 	Town         string
@@ -94,9 +93,9 @@ type Entrant = struct {
 	EditMode             string
 }
 
-const EntrantSQL = `SELECT EntrantID,ifnull(RiderFirst,''),ifnull(RiderLast,''),ifnull(RiderIBA,''),ifnull(RiderRBLR,''),ifnull(RiderEmail,''),ifnull(RiderPhone,'')
+const EntrantSQL = `SELECT EntrantID,ifnull(RiderFirst,''),ifnull(RiderLast,''),ifnull(RiderIBA,''),ifnull(RiderRBL,''),ifnull(RiderEmail,''),ifnull(RiderPhone,'')
     ,ifnull(RiderAddress1,''),ifnull(RiderAddress2,''),ifnull(RiderTown,''),ifnull(RiderCounty,''),ifnull(RiderPostcode,''),ifnull(RiderCountry,'')
-	,ifnull(PillionFirst,''),ifnull(PillionLast,''),ifnull(PillionIBA,''),ifnull(PillionRBLR,''),ifnull(PillionEmail,''),ifnull(PillionPhone,'')
+	,ifnull(PillionFirst,''),ifnull(PillionLast,''),ifnull(PillionIBA,''),ifnull(PillionRBL,''),ifnull(PillionEmail,''),ifnull(PillionPhone,'')
     ,ifnull(PillionAddress1,''),ifnull(PillionAddress2,''),ifnull(PillionTown,''),ifnull(PillionCounty,''),ifnull(PillionPostcode,''),ifnull(PillionCountry,'')
 	,ifnull(Bike,'motorbike'),ifnull(BikeReg,'')
 	,ifnull(NokName,''),ifnull(NokRelation,''),ifnull(NokPhone,'')
@@ -121,7 +120,7 @@ var SigninScreenSingle = `
 	<input type="checkbox" id="RiderIBA" name="RiderIBA" class="RiderIBA" value="RiderIBA"{{if ne .Rider.IBA ""}} checked{{end}} onchange="oic(this);">
 	{{end}}
 </div>
-<div class="field"><label for="RiderRBLR">RBL Member</label> <input type="checkbox" id="RiderRBLR" name="RiderRBLR" class="RiderRBLR" value="RiderRBLR"{{if ne .Rider.RBLR ""}} checked{{end}} onchange="oic(this);"></div>
+<div class="field"><label for="RiderRBL">RBL Member</label> <input type="checkbox" id="RiderRBL" name="RiderRBL" class="RiderRBL" value="RiderRBL"{{if ne .Rider.RBL ""}} checked{{end}} onchange="oic(this);"></div>
 <div class="field"><label for="RiderEmail">Email</label> <input id="RiderEmail" name="RiderEmail" class="RiderEmail" value="{{.Rider.Email}}" oninput="oid(this);" onchange="ocd(this);"></div>
 <div class="field"><label for="RiderPhone">Mobile</label> <input id="RiderPhone" name="RiderPhone" class="RiderPhone" value="{{.Rider.Phone}}" oninput="oid(this);" onchange="ocd(this);"></div>
 <br>
@@ -274,7 +273,7 @@ var SigninScreenSingle = `
 	<input type="checkbox" id="PillionIBA" name="PillionIBA" class="PillionIBA" value="PillionIBA"{{if ne .Pillion.IBA ""}} checked{{end}} onchange="oic(this);">
 	{{end}}
 </div>
-<div class="field"><label for="PillionRBLR">RBL Member</label> <input type="checkbox" id="PillionRBLR" name="PillionRBLR" class="PillionRBLR" value="PillionRBLR"{{if ne .Pillion.RBLR ""}} checked{{end}} onchange="oic(this);"></div>
+<div class="field"><label for="PillionRBL">RBL Member</label> <input type="checkbox" id="PillionRBL" name="PillionRBL" class="PillionRBL" value="PillionRBL"{{if ne .Pillion.RBL ""}} checked{{end}} onchange="oic(this);"></div>
 <div class="field"><label for="PillionEmail">Email</label> <input id="PillionEmail" name="PillionEmail" class="PillionEmail" value="{{.Pillion.Email}}" oninput="oid(this);" onchange="ocd(this);"></div>
 <div class="field"><label for="PillionPhone">Mobile</label> <input id="PillionPhone" name="PillionPhone" class="PillionPhone" value="{{.Pillion.Phone}}" oninput="oid(this);" onchange="ocd(this);"></div>
 <br>
@@ -296,7 +295,7 @@ var SigninScreenSingle = `
 
 func ScanEntrant(rows *sql.Rows, e *Entrant) {
 
-	err := rows.Scan(&e.EntrantID, &e.Rider.First, &e.Rider.Last, &e.Rider.IBA, &e.Rider.RBLR, &e.Rider.Email, &e.Rider.Phone, &e.Rider.Address1, &e.Rider.Address2, &e.Rider.Town, &e.Rider.County, &e.Rider.Postcode, &e.Rider.Country, &e.Pillion.First, &e.Pillion.Last, &e.Pillion.IBA, &e.Pillion.RBLR, &e.Pillion.Email, &e.Pillion.Phone, &e.Pillion.Address1, &e.Pillion.Address2, &e.Pillion.Town, &e.Pillion.County, &e.Pillion.Postcode, &e.Pillion.Country, &e.Bike, &e.BikeReg, &e.NokName, &e.NokRelation, &e.NokPhone, &e.OdoStart, &e.StartTime, &e.OdoFinish, &e.FinishTime, &e.EntrantStatus, &e.OdoCounts, &e.Route, &e.FundsRaised.EntryDonation, &e.FundsRaised.SquiresCash, &e.FundsRaised.SquiresCheque, &e.FundsRaised.RBLRAccount, &e.FundsRaised.JustGivingAmt, &e.Tshirt1, &e.Tshirt2, &e.Patches, &e.FreeCamping, &e.CertificateDelivered, &e.CertificateAvailable)
+	err := rows.Scan(&e.EntrantID, &e.Rider.First, &e.Rider.Last, &e.Rider.IBA, &e.Rider.RBL, &e.Rider.Email, &e.Rider.Phone, &e.Rider.Address1, &e.Rider.Address2, &e.Rider.Town, &e.Rider.County, &e.Rider.Postcode, &e.Rider.Country, &e.Pillion.First, &e.Pillion.Last, &e.Pillion.IBA, &e.Pillion.RBL, &e.Pillion.Email, &e.Pillion.Phone, &e.Pillion.Address1, &e.Pillion.Address2, &e.Pillion.Town, &e.Pillion.County, &e.Pillion.Postcode, &e.Pillion.Country, &e.Bike, &e.BikeReg, &e.NokName, &e.NokRelation, &e.NokPhone, &e.OdoStart, &e.StartTime, &e.OdoFinish, &e.FinishTime, &e.EntrantStatus, &e.OdoCounts, &e.Route, &e.FundsRaised.EntryDonation, &e.FundsRaised.SquiresCash, &e.FundsRaised.SquiresCheque, &e.FundsRaised.RBLRAccount, &e.FundsRaised.JustGivingAmt, &e.Tshirt1, &e.Tshirt2, &e.Patches, &e.FreeCamping, &e.CertificateDelivered, &e.CertificateAvailable)
 	checkerr(err)
 
 	e.Rider.HasIBANumber, _ = regexp.Match(`\d{1,6}`, []byte(e.Rider.IBA))
