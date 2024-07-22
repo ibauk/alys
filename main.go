@@ -76,7 +76,7 @@ func beyond24(starttime, finishtime string) bool {
 	}
 
 	hrs := ft.Sub(st).Hours()
-	//fmt.Printf("%v - %v == %v hours\n", finishtime, starttime, hrs)
+	fmt.Printf("%v - %v == %.2f hours\n", finishtime, starttime, hrs)
 	return hrs > 24 || !ok
 }
 

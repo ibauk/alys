@@ -15,8 +15,8 @@
   --form-background: whitesmoke;
   --input-text: black;
   --input-background: inherited;
-  --hover-background: lightgreen;
-  --hover-text: brown;
+  --hover-background: yellow;
+  --hover-text: red;
   --tabs-background: #dedbde;
   --tabs-text: #42454a;
   --tabs-selected: lightgray;
@@ -112,6 +112,25 @@ main.frontmenu button:hover {
 }
 #timenow {
   font-weight: bold;
+}
+#nextSlot {
+  display: inline-block;
+  border-radius: 6px;
+  font-size: calc(14pt + 1vmin);
+  width: 4em;
+  padding: 0.2em;
+  margin-left: 0.5em;
+}
+#nextSlot.hide {
+  display: none;
+}
+#pauseTime {
+  display: inline-block;
+  border-radius: 6px;
+  font-size: calc(14pt + 1vmin);
+  width: 6em;
+  padding: 0.2em;
+  margin-left: 0.5em;
 }
 #odolist {
   margin: 0.5em auto 0 auto;
@@ -281,7 +300,8 @@ input[type="radio"] {
   overflow: auto;
 }
 
-.tabContenthide {
+.tabContenthide,
+.hide {
   display: none;
 }
 
@@ -334,7 +354,6 @@ ul#tabs li a.selected {
 .signinrow:hover {
   background-color: var(--hover-background);
   color: var(--hover-text);
-  font-size: larger;
 }
 
 .signout select {
@@ -344,7 +363,7 @@ ul#tabs li a.selected {
   font-weight: bold;
 }
 .signout .Route {
-  font-size: .4em;
+  font-size: 0.4em;
   width: 5em;
 }
 .special {

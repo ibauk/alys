@@ -34,17 +34,37 @@ function calcMileage() {
 }
 
 function changeFinalStatus(sel) {
-
-  sel.classList.add('oc');
-  let ent = sel.getAttribute('data-e');
+  const certDNF = 3;
+  const certNeeded = 2;
+  const signedout = 1;
+  sel.classList.add("oi");
+  let ent = sel.getAttribute("data-e");
+  let div = sel.parentNode.parentNode;
+  let cert = div.querySelector("select[name=CertificateAD");
+  let ca = cert.getAttribute("data-ca");
+  console.log("cFS ca(r) = " + ca);
+  if (ca != "Y" && ca != "N") ca = "N";
+  console.log("cFS ca = " + ca);
   let status = sel.value;
-  let url = "putentrant?EntrantID="+ent+"&EntrantStatus="+status;
-  
-  if (status != sel.getAttribute('data-fs')) {
+  let url = "putentrant?EntrantID=" + ent + "&EntrantStatus=" + status;
+  let certix = -1;
+
+  if (status != sel.getAttribute("data-fs")) {
     url += "&CertificateAvailable=N";
+    if (status == sel.getAttribute("data-dnf")) {
+      certix = certDNF;
+    } else {
+      url += "&CertificateDelivered=" + ca;
+      certix = certNeeded;
+    }
+  } else {
+    // FinisherOK
+    if (ca != "N") certix = signedout;
+    else certix = certNeeded;
   }
-  stackTransaction(encodeURI(url),sel.id);
+  stackTransaction(encodeURI(url), sel.id);
   sendTransactions();
+  if (certix >= 0) cert.options[certix].selected = true;
 }
 
 function clickTime() {
@@ -64,6 +84,25 @@ function clickTime() {
     timeDisplay.classList.add("held");
   }
   console.log("Time clicked");
+}
+
+function clickTimeBtn(btn) {
+  let timeDisplay = document.querySelector("#timenow");
+  clickTime();
+  if (btn.innerHTML == btn.getAttribute("data-hold")) {
+    btn.innerHTML = btn.getAttribute("data-unhold");
+    setTimeout(
+      clickTimeBtnRelease,
+      timeDisplay.getAttribute("data-pause"),
+      btn
+    );
+  } else {
+    btn.innerHTML = btn.getAttribute("data-hold");
+  }
+}
+
+function clickTimeBtnRelease(btn) {
+  btn.innerHTML = btn.getAttribute("data-hold");
 }
 
 function endEditEntrant() {
@@ -129,6 +168,51 @@ function nextTimeSlot() {
   });
   let formattedString = dateString.replace(", ", " - ");
   timeDisplay.innerHTML = formattedString;
+}
+
+function nextButtonSlot() {
+  console.log("nextButtonSlot");
+  let btn = document.getElementById("nextSlot");
+  if (!btn) return;
+  console.log("nBS ok");
+  let timeDisplay = document.querySelector("#timenow");
+  let dt = new Date();
+  let dateString = dt.toLocaleString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  let formattedString = getRallyTime(dt)
+
+  let gap = parseInt(timeDisplay.getAttribute("data-gap"));
+  let xtra = parseInt(timeDisplay.getAttribute("data-xtra"));
+  let newdt = getRallyTime(dt);
+  let curdt = timeDisplay.getAttribute("data-time");
+
+
+  if (xtra > 0 && gap > 0) {
+    dt = parseDatetime(curdt);
+    dt = new Date(
+      dt.getFullYear(),
+      dt.getMonth(),
+      dt.getDate(),
+      dt.getHours(),
+      dt.getMinutes() + gap
+    );
+    newdt = getRallyTime(dt);
+    if (formattedString >= newdt) {
+      btn.classList.add("hide")
+    } else {
+      btn.classList.remove("hide")
+    }
+  } else {
+    btn.classList.add("hide");
+  }
+  dateString = dt.toLocaleString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  formattedString = dateString.replace(", ", " - ");
+  btn.innerHTML = formattedString;
 }
 
 // Called during Odo capture when input is entered
@@ -214,6 +298,7 @@ function refreshTime() {
   console.log(
     "Comparing " + curdt + " > " + newdt + "; xtra=" + xtra + "(" + gap + ")"
   );
+  nextButtonSlot();
   if (curdt >= newdt) {
     return;
   }
@@ -309,6 +394,8 @@ function saveOdo(obj) {
   let url =
     "putodo?e=" +
     ent +
+    "&st=" +
+    obj.getAttribute("data-st") +
     "&f=" +
     obj.name +
     "&v=" +

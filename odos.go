@@ -67,15 +67,22 @@ func show_odo(w http.ResponseWriter, r *http.Request, showstart bool) {
 		odoname = "f"
 	}
 	fmt.Fprintf(w, ` <span id="timenow" data-time="%v" data-refresh="1000" data-pause="120000" data-paused="0"`, st)
-	if showstart {
-		fmt.Fprintf(w, ` data-gap="%v" data-xtra="%v"`, gap, xtra)
-	}
-	fmt.Fprintf(w, ` onclick="clickTime();" ondblclick="nextTimeSlot();">%v</span>`, st[11:16])
+
+	fmt.Fprintf(w, ` data-gap="%v" data-xtra="%v"`, gap, xtra) // Only needed at start but referenced during timer ticks
+
+	fmt.Fprintf(w, ` >%v</span>`, st[11:16])
 
 	fmt.Fprint(w, ` <span id="ticker">&diams;</span>`)
+	if showstart && xtra > 0 {
+		fmt.Fprint(w, ` <button onclick="nextTimeSlot();" id="nextSlot"></button>`)
+	} else if !showstart {
+		const holdlit = `stop clock`
+		const unholdlit = `restart clock`
+		fmt.Fprintf(w, ` <button data-hold="%v" data-unhold="%v" onclick="clickTimeBtn(this);" id="pauseTime">%v</button>`, holdlit, unholdlit, holdlit)
+	}
 	fmt.Fprint(w, `<script>`+timerticker+`</script>`)
 
-	fmt.Fprint(w, ` <span id="errlog"></span>`)
+	fmt.Fprint(w, ` <span id="errlog"></span>`) // Diags only
 	fmt.Fprint(w, `</div>`)
 
 	fmt.Fprint(w, `<script>refreshTime(); timertick = setInterval(refreshTime,1000);</script>`)
@@ -106,7 +113,7 @@ func show_odo(w http.ResponseWriter, r *http.Request, showstart bool) {
 			pch = "start odo"
 			val = OdoStart
 		}
-		fmt.Fprintf(w, `<span><input id="%v" data-e="%v" name="%v" type="number" class="bignumber" oninput="oi(this);" onchange="oc(this);" min="0" placeholder="%v" value="%v"></span>`, itemno, EntrantID, odoname, pch, val)
+		fmt.Fprintf(w, `<span><input id="%v" data-e="%v" data-st="%v" name="%v" type="number" class="bignumber" oninput="oi(this);" onchange="oc(this);" min="0" placeholder="%v" value="%v"></span>`, itemno, EntrantID, StartTime, odoname, pch, val)
 		fmt.Fprint(w, `</div>`)
 
 	}

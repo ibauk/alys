@@ -241,7 +241,7 @@ func show_finals(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Fprint(w, `</select></span>`)
 
-		fmt.Fprintf(w, `<span class="field"><select name="CertificateAD" data-e="%v">`, e.EntrantID)
+		fmt.Fprintf(w, `<span class="field"><select name="CertificateAD" data-e="%v" data-ca="%v">`, e.EntrantID, e.CertificateAvailable)
 
 		ca := e.CertificateAvailable != "N"
 		cd := e.CertificateDelivered != "N"
@@ -254,7 +254,7 @@ func show_finals(w http.ResponseWriter, r *http.Request) {
 
 		fmt.Fprint(w, `<option value="A+D"`)
 		if ca && cd && !dnf {
-			fmt.Fprint(w, ` select`)
+			fmt.Fprint(w, ` selected`)
 		}
 		fmt.Fprint(w, `>Signed out &#10003;</option>`)
 
@@ -268,7 +268,7 @@ func show_finals(w http.ResponseWriter, r *http.Request) {
 		if dnf {
 			fmt.Fprint(w, ` selected`)
 		}
-		fmt.Fprint(w, `>Did Not Finish</option>`)
+		fmt.Fprint(w, `>No certificate</option>`)
 
 		fmt.Fprint(w, `</select></span>`)
 
@@ -277,10 +277,8 @@ func show_finals(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Fprint(w, `</div></main>`)
 	fmt.Fprint(w, `<footer><button class="nav" onclick="loadPage('menu');">Main menu</button>  `)
-	fmt.Fprint(w, ` <input type="checkbox" title="Enable new entrants" onchange="document.getElementById('newentrant').disabled=!this.checked;">`)
-	fmt.Fprint(w, ` <button id="newentrant" disabled class="nav" title="Enter unregistered entrant details" onclick="loadPage('edit?e=0');">New Entrant</button>`)
 	fmt.Fprint(w, `</footer>`)
-	fmt.Fprint(w, `<script>document.onkeydown=function(e){if(e.keyCode==27) {e.preventDefault();loadPage('menu');}}</script>`)
+	fmt.Fprint(w, `<script>setInterval(sendTransactions,1000);document.onkeydown=function(e){if(e.keyCode==27) {e.preventDefault();loadPage('menu');}}</script>`)
 
 	fmt.Fprint(w, `</body></html>`)
 	//fmt.Printf("Showed %v lines\n", n)
