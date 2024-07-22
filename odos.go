@@ -139,6 +139,8 @@ func update_odo(w http.ResponseWriter, r *http.Request) {
 	case "f":
 		sqlx = "OdoFinish=" + r.FormValue("v")
 
+		sqlx += ",CorrectedMiles=(" + r.FormValue("v") + " - IfNull(OdoStart,0))"
+
 		ns := STATUSCODES["finishedOK"]
 		n, _ := strconv.Atoi(r.FormValue("v"))
 		if n < 1 {

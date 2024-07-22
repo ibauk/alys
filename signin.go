@@ -241,7 +241,7 @@ func show_finals(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Fprint(w, `</select></span>`)
 
-		fmt.Fprintf(w, `<span class="field"><select name="CertificateAD" data-e="%v" data-ca="%v">`, e.EntrantID, e.CertificateAvailable)
+		fmt.Fprintf(w, `<span class="field"><select id="%vcs" name="CertificateAD" data-e="%v" data-ca="%v" onchange="changeCertStatus(this);">`, itemno, e.EntrantID, e.CertificateAvailable)
 
 		ca := e.CertificateAvailable != "N"
 		cd := e.CertificateDelivered != "N"

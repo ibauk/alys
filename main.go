@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+	"os"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -17,7 +18,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const PROGRAMVERSION = "Alys v0.1  Copyright (c) 2024 Bob Stammers"
+const PROGRAMVERSION = "Alys v0.1 Copyright © 2024 Bob Stammers"
 
 // DBNAME names the database file
 var DBNAME *string = flag.String("db", "rblr.db", "database file")
@@ -169,8 +170,11 @@ func about_this_program(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "<p>I handle administration for the RBLR1000</p>")
 	fp, err := filepath.Abs(*DBNAME)
 	checkerr(err)
-	fmt.Fprintf(w, `<p>The database is stored in <strong>%v</strong></p>`, fp)
-	fmt.Fprint(w, `<hr><p>This program is written in Go, CSS, HTML and JavaScript and the full source is available at <a href="https://github.com/ibauk/alys">https://github.com/ibauk/alys</a></p>`)
+	fmt.Fprintf(w, `<p>The database is stored in <strong>%v</strong>`, fp)
+	hn, err := os.Hostname()
+	checkerr(err)
+	fmt.Fprintf(w, ` on the server called <strong>%v</strong></p>`, hn)
+	fmt.Fprint(w, `<hr><p class="nerdy vspace">This program is written in Go, CSS, HTML and JavaScript and the full source is available at <a href="https://github.com/ibauk/alys">https://github.com/ibauk/alys</a></p>`)
 	fmt.Fprint(w, `</main>`)
 
 	fmt.Fprint(w, `<footer>`)

@@ -33,6 +33,32 @@ function calcMileage() {
   mlgdiv.innerHTML = " " + units + " miles";
 }
 
+function changeCertStatus(sel) {
+
+  console.log("changeCertStatus called");
+  sel.classList.add('oi');
+  let ent = sel.getAttribute('data-e');
+  let url = "putentrant?EntrantID="+ent;
+  let val = sel.value;
+  let ca = 'Y';
+  let cd = 'y';
+  switch(val) {
+    case 'A-D':
+      cd = 'N';
+      break;
+    case 'A+D':
+      break;
+    case '-A-D':
+    case 'dnf':
+      ca = 'N';
+      cd = 'N';
+      break;
+  }
+  url += "&CertificateAvailable="+ca+"&CertificateDelivered="+cd;
+  stackTransaction(encodeURI(url),sel.id)
+  sendTransactions();
+}
+
 function changeFinalStatus(sel) {
   const certDNF = 3;
   const certNeeded = 2;

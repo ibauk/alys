@@ -78,6 +78,7 @@ main.stats {
   display: grid;
   justify-content: space-around;
   grid-template-rows: 15% 80%;
+  margin: .5em auto 2em auto;
 }
 main.frontmenu {
   display: grid;
@@ -133,8 +134,9 @@ main.frontmenu button:hover {
   margin-left: 0.5em;
 }
 #odolist {
-  margin: 0.5em auto 0 auto;
+  margin: 0.5em auto 2em auto;
   display: table;
+  overflow: hidden;
 }
 #odolist div {
   display: table-row;
@@ -153,6 +155,7 @@ main.frontmenu button:hover {
   display: table;
   overflow: hidden;
   font-size: 1.5em;
+  margin: 0.5em auto 2em auto;
 }
 
 #signinlist div {
@@ -424,9 +427,15 @@ header {
   width: 100%;
 }
 footer {
-  position: fixed;
+  position: sticky;
   bottom: 0;
   border-top: solid;
   background-color: var(--topbar-background);
   width: 100%;
+}
+.nerdy {
+  font-size: 12pt;
+}
+.vspace {
+  margin: 1em 0 3em 0;
 }
