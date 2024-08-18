@@ -194,6 +194,7 @@ input {
   background-color: white;
   font-weight: bold;
   border-radius: 6px;
+  padding: 0 0 0 3px;
 }
 input.oi {
   background-color: yellow;
@@ -269,7 +270,7 @@ input[type="radio"] {
 
 .RiderPostcode,
 .PillionPostcode {
-  width: 5em;
+  width: 6em;
 }
 
 .RiderCountry,
