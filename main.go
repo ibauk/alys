@@ -146,7 +146,10 @@ func main() {
 	http.HandleFunc("/config", show_config)
 	http.HandleFunc("/putodo", update_odo)
 	http.HandleFunc("/putentrant", update_entrant)
-	http.ListenAndServe(":"+*HTTPPort, nil)
+	err = http.ListenAndServe(":"+*HTTPPort, nil)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func about_this_program(w http.ResponseWriter, r *http.Request) {
