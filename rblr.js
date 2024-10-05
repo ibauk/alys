@@ -2,6 +2,7 @@
 
 const myStackItem = "odoStack";
 var timertick;
+var reloadok = true;
 
 function addMoney() {
   let monies = document.getElementsByClassName("money");
@@ -34,32 +35,34 @@ function calcMileage() {
 }
 
 function changeCertStatus(sel) {
-
   console.log("changeCertStatus called");
-  sel.classList.add('oi');
-  let ent = sel.getAttribute('data-e');
-  let url = "putentrant?EntrantID="+ent;
+  reloadok = false;
+  sel.classList.add("oi");
+  let ent = sel.getAttribute("data-e");
+  let url = "putentrant?EntrantID=" + ent;
   let val = sel.value;
-  let ca = 'Y';
-  let cd = 'y';
-  switch(val) {
-    case 'A-D':
-      cd = 'N';
+  let ca = "Y";
+  let cd = "Y";
+  switch (val) {
+    case "A-D":
+      cd = "N";
       break;
-    case 'A+D':
+    case "A+D":
       break;
-    case '-A-D':
-    case 'dnf':
-      ca = 'N';
-      cd = 'N';
+    case "-A-D":
+    case "dnf":
+      ca = "N";
+      cd = "N";
       break;
   }
-  url += "&CertificateAvailable="+ca+"&CertificateDelivered="+cd;
-  stackTransaction(encodeURI(url),sel.id)
+  url += "&CertificateAvailable=" + ca + "&CertificateDelivered=" + cd;
+  stackTransaction(encodeURI(url), sel.id);
   sendTransactions();
 }
 
 function changeFinalStatus(sel) {
+  reloadok = false;
+
   const certDNF = 3;
   const certNeeded = 2;
   const signedout = 1;
@@ -133,11 +136,8 @@ function clickTimeBtnRelease(btn) {
 
 function endEditEntrant() {
   let mode = document.getElementById("EditMode").value;
-  switch (mode) {
-    case "signin":
-      window.location = "/signin";
-      break;
-  }
+
+  window.location = "signin?mode=" + mode;
 }
 
 function fix2(n) {
@@ -207,13 +207,12 @@ function nextButtonSlot() {
     hour: "2-digit",
     minute: "2-digit",
   });
-  let formattedString = getRallyTime(dt)
+  let formattedString = getRallyTime(dt);
 
   let gap = parseInt(timeDisplay.getAttribute("data-gap"));
   let xtra = parseInt(timeDisplay.getAttribute("data-xtra"));
   let newdt = getRallyTime(dt);
   let curdt = timeDisplay.getAttribute("data-time");
-
 
   if (xtra > 0 && gap > 0) {
     dt = parseDatetime(curdt);
@@ -226,9 +225,9 @@ function nextButtonSlot() {
     );
     newdt = getRallyTime(dt);
     if (formattedString >= newdt) {
-      btn.classList.add("hide")
+      btn.classList.add("hide");
     } else {
-      btn.classList.remove("hide")
+      btn.classList.remove("hide");
     }
   } else {
     btn.classList.add("hide");
@@ -254,6 +253,7 @@ function oi(obj) {
 }
 
 function oic(obj) {
+  reloadok = false;
   // Checkbox handler
   obj.setAttribute("data-chg", "1");
   // autosave handler
@@ -329,6 +329,19 @@ function refreshTime() {
     return;
   }
   nextTimeSlot();
+}
+
+function reloadPage() {
+  console.log("reloadPage called");
+  if (!reloadok) {
+    setTimeout(reloadPage, 1000);
+    return;
+  }
+
+  let url = window.location.href;
+
+  console.log("Reloading " + url);
+  window.location = url;
 }
 
 function saveConfig(obj) {
@@ -468,6 +481,7 @@ function sendTransactions() {
           //if (errlog){errlog.innerHTML="Hello sailor: "+JSON.stringify(data)}
           console.log("Data:", data);
           document.getElementById(itm.objid).classList.replace("oi", "ok");
+          reloadok = true;
         }
       })
       .catch((error) => {
@@ -499,8 +513,8 @@ function showPillionPresent() {
   }
 }
 
-function signin(e) {
-  window.location = "/edit?m=signin&e=" + e;
+function signin(m, e) {
+  window.location = "/edit?m=" + m + "&e=" + e;
 }
 
 function stackTransaction(url, objid) {
@@ -534,6 +548,7 @@ function validate_entrant() {
     "NokRelation",
     "NokPhone",
   ];
+  let noktabFields = ["NokName", "NokRelation", "NokPhone"];
 
   mustFields.forEach((fld) => {
     let f = document.getElementById(fld);
@@ -541,4 +556,14 @@ function validate_entrant() {
     if (f.value == "") f.classList.add("notblank");
     else f.classList.remove("notblank");
   });
+  let nokAlert = false;
+  noktabFields.forEach((fld) => {
+    let f = document.getElementById(fld);
+    nokAlert = nokAlert || f.value == "";
+  });
+  let noktab = document.getElementById("noktab");
+  if (noktab) {
+    if (nokAlert) noktab.classList.add("notblank");
+    else noktab.classList.remove("notblank");
+  }
 }

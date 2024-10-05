@@ -18,7 +18,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const PROGRAMVERSION = "Alys v0.1 Copyright © 2024 Bob Stammers"
+const PROGRAMVERSION = "Alys v0.2 Copyright © 2024 Bob Stammers"
 
 // DBNAME names the database file
 var DBNAME *string = flag.String("db", "rblr.db", "database file")
@@ -51,6 +51,8 @@ var interval = window.setInterval(function(){
     }
 }, 1000);`
 
+var timezone *time.Location
+
 func init() {
 	STATUSCODES = make(map[string]int)
 	STATUSCODES["DNS"] = 0          // Registered online
@@ -62,16 +64,18 @@ func init() {
 	STATUSCODES["finished24+"] = 10 // Finished outside 24 hours
 
 	//fmt.Printf("Statuses:\n%v\n\n", STATUSCODES)
+	timezone, _ = time.LoadLocation("Europe/London")
+
 }
 
 func beyond24(starttime, finishtime string) bool {
 
 	ok := true
-	st, err := time.Parse(timefmt, starttime)
+	st, err := time.ParseInLocation(timefmt, starttime, timezone)
 	if err != nil {
 		ok = false
 	}
-	ft, err := time.Parse(timefmt, finishtime)
+	ft, err := time.ParseInLocation(timefmt, finishtime, timezone)
 	if err != nil {
 		ok = false
 	}
@@ -168,7 +172,7 @@ func about_this_program(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprint(w, refresher)
 
-	fmt.Fprint(w, `<main>`)
+	fmt.Fprint(w, `<main class="about">`)
 	fmt.Fprint(w, `<p class="legal">`+PROGRAMVERSION+"</p>")
 	fmt.Fprint(w, "<p>I handle administration for the RBLR1000</p>")
 	fp, err := filepath.Abs(*DBNAME)
@@ -177,10 +181,10 @@ func about_this_program(w http.ResponseWriter, r *http.Request) {
 	hn, err := os.Hostname()
 	checkerr(err)
 	fmt.Fprintf(w, ` on the server called <strong>%v</strong></p>`, hn)
-	fmt.Fprint(w, `<hr><p class="nerdy vspace">This program is written in Go, CSS, HTML and JavaScript and the full source is available at <a href="https://github.com/ibauk/alys">https://github.com/ibauk/alys</a></p>`)
+	fmt.Fprint(w, `<hr><p class="nerdy vspace">This program is written in Go, CSS, HTML and JavaScript and the full source is available at <a href="https://github.com/ibauk/alys" target="github">https://github.com/ibauk/alys</a></p>`)
 	fmt.Fprint(w, `</main>`)
 
-	fmt.Fprint(w, `<footer>`)
+	fmt.Fprint(w, `<footer class="about">`)
 	fmt.Fprint(w, ` <button class="nav" onclick="loadPage('menu');">Main menu</button>`)
 	fmt.Fprint(w, "</footer>")
 
@@ -362,6 +366,7 @@ func show_admin(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprint(w, refresher+`<main class="frontmenu">`)
 	fmt.Fprint(w, `<h1>RBLR1000 ADMINISTRATION</h1>`)
+	fmt.Fprint(w, `<button onclick="loadPage('signin?mode=full');">Edit any entrant</button>`)
 	fmt.Fprint(w, `<button onclick="loadPage('config');">Configuration</button>`)
 	fmt.Fprint(w, `<button onclick="loadPage('about');">About Alys</button>`)
 	fmt.Fprint(w, `<button onclick="this.disabled=true;loadPage('export');">Export results for IBA database</button>`)

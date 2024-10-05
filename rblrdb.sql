@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS "config" (
 );
 CREATE TABLE IF NOT EXISTS "entrants" (
 	"EntrantID"	INTEGER NOT NULL,
-	"Bike"	TEXT,
+	"Bike"	TEXT DEFAULT 'motorbike',
 	"BikeReg"	INTEGER,
 	"RiderFirst"	TEXT,
 	"RiderLast"	TEXT,
@@ -51,8 +51,8 @@ CREATE TABLE IF NOT EXISTS "entrants" (
 	"PillionPhone"	TEXT,
 	"RiderRBLR"	TEXT,
 	"PillionRBLR"	TEXT,
-	"Tshirt1"	TEXT,
-	"Tshirt2"	TEXT,
+	"Tshirt1"	TEXT DEFAULT 'no thanks',
+	"Tshirt2"	TEXT DEFAULT 'no thanks',
 	"Patches"	INTEGER DEFAULT 0,
 	"FreeCamping"	TEXT NOT NULL DEFAULT 'N',
 	"CertificateDelivered"	TEXT NOT NULL DEFAULT 'N',

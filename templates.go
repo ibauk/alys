@@ -110,6 +110,40 @@ var SigninScreenSingle = `
 <input type="hidden" id="EntrantID" name="EntrantID" value="{{.EntrantID}}">
 <input type="hidden" id="EditMode" name="EditMode" value="{{.EditMode}}">
 <fieldset class="tabContent" id="tab_rider"><legend>Rider</legend>
+<div class="field special" title="Changing status closes the form">
+    
+	<label for="EntrantStatus">Status</label>
+	<select id="EntrantStatus" name="EntrantStatus"   data-chg="1" data-static="1" onchange="ocd(this);">
+	    <option value="0"{{if eq .EntrantStatus 0}} selected{{end}}>not signed in</option>
+	    <option value="2"{{if eq .EntrantStatus 2}} selected{{end}}>signed in</option>
+		{{if eq .EditMode "signin"}}
+		{{else}}
+	    <option value="4"{{if eq .EntrantStatus 4}} selected{{end}}>checked out</option>
+	    <option value="8"{{if eq .EntrantStatus 8}} selected{{end}}>Finisher</option>
+	    <option value="6"{{if eq .EntrantStatus 6}} selected{{end}}>DNF</option>
+	    <option value="10"{{if eq .EntrantStatus 10}} selected{{end}}>Late finisher</option>
+		{{end}}
+	    <option value="1"{{if eq .EntrantStatus 1}} selected{{end}}>withdrawn</option>
+	</select>
+
+</div>
+
+<div class="field">
+
+    <label for="Route">Route</label> 
+	<select id="Route" name="Route" data-chg="1" data-static="1" onchange="ocd(this);">
+	    <option value="A-NCW"{{if eq .Route "A-NCW"}} selected{{end}}>North clockwise</option>
+	    <option value="B-NAC"{{if eq .Route "B-NAC"}} selected{{end}}>North anticlockwise</option>
+	    <option value="C-SCW"{{if eq .Route "C-SCW"}} selected{{end}}>South clockwise</option>
+	    <option value="D-SAC"{{if eq .Route "D-SAC"}} selected{{end}}>South anticlockwise</option>
+	    <option value="E-500CW"{{if eq .Route "E-500CW"}} selected{{end}}>500 clockwise</option>
+	    <option value="F-500AC"{{if eq .Route "F-500AC"}} selected{{end}}>500 anticlockwise</option>
+	</select>
+
+</div>
+<br><br>
+
+
 <div class="field"><div class="field"><label for="RiderLast">Last name</label> <input autofocus id="RiderLast" name="RiderLast" class="RiderLast" value="{{.Rider.Last}}" oninput="oid(this);" onchange="ocd(this);"></div>
 <div class="field"><label for="RiderFirst">First name</label> <input id="RiderFirst" name="RiderFirst" class="RiderFirst" value="{{.Rider.First}}" oninput="oid(this);" onchange="ocd(this);"></div>
 <div class="field">
@@ -137,34 +171,6 @@ var SigninScreenSingle = `
 	<label for="FreeCamping">Camping</label>
 	<input type="checkbox" id="FreeCamping" name="FreeCamping" class="FreeCamping" value="FreeCamping"{{if eq .FreeCamping "Y"}} checked{{end}} onchange="oic(this);">
 </div>
-<div class="field">
-
-    <label for="Route">Route</label> 
-	<select id="Route" name="Route" data-chg="1" data-static="1" onchange="ocd(this);">
-	    <option value="A-NCW"{{if eq .Route "A-NCW"}} selected{{end}}>North clockwise</option>
-	    <option value="B-NAC"{{if eq .Route "B-NAC"}} selected{{end}}>North anticlockwise</option>
-	    <option value="C-SCW"{{if eq .Route "C-SCW"}} selected{{end}}>South clockwise</option>
-	    <option value="D-SAC"{{if eq .Route "D-SAC"}} selected{{end}}>South anticlockwise</option>
-	    <option value="E-500CW"{{if eq .Route "E-500CW"}} selected{{end}}>500 clockwise</option>
-	    <option value="F-500AC"{{if eq .Route "F-500AC"}} selected{{end}}>500 anticlockwise</option>
-	</select>
-
-</div>
-<div class="field special" title="Changing status closes the form">
-    
-	<label for="EntrantStatus">Status</label>
-	<select id="EntrantStatus" name="EntrantStatus"   data-chg="1" data-static="1" onchange="ocd(this);">
-	    <option value="0"{{if eq .EntrantStatus 0}} selected{{end}}>not signed in</option>
-	    <option value="2"{{if eq .EntrantStatus 2}} selected{{end}}>signed in</option>
-	    <option value="4"{{if eq .EntrantStatus 4}} selected{{end}}>checked out</option>
-	    <option value="8"{{if eq .EntrantStatus 8}} selected{{end}}>Finisher</option>
-	    <option value="6"{{if eq .EntrantStatus 6}} selected{{end}}>DNF</option>
-	    <option value="10"{{if eq .EntrantStatus 10}} selected{{end}}>Late finisher</option>
-	    <option value="1"{{if eq .EntrantStatus 1}} selected{{end}}>withdrawn</option>
-	</select>
-
-</div>
-<br><br>
 <div class="field"><label for="Tshirt1">T-shirt 1</label> 
 
 	<select id="Tshirt1" name="Tshirt1" class="Tshirt1"   data-chg="1" data-static="1" onchange="ocd(this);">
@@ -208,9 +214,9 @@ var SigninScreenSingle = `
 
 <div class="tabs_area">
 	<ul id="tabs">
-		<li><a href="#tab_bike">Bike</a></li>
-		<li><a href="#tab_nok">Emergency</a></li>
 		<li><a href="#tab_money">Donations <span id="showmoney"></span></a></li>
+		<li><a href="#tab_bike">Bike</a></li>
+		<li><a href="#tab_nok" id="noktab">Emergency</a></li>
 		<li><a href="#tab_pillion">Pillion <span id="showpillion"></span></a></li>
 	</ul>
 </div>

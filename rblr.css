@@ -397,7 +397,7 @@ nav {
 }
 
 .notblank {
-  background-color: var(--bright-background);
+  background-color: var(--bright-background) !important;
 }
 
 .ConfigScreen .field {
@@ -409,7 +409,7 @@ nav {
 }
 
 input.StartCohortMins {
-  width: 2em;
+  width: 3em;
 }
 
 input.ExtraCohorts {
@@ -439,4 +439,13 @@ footer {
 }
 .vspace {
   margin: 1em 0 3em 0;
+}
+
+.about {
+  max-width: 30em;
+  margin: 1em auto 0 auto;
+  border: double 6px;
+  padding: 1em;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: .9em;
 }

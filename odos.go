@@ -19,15 +19,39 @@ func get_odolist_start_time(ischeckout bool) (string, int, int) {
 	if st == "" {
 		return res, 0, 0
 	}
-	res = res[0:11] + st
+	stt := res[0:11] + st
+	//fmt.Println("Starting at " + stt)
 	mins := getIntegerFromDB("SELECT StartCohortMins FROM config", 10)
 	xtra := getIntegerFromDB("SELECT ExtraCohorts FROM config", 3)
+	if stt < res && mins > 0 { // Current time is later than the start time
+
+		for {
+			if xtra < 1 {
+				break
+			}
+			if stt >= res {
+				break
+			}
+
+			// add mins to st
+			t, _ := time.ParseInLocation(timefmt, stt, timezone)
+			nt := t.Add(time.Minute * time.Duration(mins))
+			stt = storeTimeDB(nt)
+			//fmt.Println("stt==" + stt)
+			st = stt[11:]
+			xtra--
+		}
+	}
+	res = res[0:11] + st
 	return res, mins, xtra
 
 }
 
 func show_odo(w http.ResponseWriter, r *http.Request, showstart bool) {
 
+	if r.FormValue("debug") != "" {
+		fmt.Println("show_odo called")
+	}
 	var refresher = `<!DOCTYPE html>
 	<html lang="en">
 	<head>
@@ -53,6 +77,9 @@ func show_odo(w http.ResponseWriter, r *http.Request, showstart bool) {
 	rows, _ := DBH.Query(sqlx)
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+	w.Header().Set("Pragma", "no-cache")
+	w.Header().Set("Expires", "0")
 
 	fmt.Fprint(w, refresher)
 
@@ -85,7 +112,7 @@ func show_odo(w http.ResponseWriter, r *http.Request, showstart bool) {
 	fmt.Fprint(w, ` <span id="errlog"></span>`) // Diags only
 	fmt.Fprint(w, `</div>`)
 
-	fmt.Fprint(w, `<script>refreshTime(); timertick = setInterval(refreshTime,1000);</script>`)
+	fmt.Fprint(w, `<script>setTimeout(reloadPage,30000);refreshTime(); timertick = setInterval(refreshTime,1000);</script>`)
 
 	fmt.Fprint(w, `<div id="odolist">`)
 	oe := true

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"slices"
 	"strconv"
 	"text/template"
 )
@@ -89,13 +90,13 @@ func edit_entrant(w http.ResponseWriter, r *http.Request) {
 func show_signin(w http.ResponseWriter, r *http.Request) {
 
 	scv := make(map[int]string)
-	scv[STATUSCODES["DNS"]] = "&nbsp;&nbsp;&nbsp;"       // Registered online
-	scv[STATUSCODES["confirmedDNS"]] = "DNS"             // Confirmed by rider
-	scv[STATUSCODES["signedin"]] = "&nbsp;&#9745;&nbsp;" // Signed in at Squires
-	scv[STATUSCODES["riding"]] = "out"                   // Checked-out at Squires
-	scv[STATUSCODES["DNF"]] = "dnf"                      // Ride aborted
-	scv[STATUSCODES["finishedOK"]] = "fin"               // Finished inside 24 hours
-	scv[STATUSCODES["finished24+"]] = "24+"              // Finished outside 24 hours
+	scv[STATUSCODES["DNS"]] = "&nbsp;?&nbsp;"                 // Registered online
+	scv[STATUSCODES["confirmedDNS"]] = "&nbsp;&#9746;&nbsp;"  // Confirmed by rider
+	scv[STATUSCODES["signedin"]] = "&nbsp;&#9745;&nbsp;"      // Signed in at Squires
+	scv[STATUSCODES["riding"]] = "&nbsp;&#9745; &#9850;"      // Checked-out at Squires
+	scv[STATUSCODES["DNF"]] = "&nbsp;&#9745; &#9760;"         // Ride aborted
+	scv[STATUSCODES["finishedOK"]] = "&nbsp;&#9745; &#10004;" // Finished inside 24 hours
+	scv[STATUSCODES["finished24+"]] = "&nbsp;&#9745; &check;" // Finished outside 24 hours
 
 	var refresher = `<!DOCTYPE html>
 	<html lang="en">
@@ -108,12 +109,19 @@ func show_signin(w http.ResponseWriter, r *http.Request) {
 	</head><body>`
 
 	sqlx := EntrantSQL
-	sqlx += " WHERE EntrantStatus IN (" + strconv.Itoa(STATUSCODES["DNS"]) + "," + strconv.Itoa(STATUSCODES["confirmedDNS"])
-	showSignedin := r.FormValue("all") != ""
-	if showSignedin {
-		sqlx += "," + strconv.Itoa(STATUSCODES["signedin"])
+
+	mode := r.FormValue("mode")
+	if mode == "" {
+		mode = "signin"
 	}
-	sqlx += ")"
+	if mode != "full" {
+		sqlx += " WHERE EntrantStatus IN (" + strconv.Itoa(STATUSCODES["DNS"]) + "," + strconv.Itoa(STATUSCODES["confirmedDNS"])
+		showSignedin := r.FormValue("all") != ""
+		if showSignedin {
+			sqlx += "," + strconv.Itoa(STATUSCODES["signedin"])
+		}
+		sqlx += ")"
+	}
 	sqlx += " ORDER BY RiderLast,RiderFirst"
 
 	//fmt.Println(sqlx)
@@ -124,10 +132,19 @@ func show_signin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+	w.Header().Set("Pragma", "no-cache")
+	w.Header().Set("Expires", "0")
 
 	fmt.Fprint(w, refresher)
 
-	fmt.Fprint(w, `<div class="top"><h2>RBLR1000 - Signing-in</h2></div>`)
+	action := "Signing-in"
+	if mode == "full" {
+		action = "Full entrant list"
+	}
+
+	fmt.Fprintf(w, `<div class="top"><h2>RBLR1000 - %v  <span id="ticker">&diams;</span></h2></div>`, action)
+	fmt.Fprint(w, `<script>`+timerticker+`</script>`)
 	fmt.Fprint(w, `<main class="signin">`)
 
 	fmt.Fprint(w, `<div id="signinlist">`)
@@ -145,7 +162,7 @@ func show_signin(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, "even")
 		}
 		oe = !oe
-		fmt.Fprintf(w, `" onclick="signin(%v);">`, e.EntrantID)
+		fmt.Fprintf(w, `" onclick="signin('%v',%v);">`, mode, e.EntrantID)
 
 		val, ok := scv[e.EntrantStatus]
 		if !ok {
@@ -162,7 +179,7 @@ func show_signin(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, ` <input type="checkbox" title="Enable new entrants" onchange="document.getElementById('newentrant').disabled=!this.checked;">`)
 	fmt.Fprint(w, ` <button id="newentrant" disabled class="nav" title="Enter unregistered entrant details" onclick="loadPage('edit?e=0');">New Entrant</button>`)
 	fmt.Fprint(w, `</footer>`)
-	fmt.Fprint(w, `<script>document.onkeydown=function(e){if(e.keyCode==27) {e.preventDefault();loadPage('menu');}}</script>`)
+	fmt.Fprint(w, `<script>setTimeout(reloadPage,30000);document.onkeydown=function(e){if(e.keyCode==27) {e.preventDefault();loadPage('menu');}}</script>`)
 
 	fmt.Fprint(w, `</body></html>`)
 	//fmt.Printf("Showed %v lines\n", n)
@@ -170,6 +187,7 @@ func show_signin(w http.ResponseWriter, r *http.Request) {
 
 func show_finals(w http.ResponseWriter, r *http.Request) {
 
+	//fmt.Printf("show_finals - %v\n", r)
 	scv := make(map[int]string)
 	scv[STATUSCODES["DNS"]] = "&nbsp;&nbsp;&nbsp;"       // Registered online
 	scv[STATUSCODES["confirmedDNS"]] = "DNS"             // Confirmed by rider
@@ -178,6 +196,13 @@ func show_finals(w http.ResponseWriter, r *http.Request) {
 	scv[STATUSCODES["DNF"]] = "dnf"                      // Ride aborted
 	scv[STATUSCODES["finishedOK"]] = "fin"               // Finished inside 24 hours
 	scv[STATUSCODES["finished24+"]] = "24+"              // Finished outside 24 hours
+
+	MyStatuscodes := []int{
+		STATUSCODES["riding"],
+		STATUSCODES["DNF"],
+		STATUSCODES["finishedOK"],
+		STATUSCODES["finished24+"],
+	}
 
 	var refresher = `<!DOCTYPE html>
 	<html lang="en">
@@ -190,8 +215,9 @@ func show_finals(w http.ResponseWriter, r *http.Request) {
 	</head><body>`
 
 	sqlx := EntrantSQL
-	sqlx += " WHERE EntrantStatus IN (" + strconv.Itoa(STATUSCODES["DNF"]) + "," + strconv.Itoa(STATUSCODES["finishedOK"]) + "," + strconv.Itoa(STATUSCODES["finished24+"])
+	sqlx += " WHERE EntrantStatus IN (" + strconv.Itoa(STATUSCODES["finishedOK"]) + "," + strconv.Itoa(STATUSCODES["finished24+"])
 	sqlx += ")"
+	sqlx += " AND CertificateDelivered <> 'Y'"
 	sqlx += " ORDER BY RiderLast,RiderFirst"
 
 	//fmt.Println(sqlx)
@@ -202,10 +228,14 @@ func show_finals(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+	w.Header().Set("Pragma", "no-cache")
+	w.Header().Set("Expires", "0")
 
 	fmt.Fprint(w, refresher)
 
-	fmt.Fprint(w, `<div class="top"><h2>RBLR1000 - Verification</h2></div>`)
+	fmt.Fprint(w, `<div class="top"><h2>RBLR1000 - Verification  <span id="ticker">&diams;</span></h2></div>`)
+	fmt.Fprint(w, `<script>`+timerticker+`</script>`)
 	fmt.Fprint(w, `<main class="signin">`)
 
 	fmt.Fprint(w, `<div id="signinlist">`)
@@ -233,11 +263,13 @@ func show_finals(w http.ResponseWriter, r *http.Request) {
 
 		fmt.Fprintf(w, `<span><select id="%ves" name="EntrantStatus" data-e="%v" data-fs="%v" data-dnf="%v" onchange="changeFinalStatus(this);">`, itemno, e.EntrantID, STATUSCODES["finishedOK"], STATUSCODES["DNF"])
 		for k, v := range STATUSCODES {
-			fmt.Fprintf(w, `<option value="%v"`, v)
-			if e.EntrantStatus == v {
-				fmt.Fprint(w, ` selected`)
+			if slices.Contains(MyStatuscodes, v) {
+				fmt.Fprintf(w, `<option value="%v"`, v)
+				if e.EntrantStatus == v {
+					fmt.Fprint(w, ` selected`)
+				}
+				fmt.Fprintf(w, `>%v</option>`, k)
 			}
-			fmt.Fprintf(w, `>%v</option>`, k)
 		}
 		fmt.Fprint(w, `</select></span>`)
 
@@ -256,7 +288,7 @@ func show_finals(w http.ResponseWriter, r *http.Request) {
 		if ca && cd && !dnf {
 			fmt.Fprint(w, ` selected`)
 		}
-		fmt.Fprint(w, `>Signed out &#10003;</option>`)
+		fmt.Fprint(w, `>Certificate delivered &#10003;</option>`)
 
 		fmt.Fprint(w, `<option value="-A-D"`)
 		if !ca && !dnf {
@@ -278,7 +310,7 @@ func show_finals(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, `</div></main>`)
 	fmt.Fprint(w, `<footer><button class="nav" onclick="loadPage('menu');">Main menu</button>  `)
 	fmt.Fprint(w, `</footer>`)
-	fmt.Fprint(w, `<script>setInterval(sendTransactions,1000);document.onkeydown=function(e){if(e.keyCode==27) {e.preventDefault();loadPage('menu');}}</script>`)
+	fmt.Fprint(w, `<script>setTimeout(reloadPage,30000);setInterval(sendTransactions,1000);document.onkeydown=function(e){if(e.keyCode==27) {e.preventDefault();loadPage('menu');}}</script>`)
 
 	fmt.Fprint(w, `</body></html>`)
 	//fmt.Printf("Showed %v lines\n", n)

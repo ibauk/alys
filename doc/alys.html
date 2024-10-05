@@ -9,15 +9,17 @@
     <style>
       body {
         background: white;
-        max-width: 200mm;
+        max-width: 190mm;
         margin: auto;
         font-size: 12pt;
       }
       h2 {
+        text-transform: uppercase;
         margin: 1em 0 0.2em 0;
       }
-      h3 {
-        margin: 1em 0;
+      h3,
+      figcaption {
+        margin: 1em 0 0.2em 0;
         font-size: 0.9em;
       }
       img {
@@ -30,6 +32,13 @@
       }
       p {
         text-align: justify;
+      }
+      figure {
+        display: table;
+      }
+      figcaption {
+        display: table-caption;
+        caption-side: top;
       }
     </style>
     <script src="main.js"></script>
@@ -72,15 +81,23 @@
         <li>Receipt logs</li>
         <li>Master list of entries</li>
       </ul>
-      <h3>Disclaimers</h3>
-      <img src="disclaimer.png" alt="" />
+      <figure>
+        <figcaption>Disclaimers</figcaption>
+        <img src="disclaimer.png" alt="" />
+      </figure>
       <p>
         Blank disclaimers are no longer available on the RBLR website so we
         retain control of the wording and handwriting. Those with pillions have
         signature blocks for rider and pillion.
       </p>
-      <h3>Receipt logs</h3>
-      <img src="receipt.png" alt="" />
+      <p>
+        Blank disclaimers will be available at Squires to cater for latecomers
+        and other delinquents.
+      </p>
+      <figure>
+        <figcaption>Receipt logs</figcaption>
+        <img src="receipt.png" alt="" />
+      </figure>
       <p>
         These are maintained by the rider, not the staff (except for
         signatures). The pre-filled start times are intended to optimise the
@@ -89,8 +106,15 @@
         captured electronically. Riders obviously need to retain the relevant
         receipts as well as this log.
       </p>
-      <h3>Master list of entries</h3>
-      <img src="overview.png" alt="" />
+      <p>
+        Blank logs will be available at Squires to cater for latecomers and
+        other delinquents.
+      </p>
+      <figure>
+        <figcaption>Master list of entries</figcaption>
+        <img src="overview.png" alt="" />
+      </figure>
+
       <p>
         This sheet is produced as part of the generation of the database which
         forms the basis of all administration of the event. It illustrates the
@@ -112,7 +136,7 @@
           <em>withdrawn</em> (before signing in, aka 'DNS') - not expected at
           Squires
         </li>
-        <li><em>signed</em> in at Squires</li>
+        <li><em>signed in</em> at Squires</li>
         <li><em>checked out</em> - still out riding</li>
         <li><em>finisher</em> - checked in at Squires within 24 hours</li>
         <li><em>late finisher</em> - checked in at Squires after 24 hours</li>
@@ -140,8 +164,8 @@
       </p>
       <p>Check out occurs in Squires carpark on Saturday morning.</p>
       <p>
-        DNF, Did Not Finish, occurs when an entrant reports or is reported as
-        not returning to Squires.
+        DNF occurs when an entrant reports or is reported as not returning to
+        Squires.
       </p>
       <p>
         Returning entrants are checked in at Squires by staff. Status is
@@ -156,12 +180,12 @@
         "finisher" certificate showing completion of the ride.
       </p>
       <p>The minimum requirements for ride certification are</p>
-      <ul>
+      <ol>
         <li>Checked out by staff at Squires</li>
         <li>Checked in by staff at Squires</li>
         <li>Presentation of signed receipt log</li>
         <li>Presentation of required receipts</li>
-      </ul>
+      </ol>
       <p>
         Check out and check in will be proved by records on the database and
         signatures on the receipt log. The computer will flag if odo difference
@@ -188,18 +212,155 @@
     </article>
     <article>
       <h2>Shop/merchandise</h2>
-      <p>I know little or nothing about how this operates at Squires and have consequently made little or no provision for it.</p>
+      <p>
+        I know little or nothing about how this operates at Squires and have
+        consequently made little or no provision for it.
+        <strong>Talk to me people!</strong>
+      </p>
     </article>
-    <hr>
+    <hr />
     <article>
       <h2>Automation</h2>
-      <p>Until 2024, all automation for the RBLR involved customisations of <em>ScoreMaster</em>, the rally scoring system. For 2025, a new system <em>Alys</em> has been developed exclusively for automating the RBLR.</p>
-      <p>Alys involves a cloud or local network based server being accessed from laptops, tablets or phones via a web browser. No special software needed on any device, just any browser. Networking has been operating successfully at Squires for the last few years by hotspotting a mobile phone. In the event of a complete failure of civilisation it might be necessary to revert to old-fashioned paper methods.</p>
+      <p>
+        Until 2024, all automation for the RBLR involved customisations of
+        <em>ScoreMaster</em>, the rally scoring system. For 2025, a new system
+        <em>Alys</em> has been developed exclusively for automating the RBLR.
+      </p>
+      <p>
+        Alys involves a cloud or local network based server being accessed from
+        laptops, tablets or phones via a web browser. No special software needed
+        on any device, just any browser. Networking has been operating
+        successfully at Squires for the last few years by hotspotting a mobile
+        phone. In the event of a complete failure of civilisation it might be
+        necessary to revert to old-fashioned paper methods.
+      </p>
       <h3>Check-out (start)</h3>
-      <p>Riders assemble in the carpark well before the 5am start. Staff will use phones or tablets to record staring odo readings and that act will also record the rider's start time. The phone screen looks like</p>
-      <img src="start.png" alt="">
-      <p>The initial start time will be 05:00 and this time will be recorded for all odo readings captured before then. Alys will watch the clock and automatically roll over to the next slot, 05:10, as soon as the clock hits 05:01 or when triggered to do so by the staff member. From 05:31 onwards the start time advances one minute at a time. </p>
-      <p>The ability to trigger a new starting slot enables staff to implement a cutoff for each slot. This might well be needed if more than 200 riders are present at the start.</p>
+      <p>
+        Riders assemble in the carpark well before the 5am start. Staff will use
+        phones or tablets to record staring odo readings and that act will also
+        record the rider's start time. The phone screen looks like
+      </p>
+      <figure>
+        <img src="start.png" alt="" />
+      </figure>
+      <p>
+        The initial start time will be 05:00 and this time will be recorded for
+        all odo readings captured before then. Alys will watch the clock and
+        automatically roll over to the next slot, 05:10, as soon as the clock
+        hits 05:01 or when triggered to do so by the staff member. From 05:31
+        onwards the start time advances one minute at a time.
+      </p>
+      <p>Obviously those settings (start time, gap, ...) are all variable.</p>
+      <p>
+        The ability to trigger a new starting slot enables staff to implement a
+        cutoff for each slot. This might well be needed if more than 200 riders
+        are present at the start.
+      </p>
+      <h3>Check-in (finish)</h3>
+      <p>
+        Returning riders are met in the carpark at Squires and checked in using
+        a screen similar to the one used at the start
+      </p>
+      <figure>
+        <img src="finish.png" alt="" />
+      </figure>
+      <p>
+        Alys keeps track of the time and the time shown is the finish time
+        applied when the odo reading is captured. The [stop clock] function is
+        useful when a group of riders arrive back at Squires together. Stopping
+        the clock maintains the single timestamp for two minutes giving staff
+        enough time to process everyone.
+      </p>
+      <p>
+        Finisher status, OK or Late, is also determined by the system at the
+        point of check-in. (it's ok, everything <strong>could</strong> be
+        overturned manually if necessary)
+      </p>
+      <h3>Instant state of play</h3>
+      <figure>
+        <img src="stats.png" alt="" />
+      </figure>
+      <p>
+        Because everything's automated we have access to comprehensive
+        statistics about the current state of play, especially useful overnight
+        when we can know exactly how many we're still waiting for. A little
+        thing, I know, but at 04:30 Sunday when asked for the third time, it's
+        quite helpful.
+      </p>
+    </article>
+    <article>
+      <h2>Signing in / record maintenance</h2>
+      <p>Sign in at Squires involves</p>
+      <ol>
+        <li>Confirming presence</li>
+        <li>Confirming accuracy of database info</li>
+        <li>Handing in any donations</li>
+        <li>Signing a disclaimer</li>
+        <li>Receiving receipt log</li>
+      </ol>
+      <p>
+        On completion status is changed to <em>signed in</em> and the entrant
+        will appear in the check out picklist.
+      </p>
+      <p>The database record screen currently looks like</p>
+      <figure>
+        <img src="rider.png" alt="" />
+      </figure>
+      <p>
+        This provides adequate access to all data but might not be optimal for
+        specific processes such as sign in and sign out/verification which are
+        not currently specified in any detail.
+      </p>
+    </article>
+    <article>
+      <h2>Two phase event</h2>
+      <p>
+        In order to keep things as simple and tolerant as practicable, the
+        system divides the event into two phases
+      </p>
+      <ol>
+        <li>Signing in and checking out</li>
+        <li>Checking in and verification</li>
+      </ol>
+      <p>
+        This means that menus can be kept to a minimum and nobody should be
+        confused as to which odo reading they're taking.
+      </p>
+      <p>
+        This currently calls for a manual intervention to switch modes at some
+        point on Saturday but this could also be automated with a manual
+        override.
+      </p>
+    </article>
+    <article>
+      <h2>Retained evidence</h2>
+      <p>
+        As I understand it, the decision of the verifier at Squires is final and
+        rides are proved for all purposes by the issuing of a certificate. In
+        the event of a ride being subsequently audited or the certification
+        challenged, we will need to retain some evidence for inspection. The
+        database itself will be retained but we should also consider retaining
+        receipt logs and/or actual receipts.
+      </p>
+    </article>
+    <article>
+      <h2>Demonstration setup</h2>
+      <p>
+        The system is currently running on a private server at
+        <a href="http://77.68.117.223/menu">http://77.68.117.223/menu</a>. The
+        database contains some arbitrary data so won't necessarily appear
+        logical but it's just to allow us to get a feel for the software and try
+        things out.
+      </p>
+      <p>
+        The software is at an early stage of development, breaking it will prove
+        nothing.
+      </p>
+    </article>
+    <article>
+      <h2>Document version 1.0</h2>
+      <h3>Issue history</h3>
+      <p>1.0 17Sep24 Initial release to working group</p>
     </article>
   </body>
 </html>
