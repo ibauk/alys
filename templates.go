@@ -244,19 +244,19 @@ var SigninScreenSingle = `
 </fieldset>
 <fieldset class="tabContent" id="tab_money"><legend>Money</legend>
 <div class="field">
-	<label for="EntryDonation">@ entry</label> <input id="EntryDonation" name="EntryDonation" class="EntryDonation money" value="{{.FundsRaised.EntryDonation}}" oninput="moneyChg(this);"  onchange="ocd(this);">
+	<label for="EntryDonation">@ entry</label> <input title="Paid in via Wufoo forms on entry" id="EntryDonation" name="EntryDonation" class="EntryDonation money" value="{{.FundsRaised.EntryDonation}}" oninput="moneyChg(this);"  onchange="ocd(this);">
 </div>
 <div class="field">
-	<label for="SquiresCheque">Cheque</label> <input id="SquiresCheque" name="SquiresCheque" class="SquiresCheque money" value="{{.FundsRaised.SquiresCheque}}" oninput="moneyChg(this);" onchange="ocd(this);">
+	<label for="SquiresCheque">Cheque</label> <input title="Value of cheques handed in at Squires" id="SquiresCheque" name="SquiresCheque" class="SquiresCheque money" value="{{.FundsRaised.SquiresCheque}}" oninput="moneyChg(this);" onchange="ocd(this);">
 </div>
 <div class="field">
-	<label for="SquiresCash">Cash</label> <input id="SquiresCash" name="SquiresCash" class="SquiresCash money" value="{{.FundsRaised.SquiresCash}}" oninput="moneyChg(this);" onchange="ocd(this);">
+	<label for="SquiresCash">Cash</label> <input title="Value of cash handed in at Squires" id="SquiresCash" name="SquiresCash" class="SquiresCash money" value="{{.FundsRaised.SquiresCash}}" oninput="moneyChg(this);" onchange="ocd(this);">
 </div>
 <div class="field">
-	<label for="RBLRAccount">RBLR Account</label> <input id="RBLRAccount" name="RBLRAccount" class="RBLRAccount money" value="{{.FundsRaised.RBLRAccount}}" oninput="moneyChg(this);" onchange="ocd(this);">
+	<label for="RBLRAccount">RBLR Account</label> <input title="Amount paid directly (not via IBA) to RBLR account" id="RBLRAccount" name="RBLRAccount" class="RBLRAccount money" value="{{.FundsRaised.RBLRAccount}}" oninput="moneyChg(this);" onchange="ocd(this);">
 </div>
 <div class="field">
-	<label for="JustGivingAmt">Just giving</label> <input id="JustGivingAmt" name="JustGivingAmt" class="JustGivingAmt money" value="{{.FundsRaised.JustGivingAmt}}" oninput="moneyChg(this);" onchange="ocd(this);">
+	<label for="JustGivingAmt">Just giving</label> <input title="Amount raised using JustGiving page" id="JustGivingAmt" name="JustGivingAmt" class="JustGivingAmt money" value="{{.FundsRaised.JustGivingAmt}}" oninput="moneyChg(this);" onchange="ocd(this);">
 </div>
 <div class="field">
 	<label for="JustGivingURL">Just giving URL</label> <input id="JustGivingURL" name="JustGivingURL" class="JustGivingURL" value="{{.FundsRaised.JustGivingURL}}" oninput="oid(this);" onchange="ocd(this);">

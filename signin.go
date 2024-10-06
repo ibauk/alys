@@ -113,6 +113,7 @@ func show_signin(w http.ResponseWriter, r *http.Request) {
 	mode := r.FormValue("mode")
 	if mode == "" {
 		mode = "signin"
+		scv[STATUSCODES["DNS"]] = "" // This is signin, of course they're not signed in yet
 	}
 	if mode != "full" {
 		sqlx += " WHERE EntrantStatus IN (" + strconv.Itoa(STATUSCODES["DNS"]) + "," + strconv.Itoa(STATUSCODES["confirmedDNS"])
@@ -300,7 +301,7 @@ func show_finals(w http.ResponseWriter, r *http.Request) {
 		if dnf {
 			fmt.Fprint(w, ` selected`)
 		}
-		fmt.Fprint(w, `>No certificate</option>`)
+		fmt.Fprint(w, `>No certificate due</option>`)
 
 		fmt.Fprint(w, `</select></span>`)
 

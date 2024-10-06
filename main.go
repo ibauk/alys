@@ -185,7 +185,7 @@ func about_this_program(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, `</main>`)
 
 	fmt.Fprint(w, `<footer class="about">`)
-	fmt.Fprint(w, ` <button class="nav" onclick="loadPage('menu');">Main menu</button>`)
+	fmt.Fprint(w, ` <button class="nav" autofocus onclick="loadPage('menu');">Main menu</button>`)
 	fmt.Fprint(w, "</footer>")
 
 }
@@ -222,13 +222,13 @@ func format_money(moneyamt string) string {
 func show_stats(w http.ResponseWriter, r *http.Request) {
 
 	scv := make(map[int]string)
-	scv[STATUSCODES["DNS"]] = "not signed in"        // Registered online
-	scv[STATUSCODES["confirmedDNS"]] = "withdrawn"   // Confirmed by rider
-	scv[STATUSCODES["signedin"]] = "signed in"       // Signed in at Squires
-	scv[STATUSCODES["riding"]] = "checked-out"       // Checked-out at Squires
-	scv[STATUSCODES["DNF"]] = "DNF"                  // Ride aborted
-	scv[STATUSCODES["finishedOK"]] = "Finished OK"   // Finished inside 24 hours
-	scv[STATUSCODES["finished24+"]] = "Finished 24+" // Finished outside 24 hours
+	scv[STATUSCODES["DNS"]] = "not signed in"               // Registered online
+	scv[STATUSCODES["confirmedDNS"]] = "withdrawn"          // Confirmed by rider
+	scv[STATUSCODES["signedin"]] = "signed in"              // Signed in at Squires
+	scv[STATUSCODES["riding"]] = "checked-out (out riding)" // Checked-out at Squires
+	scv[STATUSCODES["DNF"]] = "DNF"                         // Ride aborted
+	scv[STATUSCODES["finishedOK"]] = "Finished OK"          // Finished inside 24 hours
+	scv[STATUSCODES["finished24+"]] = "Finished 24+"        // Finished outside 24 hours
 
 	const showzero = false
 	var refresher = `<!DOCTYPE html>
@@ -270,6 +270,19 @@ func show_stats(w http.ResponseWriter, r *http.Request) {
 	}
 	totfunds := getStringFromDB("SELECT SUM(ifnull(EntryDonation,0)+ifnull(SquiresCheque,0)+ifnull(SquiresCash,0)+ifnull(RBLRAccount,0)+ifnull(JustGivingAmt,0)) AS funds  FROM entrants;", "0.00")
 	fmt.Fprintf(w, `<tr><td><br>Funds raised</td><td class="val"><br>&pound;%v</td></tr>`, format_money(totfunds))
+
+	sqlx := "SELECT count(*) FROM entrants WHERE EntrantStatus IN (" + strconv.Itoa(STATUSCODES["finishedOK"]) + "," + strconv.Itoa(STATUSCODES["finished24+"]) + ") "
+
+	certsWaiting := getIntegerFromDB(sqlx+"AND CertificateAvailable='Y' AND CertificateDelivered<>'Y'", 0)
+	certsNeeded := getIntegerFromDB(sqlx+"AND CertificateAvailable<>'Y'", 0)
+
+	if certsWaiting > 0 {
+		fmt.Fprintf(w, `<tr><td><br>Finisher certs uncollected</td><td class="val"><br>%v</td></tr>`, certsWaiting)
+	}
+	if certsNeeded > 0 {
+		fmt.Fprintf(w, `<tr><td>Cert reprints needed</td><td class="val">%v</td></tr>`, certsNeeded)
+	}
+
 	fmt.Fprint(w, `</table></main>`)
 	fmt.Fprint(w, `<script>document.onkeydown=function(e){if(e.keyCode==27) {e.preventDefault();loadPage('menu');}}</script>`)
 	fmt.Fprint(w, `<footer>`)
