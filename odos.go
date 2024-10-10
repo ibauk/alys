@@ -52,15 +52,6 @@ func show_odo(w http.ResponseWriter, r *http.Request, showstart bool) {
 	if r.FormValue("debug") != "" {
 		fmt.Println("show_odo called")
 	}
-	var refresher = `<!DOCTYPE html>
-	<html lang="en">
-	<head>
-	<meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>rblr1000</title>
-	<style>` + my_css + `</style>
-	<script>` + my_js + `</script>
-	</head><body>`
 
 	sqlx := "SELECT EntrantID,RiderFirst,RiderLast,ifnull(OdoStart,''),ifnull(StartTime,''),ifnull(OdoFinish,''),ifnull(FinishTime,''),EntrantStatus,OdoCounts"
 	sqlx += " FROM entrants WHERE "

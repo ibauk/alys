@@ -39,6 +39,18 @@ var my_js string
 //go:embed rblr.css
 var my_css string
 
+var refresher = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RBLR1000</title>
+<style>` + my_css + `</style>
+<script>` + my_js + `</script>
+</head><body>`
+
+const refreshscript = `<script>setTimeout(function() { window.location=window.location;},15000);</script>`
+
 const timerticker = `var img = document.getElementById('ticker');
 
 var interval = window.setInterval(function(){
@@ -140,6 +152,7 @@ func main() {
 	http.HandleFunc("/menu", show_menu)
 	http.HandleFunc("/about", about_this_program)
 	http.HandleFunc("/admin", show_admin)
+	http.HandleFunc("/merch", show_shop)
 	http.HandleFunc("/stats", show_stats)
 	http.HandleFunc("/signin", show_signin)
 	http.HandleFunc("/finals", show_finals)
@@ -158,16 +171,6 @@ func main() {
 
 func about_this_program(w http.ResponseWriter, r *http.Request) {
 
-	var refresher = `<!DOCTYPE html>
-	<html lang="en">
-	<head>
-	<meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>About Alys</title>
-	<style>` + my_css + `</style>
-	<script>` + my_js + `</script>
-	</head><body>`
-
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	fmt.Fprint(w, refresher)
@@ -175,6 +178,7 @@ func about_this_program(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, `<main class="about">`)
 	fmt.Fprint(w, `<p class="legal">`+PROGRAMVERSION+"</p>")
 	fmt.Fprint(w, "<p>I handle administration for the RBLR1000</p>")
+	fmt.Fprint(w, `<p>Importantly, I capture start and finish times and odo readings of entrants. These records form part of the ride proof justifying the issue of IBA certificates.</p>`)
 	fp, err := filepath.Abs(*DBNAME)
 	checkerr(err)
 	fmt.Fprintf(w, `<p>The database is stored in <strong>%v</strong>`, fp)
@@ -219,6 +223,88 @@ func format_money(moneyamt string) string {
 	return res
 }
 
+func show_shop(w http.ResponseWriter, r *http.Request) {
+
+	var ordered = map[string]int{"S": 0, "M": 0, "L": 0, "XL": 0, "XXL": 0}
+	var unclaimed = map[string]int{"S": 0, "M": 0, "L": 0, "XL": 0, "XXL": 0}
+	var opatches, upatches int
+
+	sqlx := "SELECT ifnull(Tshirt1,''),ifnull(Tshirt2,''),ifnull(Patches,0),EntrantStatus FROM entrants"
+	rows, err := DBH.Query(sqlx)
+	checkerr(err)
+	defer rows.Close()
+	for rows.Next() {
+		var t1, t2 string
+		var p, es int
+		err = rows.Scan(&t1, &t2, &p, &es)
+		checkerr(err)
+		if t1 != "" {
+			_, ok := ordered[t1]
+			if ok {
+				ordered[t1]++
+			} else {
+				ordered[t1] = 1
+			}
+		}
+		if t2 != "" {
+			_, ok := ordered[t2]
+			if ok {
+				ordered[t2]++
+			} else {
+				ordered[t2] = 1
+			}
+		}
+		opatches += p
+		if es < STATUSCODES["signedin"] {
+			if t1 != "" {
+				_, ok := unclaimed[t1]
+				if ok {
+					unclaimed[t1]++
+				} else {
+					unclaimed[t1] = 1
+				}
+			}
+			if t2 != "" {
+				_, ok := unclaimed[t2]
+				if ok {
+					unclaimed[t2]++
+				} else {
+					unclaimed[t2] = 1
+				}
+			}
+			upatches += p
+
+		}
+	}
+
+	showzero := r.FormValue("sz") != ""
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	fmt.Fprint(w, refresher)
+
+	fmt.Fprint(w, `<main class="merch">`)
+
+	fmt.Fprint(w, `<h2 class="shop">Merchandise</h2>`)
+
+	fmt.Fprint(w, `<div class="row hdr"><span class="col">Size</span><span class="col">Ordered</span><span class="col">Unclaimed</span></div>`)
+	for k, v := range ordered {
+		if unclaimed[k]+ordered[k] > 0 || showzero {
+			fmt.Fprintf(w, `<div class="row"><span class="col">%v</span><span class="col">%v</span>`, k, v)
+			fmt.Fprintf(w, `<span class="col">%v</span>`, unclaimed[k])
+		}
+		fmt.Fprint(w, `</div>`)
+	}
+	fmt.Fprintf(w, `<div class="row"><span class="col">Patches</span><span class="col">%v</span><span class="col">%v</span></div>`, opatches, upatches)
+	fmt.Fprint(w, `</main>`)
+	fmt.Fprint(w, `<script>document.onkeydown=function(e){if(e.keyCode==27) {e.preventDefault();loadPage('menu');}}</script>`)
+	fmt.Fprint(w, `<footer>`)
+	fmt.Fprint(w, `<button class="nav" onclick="loadPage('menu');">Main menu</button>`)
+	fmt.Fprint(w, `</footer>`)
+
+	fmt.Fprint(w, `</body><html>`)
+}
+
 func show_stats(w http.ResponseWriter, r *http.Request) {
 
 	scv := make(map[int]string)
@@ -231,16 +317,6 @@ func show_stats(w http.ResponseWriter, r *http.Request) {
 	scv[STATUSCODES["finished24+"]] = "Finished 24+"        // Finished outside 24 hours
 
 	const showzero = false
-	var refresher = `<!DOCTYPE html>
-	<html lang="en">
-	<head>
-	<meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>rblr1000</title>
-	<style>` + my_css + `</style>
-	<script>` + my_js + `</script>
-	</head><body>
-	<script>setTimeout(function() { window.location=window.location;},15000);</script>`
 
 	registered := getIntegerFromDB("SELECT count(*) FROM entrants", 0)
 	codedescs := make(map[int]string)
@@ -254,7 +330,7 @@ func show_stats(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-	fmt.Fprint(w, refresher)
+	fmt.Fprint(w, refresher+refreshscript)
 
 	fmt.Fprint(w, `<main class="stats">`)
 
@@ -327,16 +403,6 @@ func show_config(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var refresher = `<!DOCTYPE html>
-	<html lang="en">
-	<head>
-	<meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>rblr1000</title>
-	<style>` + my_css + `</style>
-	<script>` + my_js + `</script>
-	</head><body>`
-
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	fmt.Fprint(w, refresher)
@@ -366,39 +432,18 @@ func show_config(w http.ResponseWriter, r *http.Request) {
 
 func show_admin(w http.ResponseWriter, r *http.Request) {
 
-	var refresher = `<!DOCTYPE html>
-	<html lang="en">
-	<head>
-	<meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>rblr1000</title>
-	<style>` + my_css + `</style>
-	<script>` + my_js + `</script>
-	</head><body>
-	`
-
 	fmt.Fprint(w, refresher+`<main class="frontmenu">`)
 	fmt.Fprint(w, `<h1>RBLR1000 ADMINISTRATION</h1>`)
 	fmt.Fprint(w, `<button onclick="loadPage('signin?mode=full');">Edit any entrant</button>`)
+	fmt.Fprint(w, `<button onclick="loadPage('merch');">Merchandise stats</button>`)
 	fmt.Fprint(w, `<button onclick="loadPage('config');">Configuration</button>`)
-	fmt.Fprint(w, `<button onclick="loadPage('about');">About Alys</button>`)
 	fmt.Fprint(w, `<button onclick="this.disabled=true;loadPage('export');">Export results for IBA database</button>`)
 	fmt.Fprint(w, `<button onclick="loadPage('menu');">Main menu</button>`)
+	fmt.Fprint(w, `<button onclick="loadPage('about');">About Alys</button>`)
 	fmt.Fprint(w, `</main>`)
 }
 
 func show_menu(w http.ResponseWriter, r *http.Request) {
-
-	var refresher = `<!DOCTYPE html>
-	<html lang="en">
-	<head>
-	<meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>rblr1000</title>
-	<style>` + my_css + `</style>
-	<script>` + my_js + `</script>
-	</head><body>
-	`
 
 	RallyStatus := getStringFromDB("SELECT RallyStatus FROM config", "S")
 

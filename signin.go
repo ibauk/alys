@@ -27,16 +27,6 @@ func create_new_entrant() string {
 
 func edit_entrant(w http.ResponseWriter, r *http.Request) {
 
-	var refresher = `<!DOCTYPE html>
-	<html lang="en">
-	<head>
-	<meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>rblr1000</title>
-		<style>` + my_css + `</style>
-		<script>` + my_js + `</script>
-		</head><body>`
-
 	entrant := r.FormValue("e")
 	if entrant == "" {
 		return
@@ -97,16 +87,6 @@ func show_signin(w http.ResponseWriter, r *http.Request) {
 	scv[STATUSCODES["DNF"]] = "&nbsp;&#9745; &#9760;"         // Ride aborted
 	scv[STATUSCODES["finishedOK"]] = "&nbsp;&#9745; &#10004;" // Finished inside 24 hours
 	scv[STATUSCODES["finished24+"]] = "&nbsp;&#9745; &check;" // Finished outside 24 hours
-
-	var refresher = `<!DOCTYPE html>
-	<html lang="en">
-	<head>
-	<meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>rblr1000</title>
-	<style>` + my_css + `</style>
-	<script>` + my_js + `</script>
-	</head><body>`
 
 	sqlx := EntrantSQL
 
