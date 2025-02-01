@@ -18,13 +18,15 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const PROGRAMVERSION = "Alys v0.2 Copyright © 2024 Bob Stammers"
+const PROGRAMVERSION = "Alys v0.3 Copyright © 2025 Bob Stammers"
 
 // DBNAME names the database file
 var DBNAME *string = flag.String("db", "rblr.db", "database file")
 
 // HTTPPort is the web port to serve
 var HTTPPort *string = flag.String("port", "80", "Web port")
+
+var EntrantsCSV *string = flag.String("import", "", "CSV to import")
 
 // DBH provides access to the database
 var DBH *sql.DB
@@ -148,6 +150,10 @@ func main() {
 		return
 	}
 
+	if *EntrantsCSV != "" {
+		LoadEntrantsFromCSV(*EntrantsCSV)
+		return
+	}
 	http.HandleFunc("/", show_menu)
 	http.HandleFunc("/menu", show_menu)
 	http.HandleFunc("/about", about_this_program)
