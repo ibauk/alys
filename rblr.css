@@ -78,7 +78,7 @@ main.stats {
   display: grid;
   justify-content: space-around;
   grid-template-rows: 15% 80%;
-  margin: .5em auto 2em auto;
+  margin: 0.5em auto 2em auto;
 }
 main.frontmenu {
   display: grid;
@@ -217,6 +217,9 @@ input.oc {
   vertical-align: middle;
   margin-bottom: 0.5rem;
 }
+.fullwidth {
+  width: 100%;
+}
 fieldset label,
 fieldset .label {
   font-size: 14pt;
@@ -290,6 +293,14 @@ input[type="radio"] {
 }
 .JustGivingURL {
   width: 30em;
+}
+
+.Notes {
+  box-sizing: border-box;
+  padding: 1em;
+  width: inherit;
+  margin: auto;
+  font-size: 1em;
 }
 .small {
   font-size: 14pt;
@@ -446,8 +457,8 @@ footer {
   margin: 1em auto 0 auto;
   border: double 6px;
   padding: 1em;
-  font-family: 'Times New Roman', Times, serif;
-  font-size: .9em;
+  font-family: "Times New Roman", Times, serif;
+  font-size: 0.9em;
 }
 .merch {
   display: table;
@@ -466,7 +477,17 @@ h2.shop {
   text-align: center;
 }
 .hdr .col {
-  padding-bottom: .1em;
+  padding-bottom: 0.1em;
   margin-bottom: 1em;
   text-decoration: underline;
+}
+
+.footnote {
+  font-size: .5em;
+  padding: 0 0 .5em 10em;
+}
+.subrow td {
+  font-size: .7em;
+  font-style: italic;
+  text-align: right;
 }

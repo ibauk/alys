@@ -219,6 +219,8 @@ func format_money(moneyamt string) string {
 	dotix := strings.Index(res, ".")
 	if dotix < 0 {
 		res += ".00"
+	} else if len(res)-dotix == 2 {
+		res += "0"
 	}
 	// 123456.44
 	// 012345678
@@ -227,6 +229,38 @@ func format_money(moneyamt string) string {
 		res = res[0:ix] + "," + res[ix:]
 	}
 	return res
+}
+
+func show_funds_breakdown(w http.ResponseWriter) {
+
+	var sources = map[string]string{
+		"EntryDonation": "@ Registration",
+		"SquiresCheque": "Cheques",
+		"SquiresCash":   "Cash",
+		"RBLRAccount":   "&#8658; RBL accounts",
+		"JustGivingAmt": "via JustGiving",
+	}
+	var skeys = []string{"EntryDonation", "SquiresCheque", "SquiresCash", "RBLRAccount", "JustGivingAmt"}
+
+	for _, k := range skeys {
+		v := sources[k]
+		row, err := DBH.Query(fmt.Sprintf("SELECT count(*),ifnull(sum(%v),0) FROM entrants WHERE %v  <>''", k, k))
+		checkerr(err)
+		defer row.Close()
+		var n int64
+		var amt string
+		if row.Next() {
+			err = row.Scan(&n, &amt)
+			checkerr(err)
+			if n > 0 {
+				fmt.Fprintf(w, `<tr class="subrow"><td>%v (%v)</td><td class="val">&pound;%v</td></tr>`, v, n, format_money(amt))
+
+			}
+		}
+		err = row.Close()
+		checkerr(err)
+	}
+
 }
 
 func show_shop(w http.ResponseWriter, r *http.Request) {
@@ -244,21 +278,14 @@ func show_shop(w http.ResponseWriter, r *http.Request) {
 		var p, es int
 		err = rows.Scan(&t1, &t2, &p, &es)
 		checkerr(err)
-		if t1 != "" {
-			_, ok := ordered[t1]
-			if ok {
-				ordered[t1]++
-			} else {
-				ordered[t1] = 1
-			}
+		_, ok := ordered[t1]
+		if ok {
+			ordered[t1]++
 		}
-		if t2 != "" {
-			_, ok := ordered[t2]
-			if ok {
-				ordered[t2]++
-			} else {
-				ordered[t2] = 1
-			}
+
+		_, ok = ordered[t2]
+		if ok {
+			ordered[t2]++
 		}
 		opatches += p
 		if es < STATUSCODES["signedin"] {
@@ -293,7 +320,7 @@ func show_shop(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprint(w, `<h2 class="shop">Merchandise</h2>`)
 
-	fmt.Fprint(w, `<div class="row hdr"><span class="col">Size</span><span class="col">Ordered</span><span class="col">Unclaimed</span></div>`)
+	fmt.Fprint(w, `<div class="row hdr"><span class="col">Size</span><span class="col">Ordered</span><span class="col">Unclaimed*</span></div>`)
 	for k, v := range ordered {
 		if unclaimed[k]+ordered[k] > 0 || showzero {
 			fmt.Fprintf(w, `<div class="row"><span class="col">%v</span><span class="col">%v</span>`, k, v)
@@ -302,7 +329,11 @@ func show_shop(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, `</div>`)
 	}
 	fmt.Fprintf(w, `<div class="row"><span class="col">Patches</span><span class="col">%v</span><span class="col">%v</span></div>`, opatches, upatches)
+
 	fmt.Fprint(w, `</main>`)
+
+	fmt.Fprint(w, `<div class="footnote">* Unclaimed means items ordered by entrants who have not yet been signed in.</div>`)
+
 	fmt.Fprint(w, `<script>document.onkeydown=function(e){if(e.keyCode==27) {e.preventDefault();loadPage('menu');}}</script>`)
 	fmt.Fprint(w, `<footer>`)
 	fmt.Fprint(w, `<button class="nav" onclick="loadPage('menu');">Main menu</button>`)
@@ -352,6 +383,10 @@ func show_stats(w http.ResponseWriter, r *http.Request) {
 	}
 	totfunds := getStringFromDB("SELECT SUM(ifnull(EntryDonation,0)+ifnull(SquiresCheque,0)+ifnull(SquiresCash,0)+ifnull(RBLRAccount,0)+ifnull(JustGivingAmt,0)) AS funds  FROM entrants;", "0.00")
 	fmt.Fprintf(w, `<tr><td><br>Funds raised</td><td class="val"><br>&pound;%v</td></tr>`, format_money(totfunds))
+
+	if true {
+		show_funds_breakdown(w)
+	}
 
 	sqlx := "SELECT count(*) FROM entrants WHERE EntrantStatus IN (" + strconv.Itoa(STATUSCODES["finishedOK"]) + "," + strconv.Itoa(STATUSCODES["finished24+"]) + ") "
 

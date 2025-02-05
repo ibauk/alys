@@ -91,6 +91,7 @@ type Entrant = struct {
 	Tshirt2              string
 	Patches              int
 	EditMode             string
+	Notes                string
 }
 
 const EntrantSQL = `SELECT EntrantID,ifnull(RiderFirst,''),ifnull(RiderLast,''),ifnull(RiderIBA,''),ifnull(RiderRBL,''),ifnull(RiderEmail,''),ifnull(RiderPhone,'')
@@ -102,6 +103,7 @@ const EntrantSQL = `SELECT EntrantID,ifnull(RiderFirst,''),ifnull(RiderLast,''),
 	,ifnull(OdoStart,''),ifnull(StartTime,''),ifnull(OdoFinish,''),ifnull(FinishTime,''),EntrantStatus,ifnull(OdoCounts,'M'),ifnull(Route,'')
 	,ifnull(EntryDonation,''),ifnull(SquiresCash,''),ifnull(SquiresCheque,''),ifnull(RBLRAccount,''),ifnull(JustGivingAmt,'')
 	,ifnull(Tshirt1,''),ifnull(Tshirt2,''),ifnull(Patches,0),ifnull(FreeCamping,''),ifnull(CertificateDelivered,''),ifnull(CertificateAvailable,'')
+	,ifnull(Notes,'')
 	 FROM entrants
 `
 
@@ -215,11 +217,18 @@ var SigninScreenSingle = `
 <div class="tabs_area">
 	<ul id="tabs">
 		<li><a href="#tab_money">Donations <span id="showmoney"></span></a></li>
+		<li><a href="tab_notes">Notes</a></li>
 		<li><a href="#tab_bike">Bike</a></li>
 		<li><a href="#tab_nok" id="noktab">Emergency</a></li>
 		<li><a href="#tab_pillion">Pillion <span id="showpillion"></span></a></li>
 	</ul>
 </div>
+
+<fieldset class="tabContent" id="tab_notes"><legend>Notes</legend>
+<div class="field fullwidth">
+	<textarea id="Notes" name="Notes" class="Notes" oninput="oid(this)" onchange="ocd(this)">{{.Notes}}</textarea>
+</div>
+</fieldset>
 
 <fieldset class="tabContent" id="tab_bike"><legend>Bike</legend>
 <div class="field">
@@ -301,7 +310,7 @@ var SigninScreenSingle = `
 
 func ScanEntrant(rows *sql.Rows, e *Entrant) {
 
-	err := rows.Scan(&e.EntrantID, &e.Rider.First, &e.Rider.Last, &e.Rider.IBA, &e.Rider.RBL, &e.Rider.Email, &e.Rider.Phone, &e.Rider.Address1, &e.Rider.Address2, &e.Rider.Town, &e.Rider.County, &e.Rider.Postcode, &e.Rider.Country, &e.Pillion.First, &e.Pillion.Last, &e.Pillion.IBA, &e.Pillion.RBL, &e.Pillion.Email, &e.Pillion.Phone, &e.Pillion.Address1, &e.Pillion.Address2, &e.Pillion.Town, &e.Pillion.County, &e.Pillion.Postcode, &e.Pillion.Country, &e.Bike, &e.BikeReg, &e.NokName, &e.NokRelation, &e.NokPhone, &e.OdoStart, &e.StartTime, &e.OdoFinish, &e.FinishTime, &e.EntrantStatus, &e.OdoCounts, &e.Route, &e.FundsRaised.EntryDonation, &e.FundsRaised.SquiresCash, &e.FundsRaised.SquiresCheque, &e.FundsRaised.RBLRAccount, &e.FundsRaised.JustGivingAmt, &e.Tshirt1, &e.Tshirt2, &e.Patches, &e.FreeCamping, &e.CertificateDelivered, &e.CertificateAvailable)
+	err := rows.Scan(&e.EntrantID, &e.Rider.First, &e.Rider.Last, &e.Rider.IBA, &e.Rider.RBL, &e.Rider.Email, &e.Rider.Phone, &e.Rider.Address1, &e.Rider.Address2, &e.Rider.Town, &e.Rider.County, &e.Rider.Postcode, &e.Rider.Country, &e.Pillion.First, &e.Pillion.Last, &e.Pillion.IBA, &e.Pillion.RBL, &e.Pillion.Email, &e.Pillion.Phone, &e.Pillion.Address1, &e.Pillion.Address2, &e.Pillion.Town, &e.Pillion.County, &e.Pillion.Postcode, &e.Pillion.Country, &e.Bike, &e.BikeReg, &e.NokName, &e.NokRelation, &e.NokPhone, &e.OdoStart, &e.StartTime, &e.OdoFinish, &e.FinishTime, &e.EntrantStatus, &e.OdoCounts, &e.Route, &e.FundsRaised.EntryDonation, &e.FundsRaised.SquiresCash, &e.FundsRaised.SquiresCheque, &e.FundsRaised.RBLRAccount, &e.FundsRaised.JustGivingAmt, &e.Tshirt1, &e.Tshirt2, &e.Patches, &e.FreeCamping, &e.CertificateDelivered, &e.CertificateAvailable, &e.Notes)
 	checkerr(err)
 
 	e.Rider.HasIBANumber, _ = regexp.Match(`\d{1,6}`, []byte(e.Rider.IBA))

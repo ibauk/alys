@@ -57,6 +57,7 @@ CREATE TABLE IF NOT EXISTS "entrants" (
 	"FreeCamping"	TEXT NOT NULL DEFAULT 'N',
 	"CertificateDelivered"	TEXT NOT NULL DEFAULT 'N',
 	"CertificateAvailable"	TEXT NOT NULL DEFAULT 'N',
+	"Notes" TEXT,
 	PRIMARY KEY("EntrantID")
 );
 COMMIT;
