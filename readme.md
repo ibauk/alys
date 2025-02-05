@@ -22,6 +22,8 @@ In the database each entrant has a status code which is updated following his tr
 ## SIGNING-IN (START)
 Riders are registered online via Wufoo forms but on arrival at Squires they are signed in by staff who will check and confirm their details, make any amendments necessary and take charge of any cash or cheques handed in and record details of payments made directly to RBL bank accounts or via JustGiving.com. Pre-ordered t-shirts and patches are collected as part of this process.
 
+The list of riders shown at sign-in includes only those with a status of Registered or Withdrawn. The full list is always available via [administration][Edit any entrant]. The list is always shown in order of last name, first name.
+
 ## CHECK-OUT (START)
 The check-out process involves capturing odo readings and thereby changing a rider's status to 'riding'.
 
@@ -29,11 +31,18 @@ Riders are released initially in cohorts starting at 0500, then at 10 minute int
 
 The odo capture screen initially shows 05:00 and trips automatically to 05:10 at 05:01, to 05:20 at 05:11 and so on. Odo readings taken before 05:00 will show the rider as leaving at 05:00, not before.
 
+The list of riders shown at check-out includes only those with a status of signed-in.
+
 ## CHECK-IN (FINISH)
 On return to Squires, riders are checked in by team members in the carpark. Their odo reading is recorded and this action stops the clock on their ride. Their entrant status is updated to either Finisher or Late Finisher and the rider is sent off to prepare his paperwork ready for verification. A facility is provided to stop the real-time clock for two minutes so that, when a group of riders arrives back at once they'll all be given the same finish time.
 
+The list of riders shown at check-in includes only those with a status of checked-out or DNF.
+
 ## VERIFICATION (FINISH)
 Each rider takes completed paperwork to the ride verifier who confirms the relevant details and rejects or accepts the ride. If a suitable certificate is available, it's given to the rider straightaway otherwise a record is made for reprint and posting.
+
+The list of riders shown at verification includes only those with a status of Finisher or Late Finisher, with CertificateDelivered not "Y".
+
 
 
 ## SHOW STATS
