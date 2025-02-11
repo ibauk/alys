@@ -18,7 +18,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const PROGRAMVERSION = "Alys v0.3 Copyright © 2025 Bob Stammers"
+const PROGRAMVERSION = "Alys v0.4 Copyright © 2025 Bob Stammers"
 
 // DBNAME names the database file
 var DBNAME *string = flag.String("db", "rblr.db", "database file")
@@ -151,10 +151,11 @@ func main() {
 	}
 
 	if *EntrantsCSV != "" {
-		LoadEntrantsFromCSV(*EntrantsCSV)
+		LoadEntrantsFromCSV(*EntrantsCSV, "Y", true, false)
 		return
 	}
 	http.HandleFunc("/", show_menu)
+	http.HandleFunc("/getcsv", show_loadCSV)
 	http.HandleFunc("/menu", show_menu)
 	http.HandleFunc("/about", about_this_program)
 	http.HandleFunc("/admin", show_admin)
@@ -169,6 +170,7 @@ func main() {
 	http.HandleFunc("/config", show_config)
 	http.HandleFunc("/putodo", update_odo)
 	http.HandleFunc("/putentrant", update_entrant)
+	http.HandleFunc("/upload", load_entrants)
 	err = http.ListenAndServe(":"+*HTTPPort, nil)
 	if err != nil {
 		panic(err)
@@ -265,6 +267,8 @@ func show_funds_breakdown(w http.ResponseWriter) {
 
 func show_shop(w http.ResponseWriter, r *http.Request) {
 
+	var sizes = []string{"S", "M", "L", "XL", "XXL"}
+
 	var ordered = map[string]int{"S": 0, "M": 0, "L": 0, "XL": 0, "XXL": 0}
 	var unclaimed = map[string]int{"S": 0, "M": 0, "L": 0, "XL": 0, "XXL": 0}
 	var opatches, upatches int
@@ -321,9 +325,9 @@ func show_shop(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, `<h2 class="shop">Merchandise</h2>`)
 
 	fmt.Fprint(w, `<div class="row hdr"><span class="col">Size</span><span class="col">Ordered</span><span class="col">Unclaimed*</span></div>`)
-	for k, v := range ordered {
+	for _, k := range sizes {
 		if unclaimed[k]+ordered[k] > 0 || showzero {
-			fmt.Fprintf(w, `<div class="row"><span class="col">%v</span><span class="col">%v</span>`, k, v)
+			fmt.Fprintf(w, `<div class="row"><span class="col">%v</span><span class="col">%v</span>`, k, ordered[k])
 			fmt.Fprintf(w, `<span class="col">%v</span>`, unclaimed[k])
 		}
 		fmt.Fprint(w, `</div>`)
@@ -478,10 +482,17 @@ func show_admin(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, `<button onclick="loadPage('signin?mode=full');">Edit any entrant</button>`)
 	fmt.Fprint(w, `<button onclick="loadPage('merch');">Merchandise stats</button>`)
 	fmt.Fprint(w, `<button onclick="loadPage('config');">Configuration</button>`)
+	fmt.Fprint(w, `<button onclick="loadPage('getcsv');">Import from Reglist csv</button>`)
 	fmt.Fprint(w, `<button onclick="this.disabled=true;loadPage('export');">Export results for IBA database</button>`)
-	fmt.Fprint(w, `<button onclick="loadPage('menu');">Main menu</button>`)
-	fmt.Fprint(w, `<button onclick="loadPage('about');">About Alys</button>`)
 	fmt.Fprint(w, `</main>`)
+	fmt.Fprint(w, `<script>document.onkeydown=function(e){if(e.keyCode==27) {e.preventDefault();loadPage('menu');}}</script>`)
+	fmt.Fprint(w, `<footer>`)
+	fmt.Fprint(w, `<button class="nav" onclick="loadPage('menu');">Main menu</button>`)
+	fmt.Fprint(w, `<button class="nav" onclick="loadPage('about');">About Alys</button>`)
+	fmt.Fprint(w, `</footer>`)
+
+	fmt.Fprint(w, `</body><html>`)
+
 }
 
 func show_menu(w http.ResponseWriter, r *http.Request) {

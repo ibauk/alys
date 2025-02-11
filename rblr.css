@@ -81,11 +81,10 @@ main.stats {
   margin: 0.5em auto 2em auto;
 }
 main.frontmenu {
-  display: grid;
-  grid-gap: 10%;
+  display: flex;
+  flex-direction: column;
   justify-content: space-around;
   text-align: center;
-  grid-template-rows: auto;
 }
 main.frontmenu h1 {
   display: block;
@@ -95,7 +94,9 @@ main.frontmenu h1 {
 main.frontmenu button {
   border-radius: 6px;
   font-size: 1.1em;
-  padding: 0.2rem;
+  padding: 0.2rem 1em .2rem 1em;
+  width: 15em;
+  margin: 0 auto 1em auto;
 }
 main.frontmenu button:hover {
   background-color: lightblue;
@@ -240,6 +241,27 @@ input[type="checkbox"] {
 input[type="radio"] {
   width: 1em;
   margin-left: 1em;
+}
+
+.upload {
+
+  max-width: 30em;
+  margin: auto;
+
+}
+main.upload button {
+  border-radius: 6px;
+  font-size: 1.1em;
+  padding: 0.2rem;
+}
+main.upload button:hover {
+  background-color: lightblue;
+  cursor: pointer;
+}
+
+.upload fieldset {
+  border: none;
+  height: 2em;
 }
 
 .RiderIBA,

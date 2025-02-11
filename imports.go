@@ -4,7 +4,10 @@ import (
 	"encoding/csv"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
+	"regexp"
+	"strings"
 )
 
 var ReglistCSV = map[string]int{
@@ -55,7 +58,7 @@ var ReglistCSV = map[string]int{
 }
 
 const InsertEntrantSQL = `
-	INSERT INTO entrants (
+	INSERT OR IGNORE INTO entrants (
 	EntrantID,Bike,BikeReg,RiderFirst,RiderLast,
 	RiderAddress1,RiderAddress2,RiderTown,RiderCounty,
 	RiderPostcode,RiderCountry,RiderIBA,RiderPhone,RiderEmail,
@@ -146,19 +149,88 @@ func intval(x string) int {
 	}
 	return res
 }
-func LoadEntrantsFromCSV(csvFile string) {
 
-	rex := readCsvFile(csvFile)
-	_, err := DBH.Exec("DELETE FROM entrants")
-	checkerr(err)
+func isValidReglistData(hdr []string) bool {
+
+	re := regexp.MustCompile(`^Entrantid,RiderFirst,RiderLast.*RouteClass.*Miles2Squires`)
+	return re.MatchString(strings.Join(hdr, ","))
+}
+
+func load_entrants(w http.ResponseWriter, r *http.Request) {
+
+	zap := r.FormValue("updatemode") == "overwrite"
+	certavail := r.FormValue("certavail")
+	if certavail == "" {
+		certavail = "Y"
+	}
+
+	n := LoadEntrantsFromCSV(r.FormValue("csvdata"), certavail, zap, true)
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	fmt.Fprint(w, refresher)
+
+	fmt.Fprint(w, `<main class="upload">`)
+	fmt.Fprint(w, `<h2>Entrant upload complete</h2>`)
+
+	if n < 1 {
+		fmt.Fprint(w, `<p>No entrants were loaded</p>`)
+	} else {
+		if zap {
+			fmt.Fprint(w, `<p>This upload replaced the entire set of entrants</p>`)
+		} else {
+			fmt.Fprint(w, `<p>New entrants were added to the existing dataset</p>`)
+		}
+
+		if n == 1 {
+			fmt.Fprintf(w, `<p>A single, wafer-thin, entrant was loaded. Certificate available=%v</p>`, certavail)
+		} else {
+			fmt.Fprintf(w, `<p>%v entrants loaded. Certificates available=%v</p>`, n, certavail)
+		}
+	}
+
+	rex := getIntegerFromDB("SELECT count(*) FROM entrants", -1)
+	fmt.Fprintf(w, `<p>The database now contains %v entrant records</p>`, rex)
+
+	fmt.Fprint(w, `</main>`)
+	fmt.Fprint(w, `<script>document.onkeydown=function(e){if(e.keyCode==27) {e.preventDefault();loadPage('menu');}}</script>`)
+	fmt.Fprint(w, `<footer>`)
+	fmt.Fprint(w, `<button class="nav" onclick="loadPage('menu');">Main menu</button>`)
+	fmt.Fprint(w, `</footer>`)
+
+	fmt.Fprint(w, `</body><html>`)
+
+}
+func LoadEntrantsFromCSV(csvFile string, certAvail string, zapExisting bool, fileIsData bool) int64 {
+
+	var rex [][]string
+	if fileIsData {
+		rex = readCsvData(csvFile)
+	} else {
+		rex = readCsvFile(csvFile)
+	}
+
 	stmt, err := DBH.Prepare(InsertEntrantSQL)
 	checkerr(err)
 	defer stmt.Close()
 	n := 0
+	nl := int64(0)
 	r := ReglistCSV // convenient shorthand
 	for _, ln := range rex {
 		n++
 		if n == 1 {
+			if !isValidReglistData(ln) {
+				fmt.Println("Import file not valid")
+				return 0
+			}
+			if zapExisting {
+				_, err := DBH.Exec("DELETE FROM entrants")
+				checkerr(err)
+			}
+
+			_, err := DBH.Exec("BEGIN TRANSACTION")
+			checkerr(err)
+
 			continue
 		}
 		fmt.Printf("%v\n", ln[r["RiderLast"]])
@@ -166,7 +238,7 @@ func LoadEntrantsFromCSV(csvFile string) {
 		if err != nil {
 			fmt.Printf("%v gives %v with error %v\n", ln[r["Patches"]], patches, err)
 		}
-		_, err = stmt.Exec(ln[r["EntrantID"]], ln[r["Bike"]], ln[r["BikeReg"]], ln[r["RiderFirst"]], ln[r["RiderLast"]],
+		res, err := stmt.Exec(ln[r["EntrantID"]], ln[r["Bike"]], ln[r["BikeReg"]], ln[r["RiderFirst"]], ln[r["RiderLast"]],
 			ln[r["Address1"]], ln[r["Address2"]], ln[r["Town"]], ln[r["County"]],
 			ln[r["Postcode"]], ln[r["Country"]], ln[r["RiderIBA"]], ln[r["Phone"]], ln[r["Email"]],
 			ln[r["PillionFirst"]], ln[r["PillionLast"]],
@@ -175,11 +247,27 @@ func LoadEntrantsFromCSV(csvFile string) {
 			ln[r["OdoCounts"]], STATUSCODES["DNS"], ln[r["NokName"]], ln[r["NokPhone"]], ln[r["NokRelation"]],
 			ln[r["Sponsorship"]], RouteClass(ln[r["RouteClass"]]), ln[r["RiderRBL"]], ln[r["PillionRBL"]],
 			ln[r["Tshirt1"]], ln[r["Tshirt2"]], patches, ln[r["FreeCamping"]],
-			"Y", "N",
+			certAvail, "N",
 		)
 		checkerr(err)
+		ra, err := res.RowsAffected()
+		checkerr(err)
+		nl += ra
 	}
-	fmt.Printf("%v records loaded\n", n)
+	DBH.Exec("COMMIT")
+	fmt.Printf("%v records loaded\n", nl)
+	return nl
+}
+
+func readCsvData(filedata string) [][]string {
+
+	csvReader := csv.NewReader(strings.NewReader(filedata))
+	records, err := csvReader.ReadAll()
+	if err != nil {
+		log.Fatal("Unable to parse file as CSV ", err)
+	}
+
+	return records
 }
 
 func readCsvFile(filePath string) [][]string {
@@ -214,4 +302,50 @@ func RouteClass(rc string) string {
 		return RC["A"]
 	}
 	return val
+}
+
+func show_loadCSV(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	fmt.Fprint(w, refresher)
+
+	fmt.Fprint(w, `<main class="upload">`)
+	fmt.Fprint(w, `<h2>Import Entrants</h2>`)
+	fmt.Fprint(w, `<p>Import entrant details from a CSV file prepared by Reglist.</p>`)
+	fmt.Fprint(w, `<form action="/upload" method="post" enctype="multipart/form-data" onsubmit="importEntrantsCSV(this)">`)
+
+	fmt.Fprint(w, `<fieldset>`)
+	fmt.Fprint(w, `<label for="updatemode">Update mode</label> `)
+	fmt.Fprint(w, `<select id="updatemode" name="updatemode">`)
+	fmt.Fprint(w, `<option selected value="append">Add new entries only</option>`)
+	fmt.Fprint(w, `<option value="overwrite">Replace all entries</option>`)
+	fmt.Fprint(w, `</select>`)
+	fmt.Fprint(w, `</fieldset>`)
+
+	fmt.Fprint(w, `<fieldset>`)
+	fmt.Fprint(w, `<label for="certavail">Certificates available</label> `)
+	fmt.Fprint(w, `<select id="certavail" name="certavail">`)
+	fmt.Fprint(w, `<option selected value="Y">Yes, already printed</option>`)
+	fmt.Fprint(w, `<option value="N">No, printing needed</option>`)
+	fmt.Fprint(w, `</select>`)
+	fmt.Fprint(w, `</fieldset>`)
+
+	fmt.Fprint(w, `<fieldset>`)
+	fmt.Fprint(w, `<label for="csvfile">CSV (reglist) file to upload</label> `)
+	fmt.Fprint(w, `<input id="csvfile" name="csvfile" type="file" accept=".csv" onchange="enableImportLoad(this)">`)
+	fmt.Fprint(w, `</fieldset>`)
+
+	fmt.Fprint(w, `<input type="hidden" id="csvdata" name="csvdata" value="nodata">`)
+
+	fmt.Fprint(w, `<fieldset id="importloader" class="hide"><button>Update database</button></fieldlist>`)
+	fmt.Fprint(w, `</form>`)
+	fmt.Fprint(w, `</main>`)
+
+	fmt.Fprint(w, `<script>document.onkeydown=function(e){if(e.keyCode==27) {e.preventDefault();loadPage('menu');}}</script>`)
+	fmt.Fprint(w, `<footer>`)
+	fmt.Fprint(w, `<button class="nav" onclick="loadPage('menu');">Main menu</button>`)
+	fmt.Fprint(w, `</footer>`)
+
+	fmt.Fprint(w, `</body></html>`)
 }
