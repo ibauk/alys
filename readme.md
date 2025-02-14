@@ -49,5 +49,14 @@ The list of riders shown at verification includes only those with a status of Fi
 A button is provided to show the current state of play: numbers are shown for each (non-zero) entrant status and for total funds raised. A separate button shows the status of pre-ordered merchandise.
 
 
+## MERCHANDISE STATS
+A button is provided to show statistics about pre-ordered t-shirts and patches. It is assumed that anyone completing sign-in will also collect pre-ordered merchandise. No facilities are provided to handle any cash transactions or additional orders.
+
 ## CONFIGURATION
 An administrative facility is provided to control parameters such as start times and whether the application is set for the start (Friday/Saturday AM) or finish (Saturday PM/Sunday).
+
+## IMPORT ENTRANTS
+Mechanism to import entrant details from a CSV created by the Reglist entry filtering application. Options include setting the value of *CertificateAvailable* to 'Y' or 'N' and whether to add new entries only or reload the entire list.
+
+## EXPORT RESULTS
+Mechanism to export post-event details for inclusion in the main IBA UK Rides database.

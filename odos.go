@@ -47,7 +47,7 @@ func get_odolist_start_time(ischeckout bool) (string, int, int) {
 
 }
 
-func show_odo(w http.ResponseWriter, r *http.Request, showstart bool) {
+func show_odo(w http.ResponseWriter, r *http.Request, showstart bool, fullaccess bool) {
 
 	if r.FormValue("debug") != "" {
 		fmt.Println("show_odo called")
@@ -135,9 +135,13 @@ func show_odo(w http.ResponseWriter, r *http.Request, showstart bool) {
 		fmt.Fprint(w, `</div>`)
 
 	}
-	fmt.Fprint(w, `<script>document.onkeydown=function(e){if(e.keyCode==27) {e.preventDefault();loadPage('menu');}}</script>`)
 
-	fmt.Fprint(w, `</div><footer><button class="nav" onclick="loadPage('menu');">Main menu</button></footer></body></html>`)
+	if fullaccess {
+		fmt.Fprint(w, `<script>document.onkeydown=function(e){if(e.keyCode==27) {e.preventDefault();loadPage('menu');}}</script>`)
+		fmt.Fprint(w, `</div><footer><button class="nav" onclick="loadPage('menu');">Main menu</button></footer></body></html>`)
+	} else {
+		fmt.Fprint(w, `</div><footer><button class="nav" onclick="loadPage('stats');">Live stats</button></footer></body></html>`)
+	}
 }
 
 func update_odo(w http.ResponseWriter, r *http.Request) {

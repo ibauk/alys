@@ -18,7 +18,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const PROGRAMVERSION = "Alys v0.4 Copyright © 2025 Bob Stammers"
+const PROGRAMVERSION = "Alys v0.5 Copyright © 2025 Bob Stammers"
 
 // DBNAME names the database file
 var DBNAME *string = flag.String("db", "rblr.db", "database file")
@@ -154,7 +154,7 @@ func main() {
 		LoadEntrantsFromCSV(*EntrantsCSV, "Y", true, false)
 		return
 	}
-	http.HandleFunc("/", show_menu)
+	http.HandleFunc("/", show_root)
 	http.HandleFunc("/getcsv", show_loadCSV)
 	http.HandleFunc("/menu", show_menu)
 	http.HandleFunc("/about", about_this_program)
@@ -203,10 +203,10 @@ func about_this_program(w http.ResponseWriter, r *http.Request) {
 }
 
 func check_in(w http.ResponseWriter, r *http.Request) {
-	show_odo(w, r, false)
+	show_odo(w, r, false, true)
 }
 func check_out(w http.ResponseWriter, r *http.Request) {
-	show_odo(w, r, true)
+	show_odo(w, r, true, true)
 }
 
 func checkerr(err error) {
@@ -261,6 +261,18 @@ func show_funds_breakdown(w http.ResponseWriter) {
 		}
 		err = row.Close()
 		checkerr(err)
+	}
+
+}
+
+func show_root(w http.ResponseWriter, r *http.Request) {
+
+	RallyStatus := getStringFromDB("SELECT RallyStatus FROM config", "S")
+
+	if RallyStatus != "F" {
+		show_odo(w, r, true, false)
+	} else {
+		show_odo(w, r, false, false)
 	}
 
 }
@@ -348,6 +360,7 @@ func show_shop(w http.ResponseWriter, r *http.Request) {
 
 func show_stats(w http.ResponseWriter, r *http.Request) {
 
+	fullaccess := r.FormValue("mode") == "f"
 	scv := make(map[int]string)
 	scv[STATUSCODES["DNS"]] = "not signed in"               // Registered online
 	scv[STATUSCODES["confirmedDNS"]] = "withdrawn"          // Confirmed by rider
@@ -405,9 +418,21 @@ func show_stats(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Fprint(w, `</table></main>`)
-	fmt.Fprint(w, `<script>document.onkeydown=function(e){if(e.keyCode==27) {e.preventDefault();loadPage('menu');}}</script>`)
+	if fullaccess {
+		fmt.Fprint(w, `<script>document.onkeydown=function(e){if(e.keyCode==27) {e.preventDefault();loadPage('menu');}}</script>`)
+	}
 	fmt.Fprint(w, `<footer>`)
-	fmt.Fprint(w, `<button class="nav" onclick="loadPage('menu');">Main menu</button>`)
+
+	if fullaccess {
+		fmt.Fprint(w, `<button class="nav" onclick="loadPage('menu');">Main menu</button>`)
+	} else {
+		RallyStatus := getStringFromDB("SELECT RallyStatus FROM config", "S")
+		if RallyStatus == "F" {
+			fmt.Fprint(w, `<button class="nav" onclick="loadPage('/');">Check-in</button>`)
+		} else {
+			fmt.Fprint(w, `<button class="nav" onclick="loadPage('/');">Check-out</button>`)
+		}
+	}
 	fmt.Fprint(w, `</footer>`)
 
 	fmt.Fprint(w, `</body><html>`)
@@ -479,11 +504,11 @@ func show_admin(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprint(w, refresher+`<main class="frontmenu">`)
 	fmt.Fprint(w, `<h1>RBLR1000 ADMINISTRATION</h1>`)
-	fmt.Fprint(w, `<button onclick="loadPage('signin?mode=full');">Edit any entrant</button>`)
-	fmt.Fprint(w, `<button onclick="loadPage('merch');">Merchandise stats</button>`)
-	fmt.Fprint(w, `<button onclick="loadPage('config');">Configuration</button>`)
-	fmt.Fprint(w, `<button onclick="loadPage('getcsv');">Import from Reglist csv</button>`)
-	fmt.Fprint(w, `<button onclick="this.disabled=true;loadPage('export');">Export results for IBA database</button>`)
+	fmt.Fprint(w, `<button onclick="loadPage('signin?mode=full');" title="Inspect/update entrant details regardless of status">Edit any entrant</button>`)
+	fmt.Fprint(w, `<button onclick="loadPage('merch');" title="Summary of pre-ordered T-shirts/patches">Merchandise stats</button>`)
+	fmt.Fprint(w, `<button onclick="loadPage('config');" title="Parameters of the event">Configuration</button>`)
+	fmt.Fprint(w, `<button onclick="loadPage('getcsv');" title="Load entrants from CSV prepared by Reglist">Import entrants</button>`)
+	fmt.Fprint(w, `<button onclick="this.disabled=true;loadPage('export');" title="Create JSON file for upload to the Rides database">Export results for IBA database</button>`)
 	fmt.Fprint(w, `</main>`)
 	fmt.Fprint(w, `<script>document.onkeydown=function(e){if(e.keyCode==27) {e.preventDefault();loadPage('menu');}}</script>`)
 	fmt.Fprint(w, `<footer>`)
@@ -508,7 +533,7 @@ func show_menu(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, `<button onclick="loadPage('checkin');">CHECK-IN(finish)</button>`)
 		fmt.Fprint(w, `<button class="bigscreen" onclick="loadPage('finals');">Verification(finish)</button>`)
 	}
-	fmt.Fprint(w, `<button onclick="loadPage('stats');">show stats</button>`)
+	fmt.Fprint(w, `<button onclick="loadPage('stats?mode=f');">show stats</button>`)
 	fmt.Fprint(w, `<button class="bigscreen" onclick="loadPage('admin');">administration</button>`)
 	fmt.Fprint(w, `</main>`)
 }
