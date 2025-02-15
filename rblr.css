@@ -96,6 +96,7 @@ main.frontmenu button {
   font-size: 1.1em;
   padding: 0.2rem 1em .2rem 1em;
   width: 15em;
+  max-width: 98%;
   margin: 0 auto 1em auto;
 }
 main.frontmenu button:hover {
@@ -208,15 +209,15 @@ input.oc {
 }
 
 .SigninScreenSingle {
-  max-width: 45em;
+  max-width: 98%;
   margin: auto;
 }
 
 .field {
-  float: none;
   display: inline-block;
   vertical-align: middle;
   margin-bottom: 0.5rem;
+  
 }
 .fullwidth {
   width: 100%;
@@ -276,7 +277,7 @@ main.upload button:hover {
 
 .RiderEmail,
 .PillionEmail {
-  width: 20em;
+  width: 18em;
 }
 
 .BikeReg {
@@ -314,7 +315,8 @@ main.upload button:hover {
   width: 5em;
 }
 .JustGivingURL {
-  width: 30em;
+  width: 20em;
+  max-width: 98vw;
 }
 
 .Notes {
@@ -333,7 +335,7 @@ main.upload button:hover {
   border-radius: 5px;
   background-color: var(--form-background);
   padding: 0.2em;
-  display: inherit;
+  display: block;
   overflow: auto;
 }
 
@@ -382,6 +384,7 @@ ul#tabs li a.selected {
 .flex {
   display: inline-block;
   width: 28em;
+  max-width: 98vw;
   border: none;
 }
 .signinrow {
