@@ -146,7 +146,7 @@ var SigninScreenSingle = `
 <!-- <br><br> -->
 
 
-<div class="field"><div class="field"><label for="RiderLast">Last name</label> <input autofocus id="RiderLast" name="RiderLast" class="RiderLast" value="{{.Rider.Last}}" oninput="oid(this);" onchange="ocd(this);"></div>
+<div class="field"><label for="RiderLast">Last name</label> <input autofocus id="RiderLast" name="RiderLast" class="RiderLast" value="{{.Rider.Last}}" oninput="oid(this);" onchange="ocd(this);"></div>
 <div class="field"><label for="RiderFirst">First name</label> <input id="RiderFirst" name="RiderFirst" class="RiderFirst" value="{{.Rider.First}}" oninput="oid(this);" onchange="ocd(this);"></div>
 <div class="field">
 	<label for="RiderIBA">IBA member</label> 
@@ -160,14 +160,16 @@ var SigninScreenSingle = `
 <div class="field"><label for="RiderEmail">Email</label> <input id="RiderEmail" name="RiderEmail" class="RiderEmail" value="{{.Rider.Email}}" oninput="oid(this);" onchange="ocd(this);"></div>
 <div class="field"><label for="RiderPhone">Mobile</label> <input id="RiderPhone" name="RiderPhone" class="RiderPhone" value="{{.Rider.Phone}}" oninput="oid(this);" onchange="ocd(this);"></div>
 <br>
-<div class="field"> <fieldset><legend class="small">Address</legend>
+<div class="field">
+ <fieldset><legend class="small">Address</legend>
     <input id="RiderAddress1" name="RiderAddress1" class="RiderAddress1"  value="{{.Rider.Address1}}" oninput="oid(this);" onchange="ocd(this);"><br>
     <input id="RiderAddress2" name="RiderAddress2" class="RiderAddress2"  value="{{.Rider.Address2}}" oninput="oid(this);" onchange="ocd(this);"><br>
     <input id="RiderTown" name="RiderTown" class="RiderTown" placeholder="town" value="{{.Rider.Town}}" oninput="oid(this);" onchange="ocd(this);"><br>
     <input id="RiderCounty" name="RiderCounty" class="RiderCounty" placeholder="county" value="{{.Rider.County}}" oninput="oid(this);" onchange="ocd(this);"><br>
 	<input id="RiderPostcode" name="RiderPostcode" class="RiderPostcode" placeholder="postcode" value="{{.Rider.Postcode}}" oninput="oid(this);" onchange="ocd(this);">
     <input id="RiderCountry" name="RiderCountry" class="RiderCountry" placeholder="country" value="{{.Rider.Country}}" oninput="oid(this);" onchange="ocd(this);">
-	</fieldset></div>
+ </fieldset>
+</div>
 <fieldset class="flex field">
 <div class="field">
 	<label for="FreeCamping">Camping</label>

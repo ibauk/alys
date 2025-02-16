@@ -56,6 +56,7 @@ func edit_entrant(w http.ResponseWriter, r *http.Request) {
 
 	sss, err := template.New("SigninScreenSingle").Parse(SigninScreenSingle)
 	checkerr(err)
+	fmt.Fprint(w, `<main class="signin">`)
 	for rows.Next() {
 
 		var e Entrant
@@ -67,6 +68,7 @@ func edit_entrant(w http.ResponseWriter, r *http.Request) {
 
 	}
 
+	fmt.Fprint(w, `</main>`)
 	fmt.Fprint(w, "<footer>")
 	if mode == "signin" {
 		fmt.Fprint(w, `<button class="nav" onclick="loadPage('signin');">back to list</button>`)
