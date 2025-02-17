@@ -74,6 +74,9 @@ div.top {
 div.top h2 {
   margin: 0;
 }
+main.config {
+  text-align: center;
+}
 main.stats {
   display: grid;
   justify-content: space-around;
@@ -221,6 +224,10 @@ input.oc {
 }
 .fullwidth {
   width: 100%;
+}
+fieldset.setup {
+  border: none;
+  margin: 1.5em;
 }
 fieldset label,
 fieldset .label {

@@ -312,7 +312,7 @@ func show_loadCSV(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprint(w, `<main class="upload">`)
 	fmt.Fprint(w, `<h2>Import Entrants</h2>`)
-	fmt.Fprint(w, `<p>Import entrant details from a CSV file prepared by Reglist.</p>`)
+	fmt.Fprint(w, `<p>Import entrant details from a CSV file prepared by <em>Reglist</em>.</p>`)
 	fmt.Fprint(w, `<form action="/upload" method="post" enctype="multipart/form-data" onsubmit="importEntrantsCSV(this)">`)
 
 	fmt.Fprint(w, `<fieldset>`)

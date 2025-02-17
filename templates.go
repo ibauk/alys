@@ -26,12 +26,13 @@ const ConfigScreen = `
 	</div>
 	<div class="field">
 		<label for="ExtraCohorts">Number of extra cohorts</label> 
-		<input type="number" min="0" max="10" class="ExtraCohorts" id="ExtraCohorts" name="ExtraCohorts" value="{{.ExtraCohorts}}" oninput="oidcfg(this);" onchange="ocdcfg(this);">
+		<input type="number" min="0" max="9" class="ExtraCohorts" id="ExtraCohorts" name="ExtraCohorts" value="{{.ExtraCohorts}}" oninput="oidcfg(this);" onchange="ocdcfg(this);">
 	</div>
 	<div class="field">
 		<label for="StartCohortMins">Minutes between cohorts</label> 
 		<input type="number" min="1" max="40" class="StartCohortMins" id="StartCohortMins" name="StartCohortMins" value="{{.StartCohortMins}}" oninput="oidcfg(this);" onchange="ocdcfg(this);">
 	</div>
+	<!--
 	<div class="field">
 		<span class="label">State of play: </span>
 		<input type="radio" id="RallyStatusS" class="RallyStatus" name="RallyStatus" value="S" {{if ne .RallyStatus "F"}} checked{{end}} data-chg="1" data-static="1" onchange="ocdcfg(this);">
@@ -39,6 +40,7 @@ const ConfigScreen = `
 		<input type="radio" id="RallyStatusF" class="RallyStatus" name="RallyStatus" value="F" {{if eq .RallyStatus "F"}} checked{{end}} data-chg="1" data-static="1" onchange="ocdcfg(this);">
 		<label for="RallyStatusF">Check back in and finish after the ride</label>
 	</div>
+	-->
 </div>
 `
 
