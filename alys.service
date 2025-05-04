@@ -1,0 +1,21 @@
+# alys.Service
+#
+# Alys systemd service descriptor for Debian/Ubuntu Linux servers
+#
+# Amend the ExecStart line as you see fit then install this file
+# in /etc/systemd/system and issue 'systemctl daemon-reload' and
+# 'systemctl enable ebcfetch.service' commands
+#
+
+
+[Unit]
+Description=RBLR000 Alys server
+After=network.target
+
+[Service]
+Type=simple
+Restart=on-success
+ExecStart=/home/bob/alys/alys
+
+[Install]
+WantedBy=multi-user.target
