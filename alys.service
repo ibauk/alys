@@ -15,7 +15,7 @@ After=network.target
 [Service]
 Type=simple
 Restart=on-success
-ExecStart=/home/bob/alys/alys
+ExecStart=/home/bob/alys/alys -port 1080
 
 [Install]
 WantedBy=multi-user.target
