@@ -97,7 +97,7 @@ main.frontmenu h1 {
 main.frontmenu button {
   border-radius: 6px;
   font-size: 1.1em;
-  padding: 0.2rem 1em .2rem 1em;
+  padding: 0.2rem 1em 0.2rem 1em;
   width: 15em;
   max-width: 98%;
   margin: 0 auto 1em auto;
@@ -220,7 +220,6 @@ input.oc {
   display: inline-block;
   vertical-align: middle;
   margin-bottom: 0.5rem;
-  
 }
 .fullwidth {
   width: 100%;
@@ -252,10 +251,8 @@ input[type="radio"] {
 }
 
 .upload {
-
   max-width: 30em;
   margin: auto;
-
 }
 main.upload button {
   border-radius: 6px;
@@ -515,11 +512,11 @@ h2.shop {
 }
 
 .footnote {
-  font-size: .5em;
-  padding: 0 0 .5em 10em;
+  font-size: 0.5em;
+  padding: 0 0 0.5em 10em;
 }
 .subrow td {
-  font-size: .7em;
+  font-size: 0.7em;
   font-style: italic;
   text-align: right;
 }

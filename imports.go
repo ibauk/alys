@@ -233,7 +233,7 @@ func LoadEntrantsFromCSV(csvFile string, certAvail string, zapExisting bool, fil
 
 			continue
 		}
-		fmt.Printf("%v\n", ln[r["RiderLast"]])
+		//fmt.Printf("%v\n", ln[r["RiderLast"]])
 		patches := intval(ln[r["Patches"]])
 		if err != nil {
 			fmt.Printf("%v gives %v with error %v\n", ln[r["Patches"]], patches, err)

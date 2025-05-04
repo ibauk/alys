@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS "config" (
 	"ExtraCohorts"	INTEGER NOT NULL DEFAULT 3,
 	"RallyStatus"	TEXT NOT NULL DEFAULT 'S'
 );
+INSERT INTO config (DBInitialised) VALUES(1);
 CREATE TABLE IF NOT EXISTS "entrants" (
 	"EntrantID"	INTEGER NOT NULL,
 	"Bike"	TEXT DEFAULT 'motorbike',
@@ -19,6 +20,7 @@ CREATE TABLE IF NOT EXISTS "entrants" (
 	"RiderPostcode"	TEXT,
 	"RiderCountry"	TEXT DEFAULT 'United Kingdom',
 	"RiderIBA"	TEXT,
+	"RiderRBL" 	TEXT,
 	"RiderPhone"	TEXT,
 	"RiderEmail"	TEXT,
 	"PillionFirst"	TEXT,
@@ -30,6 +32,7 @@ CREATE TABLE IF NOT EXISTS "entrants" (
 	"PillionPostcode"	TEXT,
 	"PillionCountry"	INTEGER DEFAULT 'United Kingdom',
 	"PillionIBA"	TEXT,
+	"PillionRBL"	TEXT,
 	"OdoCounts"	TEXT NOT NULL DEFAULT 'M',
 	"OdoStart"	INTEGER,
 	"OdoFinish"	INTEGER,

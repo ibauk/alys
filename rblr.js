@@ -1,6 +1,6 @@
 "use strict";
 
-const RBLRCSVRE = /^Entrantid,RiderFirst,RiderLast.*RouteClass.*Miles2Squires/
+const RBLRCSVRE = /^Entrantid,RiderFirst,RiderLast.*RouteClass.*Miles2Squires/;
 
 const myStackItem = "odoStack";
 var timertick;
@@ -137,36 +137,32 @@ function clickTimeBtnRelease(btn) {
 }
 
 function enableImportLoad(obj) {
+  let ldr = document.getElementById("importloader");
+  if (ldr) ldr.classList.add("hide");
 
-  let ldr = document.getElementById('importloader')
-  if (ldr) ldr.classList.add('hide')
-
-  let csv = document.getElementById('csvfile')
-  if (!csv) return
-  let data = document.getElementById('csvdata')
-  if (!data) return
+  let csv = document.getElementById("csvfile");
+  if (!csv) return;
+  let data = document.getElementById("csvdata");
+  if (!data) return;
   const file = csv.files[0];
-  console.log("File is "+file)
+  console.log("File is " + file);
   if (file) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-          const content = e.target.result;
-          data.value = content;
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const content = e.target.result;
+      data.value = content;
 
-          let ok =RBLRCSVRE.test(content)
-          console.log("ok == "+ok)
-          if (!ok) {
-            console.log("no match")
-            return
-          }
-          
+      let ok = RBLRCSVRE.test(content);
+      console.log("ok == " + ok);
+      if (!ok) {
+        console.log("no match");
+        return;
+      }
 
-          if (ldr) ldr.classList.remove('hide')
-
-      };
-      reader.readAsText(file);
+      if (ldr) ldr.classList.remove("hide");
+    };
+    reader.readAsText(file);
   }
-
 }
 function endEditEntrant() {
   let mode = document.getElementById("EditMode").value;
@@ -191,8 +187,7 @@ function getRallyTime(dt) {
 }
 
 function importEntrantsCSV(obj) {
-
-  console.log("Importing")
+  console.log("Importing");
 }
 function loadPage(x) {
   window.location.href = x;

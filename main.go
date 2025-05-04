@@ -18,7 +18,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const PROGRAMVERSION = "Alys v0.7 Copyright © 2025 Bob Stammers"
+const PROGRAMVERSION = "Alys v1.0 Copyright © 2025 Bob Stammers"
 
 // DBNAME names the database file
 var DBNAME *string = flag.String("db", "rblr.db", "database file")
@@ -143,11 +143,8 @@ func main() {
 		panic(err)
 	}
 
-	sqlx := "SELECT DBInitialised FROM config"
-	dbi, _ := strconv.Atoi(getStringFromDB(sqlx, "0"))
-	if dbi != 1 {
-		fmt.Println("Duff database")
-		return
+	if !checkDB() {
+		createDB()
 	}
 
 	if *EntrantsCSV != "" {
