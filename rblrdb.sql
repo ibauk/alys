@@ -7,6 +7,12 @@ CREATE TABLE IF NOT EXISTS "config" (
 	"RallyStatus"	TEXT NOT NULL DEFAULT 'S'
 );
 INSERT INTO config (DBInitialised) VALUES(1);
+CREATE TABLE IF NOT EXISTS "rallyparams" (
+	"RallyTitle" TEXT,
+	"StartTime" TEXT,
+	"FinishTime" TEXT
+);
+INSERT INTO rallyparams(RallyTitle,StartTime,FinishTime) VALUES('RBLR1000','2025-06-7T05:00','2025-06-08T12:00');
 CREATE TABLE IF NOT EXISTS "entrants" (
 	"EntrantID"	INTEGER NOT NULL,
 	"Bike"	TEXT DEFAULT 'motorbike',
