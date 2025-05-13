@@ -68,6 +68,7 @@ function changeFinalStatus(sel) {
   const certDNF = 3;
   const certNeeded = 2;
   const signedout = 1;
+  const latefinisher = 10;
   sel.classList.add("oi");
   let ent = sel.getAttribute("data-e");
   let div = sel.parentNode.parentNode;
@@ -77,10 +78,13 @@ function changeFinalStatus(sel) {
   if (ca != "Y" && ca != "N") ca = "N";
   console.log("cFS ca = " + ca);
   let status = sel.value;
+  if (status == latefinisher) {
+    ca = "N"
+  }
   let url = "putentrant?EntrantID=" + ent + "&EntrantStatus=" + status;
   let certix = -1;
 
-  if (status != sel.getAttribute("data-fs")) {
+  if (status != sel.getAttribute("data-fs") || true) {
     url += "&CertificateAvailable=N";
     if (status == sel.getAttribute("data-dnf")) {
       certix = certDNF;
@@ -532,6 +536,18 @@ function showMoneyAmt() {
   let sf = document.getElementById("showmoney");
   if (sf) {
     sf.innerHTML = "£" + amt;
+  }
+}
+
+function showNotesPresent() {
+  console.log("showNotesPresent called")
+  let notes = document.getElementById("Notes");
+  let present = notes.innerText != "";
+  let ps = document.getElementById("shownotes");
+  console.log("snp: "+present+" == "+ps)
+  if (ps) {
+    ps.innerHTML = "";
+    if (present) ps.innerHTML = "&#9745;";
   }
 }
 

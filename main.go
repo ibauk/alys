@@ -18,7 +18,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const PROGRAMVERSION = "Alys v1.0 Copyright © 2025 Bob Stammers"
+const PROGRAMVERSION = "Alys v1.1 Copyright © 2025 Bob Stammers"
 
 // DBNAME names the database file
 var DBNAME *string = flag.String("db", "rblr.db", "database file")
@@ -586,7 +586,7 @@ func update_entrant(w http.ResponseWriter, r *http.Request) {
 		comma = true
 	}
 	sqlx += " WHERE EntrantID=" + e
-	fmt.Println(sqlx)
+	//fmt.Printf("update_entrant: %v\n", sqlx)
 	_, err = DBH.Exec(sqlx)
 	checkerr(err)
 	fmt.Fprint(w, `{"err":false,"msg":"ok"}`)

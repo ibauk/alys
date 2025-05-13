@@ -10,12 +10,15 @@ import (
 
 func export_finishers(w http.ResponseWriter, r *http.Request) {
 
-	// I will export records marked as Finisher, not Finisher24+, where CorrectedMiles > 1000
+	// I will export records marked as Finisher or Finisher24+
+	//
+	// The Rides database loader, Rupert, will differentiate between the different classes
+	// IBA cert or not. Only 24hr 1000 miles rides will shown on the RoH.
 
 	sqlx := EntrantSQL
 
 	sqlx += " WHERE EntrantStatus=" + strconv.Itoa(STATUSCODES["finishedOK"])
-	sqlx += " AND CorrectedMiles >=1000"
+	sqlx += " OR EntrantStatus=" + strconv.Itoa(STATUSCODES["finished24+"])
 
 	rows, err := DBH.Query(sqlx)
 	checkerr(err)

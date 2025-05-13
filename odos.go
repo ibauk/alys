@@ -103,7 +103,10 @@ func show_odo(w http.ResponseWriter, r *http.Request, showstart bool, fullaccess
 	fmt.Fprint(w, ` <span id="errlog"></span>`) // Diags only
 	fmt.Fprint(w, `</div>`)
 
-	fmt.Fprint(w, `<script>setTimeout(reloadPage,30000);refreshTime(); timertick = setInterval(refreshTime,1000);</script>`)
+	const MinsB4Reload = 10
+	const SecsB4Reload = 0
+	const MsecsB4Reload = ((MinsB4Reload * 60) + SecsB4Reload) * 1000
+	fmt.Fprintf(w, `<script>setTimeout(reloadPage,%v);refreshTime(); timertick = setInterval(refreshTime,1000);</script>`, MsecsB4Reload)
 
 	fmt.Fprint(w, `<div id="odolist">`)
 	oe := true

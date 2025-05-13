@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	_ "embed"
 	"regexp"
+	"strings"
 )
 
 //go:embed tabs.js
@@ -94,6 +95,8 @@ type Entrant = struct {
 	Patches              int
 	EditMode             string
 	Notes                string
+	StartTimeOnly        string
+	FinishTimeOnly       string
 }
 
 const EntrantSQL = `SELECT EntrantID,ifnull(RiderFirst,''),ifnull(RiderLast,''),ifnull(RiderIBA,''),ifnull(RiderRBL,''),ifnull(RiderEmail,''),ifnull(RiderPhone,'')
@@ -214,14 +217,36 @@ var SigninScreenSingle = `
 	<input type="checkbox" id="CertificateDelivered" name="CertificateDelivered" class="CertificateDelivered" value="Y"{{if eq .CertificateDelivered "Y"}} checked{{end}} onchange="oic(this);">
 </div>
 
+{{if ge .EntrantStatus 4}}
+	<fieldset class="flex field">
+		<div class="field">
+			<label for="StartTime"><br>Checked out @</label>
+			<input type="text" class="showtime" id="StartTime" title="{{.StartTime}}" readonly value="{{.StartTimeOnly}}">
+
+			{{if ge .EntrantStatus 8}}
+				<div class="field">
+					<label for="FinishTime"> Checked in @</label>
+					<input type="text class="showtime" id="FinishTime" title="{{.FinishTime}}" readonly value="{{.FinishTimeOnly}}">
+				</div>
+			{{end}}
+
+
+		</div>
+	</fieldset>
+{{end}}
+
 </fieldset>
+
+
+
+
 </fieldset>
 
 
 <div class="tabs_area">
 	<ul id="tabs">
 		<li><a href="#tab_money">Donations <span id="showmoney"></span></a></li>
-		<li><a href="tab_notes">Notes</a></li>
+		<li><a href="tab_notes">Notes <span id="shownotes"></span></a></li>
 		<li><a href="#tab_bike">Bike</a></li>
 		<li><a href="#tab_nok" id="noktab">Emergency</a></li>
 		<li><a href="#tab_pillion">Pillion <span id="showpillion"></span></a></li>
@@ -309,9 +334,17 @@ var SigninScreenSingle = `
 
 
 </div>
-<script>` + my_tabs_js + ` setupTabs();showMoneyAmt();showPillionPresent();calcMileage();validate_entrant();setInterval(sendTransactions,1000);</script>
+<script>` + my_tabs_js + ` setupTabs();showMoneyAmt();showNotesPresent();showPillionPresent();calcMileage();validate_entrant();setInterval(sendTransactions,1000);</script>
 `
 
+func TimeOnly(dt string) string {
+
+	dtx := strings.Split(dt, "T")
+	if len(dtx) < 2 {
+		return dt
+	}
+	return dtx[1]
+}
 func ScanEntrant(rows *sql.Rows, e *Entrant) {
 
 	err := rows.Scan(&e.EntrantID, &e.Rider.First, &e.Rider.Last, &e.Rider.IBA, &e.Rider.RBL, &e.Rider.Email, &e.Rider.Phone, &e.Rider.Address1, &e.Rider.Address2, &e.Rider.Town, &e.Rider.County, &e.Rider.Postcode, &e.Rider.Country, &e.Pillion.First, &e.Pillion.Last, &e.Pillion.IBA, &e.Pillion.RBL, &e.Pillion.Email, &e.Pillion.Phone, &e.Pillion.Address1, &e.Pillion.Address2, &e.Pillion.Town, &e.Pillion.County, &e.Pillion.Postcode, &e.Pillion.Country, &e.Bike, &e.BikeReg, &e.NokName, &e.NokRelation, &e.NokPhone, &e.OdoStart, &e.StartTime, &e.OdoFinish, &e.FinishTime, &e.EntrantStatus, &e.OdoCounts, &e.Route, &e.FundsRaised.EntryDonation, &e.FundsRaised.SquiresCash, &e.FundsRaised.SquiresCheque, &e.FundsRaised.RBLRAccount, &e.FundsRaised.JustGivingAmt, &e.Tshirt1, &e.Tshirt2, &e.Patches, &e.FreeCamping, &e.CertificateDelivered, &e.CertificateAvailable, &e.Notes)
@@ -319,5 +352,6 @@ func ScanEntrant(rows *sql.Rows, e *Entrant) {
 
 	e.Rider.HasIBANumber, _ = regexp.Match(`\d{1,6}`, []byte(e.Rider.IBA))
 	e.Pillion.HasIBANumber, _ = regexp.Match(`\d{1,6}`, []byte(e.Pillion.IBA))
-
+	e.StartTimeOnly = TimeOnly(e.StartTime)
+	e.FinishTimeOnly = TimeOnly(e.FinishTime)
 }
