@@ -179,7 +179,7 @@ func update_odo(w http.ResponseWriter, r *http.Request) {
 		sqlx += ",FinishTime='" + dt + "'"
 		sqlx += ",EntrantStatus=" + strconv.Itoa(ns)
 		sqlx += " WHERE EntrantID=" + r.FormValue("e")
-		sqlx += " AND FinishTime IS NULL"
+		sqlx += " AND ifnull(FinishTime,'')=''"
 		sqlx += " AND EntrantStatus IN (" + strconv.Itoa(STATUSCODES["riding"]) + "," + strconv.Itoa(STATUSCODES["DNF"]) + ")"
 	case "s":
 		sqlx = "OdoStart=" + r.FormValue("v")

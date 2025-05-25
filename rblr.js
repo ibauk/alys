@@ -2,6 +2,8 @@
 
 const RBLRCSVRE = /^Entrantid,RiderFirst,RiderLast.*RouteClass.*Miles2Squires/;
 
+const StatusCodeCheckedOut = 4; // Out riding
+
 const myStackItem = "odoStack";
 var timertick;
 var reloadok = true;
@@ -79,7 +81,7 @@ function changeFinalStatus(sel) {
   console.log("cFS ca = " + ca);
   let status = sel.value;
   if (status == latefinisher) {
-    ca = "N"
+    ca = "N";
   }
   let url = "putentrant?EntrantID=" + ent + "&EntrantStatus=" + status;
   let certix = -1;
@@ -234,7 +236,7 @@ function nextTimeSlot() {
 }
 
 function nextButtonSlot() {
-  console.log("nextButtonSlot");
+  //console.log("nextButtonSlot");
   let btn = document.getElementById("nextSlot");
   if (!btn) return;
   console.log("nBS ok");
@@ -358,9 +360,11 @@ function refreshTime() {
   let xtra = parseInt(timeDisplay.getAttribute("data-xtra"));
   let newdt = getRallyTime(dt);
   let curdt = timeDisplay.getAttribute("data-time");
+  /*
   console.log(
     "Comparing " + curdt + " > " + newdt + "; xtra=" + xtra + "(" + gap + ")"
   );
+  */
   nextButtonSlot();
   if (curdt >= newdt) {
     return;
@@ -405,6 +409,7 @@ function saveData(obj) {
 
   let ent = document.getElementById("EntrantID").value;
   let val = obj.value;
+  let xtra = "";
   switch (obj.name) {
     case "RiderPostcode":
     case "PillionPostcode":
@@ -426,6 +431,9 @@ function saveData(obj) {
       break;
 
     case "EntrantStatus":
+      if (val == StatusCodeCheckedOut) {
+        xtra = "&FinishTime=&OdoFinish=";
+      }
       setTimeout(endEditEntrant, 1000);
       break;
 
@@ -438,7 +446,7 @@ function saveData(obj) {
   }
 
   let url = encodeURI(
-    "putentrant?EntrantID=" + ent + "&" + obj.name + "=" + val
+    "putentrant?EntrantID=" + ent + "&" + obj.name + "=" + val + xtra
   );
   stackTransaction(url, obj.id);
 
@@ -517,7 +525,12 @@ function sendTransactions() {
           // Process the data if no error
           //if (errlog){errlog.innerHTML="Hello sailor: "+JSON.stringify(data)}
           console.log("Data:", data);
-          document.getElementById(itm.objid).classList.replace("oi", "ok");
+          let x = document.getElementById(itm.objid);
+          if (x) {
+            x.classList.replace("oi", "ok");
+          } else {
+            console.log("item " + itm.objid + " no longer exists");
+          }
           reloadok = true;
         }
       })
@@ -540,11 +553,11 @@ function showMoneyAmt() {
 }
 
 function showNotesPresent() {
-  console.log("showNotesPresent called")
+  console.log("showNotesPresent called");
   let notes = document.getElementById("Notes");
   let present = notes.innerText != "";
   let ps = document.getElementById("shownotes");
-  console.log("snp: "+present+" == "+ps)
+  console.log("snp: " + present + " == " + ps);
   if (ps) {
     ps.innerHTML = "";
     if (present) ps.innerHTML = "&#9745;";
