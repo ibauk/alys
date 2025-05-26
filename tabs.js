@@ -35,9 +35,12 @@ function setupTabs() {
 
   for (let id in tabLinks) {
     tabLinks[id].onclick = tabsShowTab;
+    tabLinks[id].onfocus = tabsShowTab;
+    /*
     tabLinks[id].onfocus = function () {
       this.blur();
     };
+    */
     if (i == tab2show) tabLinks[id].className = "selected";
     i++;
   }

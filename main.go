@@ -18,7 +18,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const PROGRAMVERSION = "Alys v1.1 Copyright © 2025 Bob Stammers"
+const PROGRAMVERSION = "Alys v1.2 Copyright © 2025 Bob Stammers"
 
 // DBNAME names the database file
 var DBNAME *string = flag.String("db", "rblr.db", "database file")
