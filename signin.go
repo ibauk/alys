@@ -17,7 +17,7 @@ func create_new_entrant() string {
 		return "0"
 	}
 	res := strconv.Itoa(e)
-	sqlx = "INSERT INTO entrants(EntrantID) VALUES(" + res + ")"
+	sqlx = "INSERT INTO entrants(EntrantID,EntrantStatus) VALUES(" + res + "," + strconv.Itoa(STATUSCODES["signedin"]) + ")"
 	_, err := DBH.Exec(sqlx)
 	if err != nil {
 		return "0"

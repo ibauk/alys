@@ -135,7 +135,7 @@ var SigninScreenSingle = `
 
 </div>
 
-<div class="field">
+<div class="field" title="If switching between North & South, first untick 'Certificate available'">
 
     <label for="Route">Route</label> 
 	<select id="Route" name="Route" data-chg="1" data-static="1" onchange="ocd(this);">
@@ -156,7 +156,7 @@ var SigninScreenSingle = `
 <div class="field">
 	<label for="RiderIBA">IBA member</label> 
 	{{if .Rider.HasIBANumber}}
-	<input type="number" id="RiderIBA" name="RiderIBA" class="RiderIBA" value="{{.Rider.IBA}}" readonly tabindex="-1">
+	<input type="text" id="RiderIBA" name="RiderIBA" class="RiderIBA" value="{{.Rider.IBA}}" readonly tabindex="-1">
 	{{else}}
 	<input type="checkbox" id="RiderIBA" name="RiderIBA" class="RiderIBA" value="RiderIBA"{{if ne .Rider.IBA ""}} checked{{end}} onchange="oic(this);">
 	{{end}}
@@ -253,6 +253,29 @@ var SigninScreenSingle = `
 	</ul>
 </div>
 
+
+<fieldset class="tabContent" id="tab_money"><legend>Money</legend>
+<div class="field">
+	<label for="EntryDonation">@ entry</label> <input title="Paid in via Wufoo forms on entry" id="EntryDonation" name="EntryDonation" class="EntryDonation money" value="{{.FundsRaised.EntryDonation}}" oninput="moneyChg(this);"  onchange="ocd(this);" placeholder="&pound;0.00">
+</div>
+<div class="field">
+	<label for="SquiresCheque">Cheque</label> <input title="Value of cheques handed in at Squires" id="SquiresCheque" name="SquiresCheque" class="SquiresCheque money" value="{{.FundsRaised.SquiresCheque}}" oninput="moneyChg(this);" onchange="ocd(this);" placeholder="&pound;0.00">
+</div>
+<div class="field">
+	<label for="SquiresCash">Cash</label> <input title="Value of cash handed in at Squires" id="SquiresCash" name="SquiresCash" class="SquiresCash money" value="{{.FundsRaised.SquiresCash}}" oninput="moneyChg(this);" onchange="ocd(this);" placeholder="&pound;0.00">
+</div>
+<div class="field">
+	<label for="RBLRAccount">RBLR Account</label> <input title="Amount paid directly (not via IBA) to RBLR account" id="RBLRAccount" name="RBLRAccount" class="RBLRAccount money" value="{{.FundsRaised.RBLRAccount}}" oninput="moneyChg(this);" onchange="ocd(this);" placeholder="&pound;0.00">
+</div>
+<div class="field">
+	<label for="JustGivingAmt">JustGiving</label> <input title="Amount raised using JustGiving page" id="JustGivingAmt" name="JustGivingAmt" class="JustGivingAmt money" value="{{.FundsRaised.JustGivingAmt}}" oninput="moneyChg(this);" onchange="ocd(this);" placeholder="&pound;0.00">
+</div>
+<div class="field">
+	<label for="JustGivingURL">JustGiving URL</label> <input id="JustGivingURL" name="JustGivingURL" class="JustGivingURL" value="{{.FundsRaised.JustGivingURL}}" oninput="oid(this);" onchange="ocd(this);">
+</div>
+
+
+
 <fieldset class="tabContent" id="tab_notes"><legend>Notes</legend>
 <div class="field fullwidth">
 	<textarea id="Notes" name="Notes" class="Notes" oninput="oid(this)" onchange="ocd(this)">{{.Notes}}</textarea>
@@ -280,25 +303,6 @@ var SigninScreenSingle = `
 <div class="field"><label for="OdoFinish">Odo @ finish</label> <input id="OdoFinish" name="OdoFinish" class="OdoFinish" value="{{.OdoFinish}}" oninput="oid(this);" onchange="ocd(this);"></div>
 <div class="field" id="OdoMileage"></div>
 </fieldset>
-<fieldset class="tabContent" id="tab_money"><legend>Money</legend>
-<div class="field">
-	<label for="EntryDonation">@ entry</label> <input title="Paid in via Wufoo forms on entry" id="EntryDonation" name="EntryDonation" class="EntryDonation money" value="{{.FundsRaised.EntryDonation}}" oninput="moneyChg(this);"  onchange="ocd(this);">
-</div>
-<div class="field">
-	<label for="SquiresCheque">Cheque</label> <input title="Value of cheques handed in at Squires" id="SquiresCheque" name="SquiresCheque" class="SquiresCheque money" value="{{.FundsRaised.SquiresCheque}}" oninput="moneyChg(this);" onchange="ocd(this);">
-</div>
-<div class="field">
-	<label for="SquiresCash">Cash</label> <input title="Value of cash handed in at Squires" id="SquiresCash" name="SquiresCash" class="SquiresCash money" value="{{.FundsRaised.SquiresCash}}" oninput="moneyChg(this);" onchange="ocd(this);">
-</div>
-<div class="field">
-	<label for="RBLRAccount">RBLR Account</label> <input title="Amount paid directly (not via IBA) to RBLR account" id="RBLRAccount" name="RBLRAccount" class="RBLRAccount money" value="{{.FundsRaised.RBLRAccount}}" oninput="moneyChg(this);" onchange="ocd(this);">
-</div>
-<div class="field">
-	<label for="JustGivingAmt">Just giving</label> <input title="Amount raised using JustGiving page" id="JustGivingAmt" name="JustGivingAmt" class="JustGivingAmt money" value="{{.FundsRaised.JustGivingAmt}}" oninput="moneyChg(this);" onchange="ocd(this);">
-</div>
-<div class="field">
-	<label for="JustGivingURL">Just giving URL</label> <input id="JustGivingURL" name="JustGivingURL" class="JustGivingURL" value="{{.FundsRaised.JustGivingURL}}" oninput="oid(this);" onchange="ocd(this);">
-</div>
 
 </fieldset>
 <fieldset class="tabContent" id="tab_nok"><legend>Emergency</legend>
@@ -312,7 +316,7 @@ var SigninScreenSingle = `
 <div class="field">
 	<label for="PillionIBA">IBA member</label> 
 	{{if .Pillion.HasIBANumber}}
-	<input type="number" id="PillionIBA" name="PillionIBA" class="PillionIBA" value="{{.Pillion.IBA}}" readonly tabindex="-1">
+	<input type="text" id="PillionIBA" name="PillionIBA" class="PillionIBA" value="{{.Pillion.IBA}}" readonly tabindex="-1">
 	{{else}}
 	<input type="checkbox" id="PillionIBA" name="PillionIBA" class="PillionIBA" value="PillionIBA"{{if ne .Pillion.IBA ""}} checked{{end}} onchange="oic(this);">
 	{{end}}

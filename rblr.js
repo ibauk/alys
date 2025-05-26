@@ -434,6 +434,9 @@ function saveData(obj) {
       if (val == StatusCodeCheckedOut) {
         xtra = "&FinishTime=&OdoFinish=";
       }
+      if (val < StatusCodeCheckedOut) {
+        xtra = "&StartTime=&OdoStart="
+      }
       setTimeout(endEditEntrant, 1000);
       break;
 
