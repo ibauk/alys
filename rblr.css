@@ -323,8 +323,9 @@ main.upload button:hover {
   width: 5em;
 }
 .JustGivingURL {
-  width: 20em;
+  width: 40rem;
   max-width: 98vw;
+  font-size: .8em;
 }
 
 .Notes {

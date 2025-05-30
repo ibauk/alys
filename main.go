@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
@@ -18,7 +19,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const PROGRAMVERSION = "Alys v1.2 Copyright © 2025 Bob Stammers"
+const PROGRAMVERSION = "Alys v1.3 Copyright © 2025 Bob Stammers"
 
 // DBNAME names the database file
 var DBNAME *string = flag.String("db", "rblr.db", "database file")
@@ -579,11 +580,18 @@ func update_entrant(w http.ResponseWriter, r *http.Request) {
 	sqlx := "UPDATE entrants SET "
 	comma := false
 	for key, val := range v {
-		if comma {
-			sqlx += ","
+		if key[0:4] != "utm_" { // protect against buffered unencoded urls
+			if comma {
+				sqlx += ","
+			}
+			x, err := url.QueryUnescape(val)
+			checkerr(err)
+			if key == "JustGivingURL" {
+				x = FixJustGivingURL(x)
+			}
+			sqlx += key + "='" + x + "'"
+			comma = true
 		}
-		sqlx += key + "='" + val + "'"
-		comma = true
 	}
 	sqlx += " WHERE EntrantID=" + e
 	//fmt.Printf("update_entrant: %v\n", sqlx)

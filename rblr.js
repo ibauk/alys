@@ -446,10 +446,12 @@ function saveData(obj) {
     case "OdoCounts":
       calcMileage();
       break;
+    case "JustGivingURL":
+      break;
   }
 
   let url = encodeURI(
-    "putentrant?EntrantID=" + ent + "&" + obj.name + "=" + val + xtra
+    "putentrant?EntrantID=" + ent + "&" + obj.name + "=" + encodeURIComponent(val) + xtra
   );
   stackTransaction(url, obj.id);
 
