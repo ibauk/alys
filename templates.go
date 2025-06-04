@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+const JGV = "https://www.justgiving.com/page/"
+
 //go:embed tabs.js
 var my_tabs_js string
 
@@ -274,23 +276,23 @@ var SigninScreenSingle = `
 <fieldset class="tabContent" id="tab_money"><legend>Money</legend>
     <div class="field">
 	    <label for="EntryDonation">@ entry</label> 
-        <input title="Paid in via Wufoo forms on entry" id="EntryDonation" name="EntryDonation" class="EntryDonation money" value="{{.FundsRaised.EntryDonation}}" oninput="moneyChg(this);"  onchange="ocd(this);" placeholder="&pound;0.00" tabindex="22">
+        <input title="Paid in via Wufoo forms on entry" id="EntryDonation" name="EntryDonation" class="EntryDonation money" value="{{.FundsRaised.EntryDonation}}" oninput="moneyChg(this);"  onchange="ocd(this);" placeholder="0.00" tabindex="22">
     </div>
     <div class="field">
 	    <label for="SquiresCheque">Cheque</label> 
-        <input title="Value of cheques handed in at Squires" id="SquiresCheque" name="SquiresCheque" class="SquiresCheque money" value="{{.FundsRaised.SquiresCheque}}" oninput="moneyChg(this);" onchange="ocd(this);" placeholder="&pound;0.00" tabindex="23">
+        <input title="Value of cheques handed in at Squires" id="SquiresCheque" name="SquiresCheque" class="SquiresCheque money" value="{{.FundsRaised.SquiresCheque}}" oninput="moneyChg(this);" onchange="ocd(this);" placeholder="0.00" tabindex="23">
     </div>
     <div class="field">
 	    <label for="SquiresCash">Cash</label> 
-        <input title="Value of cash handed in at Squires" id="SquiresCash" name="SquiresCash" class="SquiresCash money" value="{{.FundsRaised.SquiresCash}}" oninput="moneyChg(this);" onchange="ocd(this);" placeholder="&pound;0.00" tabindex="24">
+        <input title="Value of cash handed in at Squires" id="SquiresCash" name="SquiresCash" class="SquiresCash money" value="{{.FundsRaised.SquiresCash}}" oninput="moneyChg(this);" onchange="ocd(this);" placeholder="0.00" tabindex="24">
     </div>
     <div class="field">
 	    <label for="RBLRAccount">RBLR Account</label> 
-        <input title="Amount paid directly (not via IBA) to RBLR account" id="RBLRAccount" name="RBLRAccount" class="RBLRAccount money" value="{{.FundsRaised.RBLRAccount}}" oninput="moneyChg(this);" onchange="ocd(this);" placeholder="&pound;0.00" tabindex="25">
+        <input title="Amount paid directly (not via IBA) to RBLR account" id="RBLRAccount" name="RBLRAccount" class="RBLRAccount money" value="{{.FundsRaised.RBLRAccount}}" oninput="moneyChg(this);" onchange="ocd(this);" placeholder="0.00" tabindex="25">
     </div>
     <div class="field">
 	    <label for="JustGivingAmt">JustGiving</label> 
-        <input title="Amount raised using JustGiving page" id="JustGivingAmt" name="JustGivingAmt" class="JustGivingAmt money" value="{{.FundsRaised.JustGivingAmt}}" oninput="moneyChg(this);" onchange="ocd(this);" placeholder="&pound;0.00" tabindex="26" title="{{.FundsRaised.JustGivingAmt}}">
+        <input title="Amount raised using JustGiving page" id="JustGivingAmt" name="JustGivingAmt" class="JustGivingAmt money" value="{{.FundsRaised.JustGivingAmt}}" oninput="moneyChg(this);" onchange="ocd(this);" placeholder="0.00" tabindex="26" title="{{.FundsRaised.JustGivingAmt}}">
     </div>
     <div class="field">
 	    <label for="JustGivingURL">JustGiving URL</label> 
@@ -403,13 +405,11 @@ var SigninScreenSingle = `
 
 func FixJustGivingURL(x string) string {
 
-	const jgv = "https://www.justgiving.com/page/"
-
 	xl := len(x)
-	if xl > len(jgv) && x[0:len(jgv)] == jgv {
+	if xl > len(JGV) && x[0:len(JGV)] == JGV {
 		return x
 	}
-	return jgv + x
+	return JGV + x
 }
 
 func TimeOnly(dt string) string {

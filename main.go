@@ -19,7 +19,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const PROGRAMVERSION = "Alys v1.3 Copyright © 2025 Bob Stammers"
+const PROGRAMVERSION = "Alys v1.4 Copyright © 2025 Bob Stammers"
 
 // DBNAME names the database file
 var DBNAME *string = flag.String("db", "rblr.db", "database file")
@@ -169,6 +169,7 @@ func main() {
 	http.HandleFunc("/putodo", update_odo)
 	http.HandleFunc("/putentrant", update_entrant)
 	http.HandleFunc("/upload", load_entrants)
+	http.HandleFunc("/just", export_JustGiving)
 	err = http.ListenAndServe(":"+*HTTPPort, nil)
 	if err != nil {
 		panic(err)
@@ -244,6 +245,13 @@ func show_funds_breakdown(w http.ResponseWriter) {
 
 	for _, k := range skeys {
 		v := sources[k]
+		if k == "JustGivingAmt" {
+			n, amt := show_funds_JustGiving()
+			if n > 0 {
+				fmt.Fprintf(w, `<tr class="subrow"><td>%v (%v)</td><td class="val">&pound;%v</td></tr>`, v, n, format_money(amt))
+			}
+			continue
+		}
 		row, err := DBH.Query(fmt.Sprintf("SELECT count(*),ifnull(sum(%v),0) FROM entrants WHERE %v  <>''", k, k))
 		checkerr(err)
 		defer row.Close()
@@ -261,6 +269,39 @@ func show_funds_breakdown(w http.ResponseWriter) {
 		checkerr(err)
 	}
 
+}
+
+func show_funds_JustGiving() (int64, string) {
+
+	row, err := DBH.Query("SELECT ifnull(JustGivingAmt,''),ifnull(JustGivingURL,'') FROM entrants WHERE ifnull(JustGivingAmt,'')<>'' ORDER BY JustGivingURL")
+	checkerr(err)
+	defer row.Close()
+	var amt string
+	var lastjgurl string
+	var totamt int
+	var jgurl string
+	var n int64
+	for row.Next() {
+		err = row.Scan(&amt, &jgurl)
+		checkerr(err)
+		if len(jgurl) > len(JGV) {
+			jgurl = jgurl[len(JGV):]
+		}
+		p := strings.Index(jgurl, "?")
+		if p >= 0 {
+			jgurl = jgurl[:p]
+		}
+
+		n++
+		v := 0
+		if jgurl != lastjgurl {
+			v = intval(amt)
+			totamt += v
+		}
+		//fmt.Printf("#%v '%v' = %v\n", n, jgurl, v)
+		lastjgurl = jgurl
+	}
+	return n, strconv.Itoa(totamt)
 }
 
 func show_root(w http.ResponseWriter, r *http.Request) {
@@ -523,6 +564,7 @@ func show_admin(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, `</fieldset>`)
 	fmt.Fprint(w, `<button onclick="loadPage('getcsv');" title="Load entrants from CSV prepared by Reglist">Import entrants</button>`)
 	fmt.Fprint(w, `<button onclick="this.disabled=true;loadPage('export');" title="Create JSON file for upload to the Rides database">Export results for IBA database</button>`)
+	fmt.Fprint(w, `<button onclick="this.disabled=true;loadPage('just');" title="Create CSV file of JustGiving user info">Export JustGiving CSV</button>`)
 	fmt.Fprint(w, `<button onclick="loadPage('config');" title="Start times and other variables">Settings</button>`)
 	fmt.Fprint(w, `</main>`)
 	fmt.Fprint(w, `<script>document.onkeydown=function(e){if(e.keyCode==27) {e.preventDefault();loadPage('menu');}}</script>`)

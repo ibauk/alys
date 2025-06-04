@@ -143,7 +143,7 @@ func intval(x string) int {
 		if n >= '0' && n <= '9' {
 			res = res * 10
 			res = res + int(n) - int('0')
-		} else {
+		} else if n != '£' {
 			break
 		}
 	}
