@@ -437,7 +437,9 @@ func show_stats(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, `<tr><td>%v</td><td class="val">%v</td></tr>`, scv[sc], counts[codedescs[sc]])
 		}
 	}
-	totfunds := getStringFromDB("SELECT SUM(ifnull(EntryDonation,0)+ifnull(SquiresCheque,0)+ifnull(SquiresCash,0)+ifnull(RBLRAccount,0)+ifnull(JustGivingAmt,0)) AS funds  FROM entrants;", "0.00")
+	_, jgamt := show_funds_JustGiving()
+	totfundx := getStringFromDB("SELECT SUM(ifnull(EntryDonation,0)+ifnull(SquiresCheque,0)+ifnull(SquiresCash,0)+ifnull(RBLRAccount,0)) AS funds  FROM entrants;", "0.00")
+	totfunds := strconv.Itoa(intval(jgamt) + intval(totfundx))
 	fmt.Fprintf(w, `<tr><td><br>Funds raised</td><td class="val"><br>&pound;%v</td></tr>`, format_money(totfunds))
 
 	if true {
