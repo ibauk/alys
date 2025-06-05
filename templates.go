@@ -146,8 +146,8 @@ var SigninScreenSingle = `
 	        <option value="B-NAC"{{if eq .Route "B-NAC"}} selected{{end}}>North anticlockwise</option>
 	        <option value="C-SCW"{{if eq .Route "C-SCW"}} selected{{end}}>South clockwise</option>
 	        <option value="D-SAC"{{if eq .Route "D-SAC"}} selected{{end}}>South anticlockwise</option>
-	        <option value="E-500CW"{{if eq .Route "E-5CW"}} selected{{end}}>500 clockwise</option>
-	        <option value="F-500AC"{{if eq .Route "F-5AC"}} selected{{end}}>500 anticlockwise</option>
+	        <option value="E-5CW"{{if eq .Route "E-5CW"}} selected{{end}}>500 clockwise</option>
+	        <option value="F-5AC"{{if eq .Route "F-5AC"}} selected{{end}}>500 anticlockwise</option>
 	    </select>
 
     </div>

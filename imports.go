@@ -293,8 +293,8 @@ func RouteClass(rc string) string {
 		"B": "B-NAC",
 		"C": "C-SCW",
 		"D": "D-SAC",
-		"E": "E-500CW",
-		"F": "F-500AC",
+		"E": "E-5CW",
+		"F": "F-5AC",
 	}
 	rca := rc[0:1]
 	val, ok := RC[rca]
