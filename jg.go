@@ -128,6 +128,78 @@ func doJGTestOffline() {
 	}
 
 }
+
+type pair struct {
+	url string
+	eid int
+}
+type justg struct {
+	url string
+	nu  int
+	fr  int
+	pu  int
+}
+
+func extractJGPages() {
+
+	sqlx := "SELECT EntrantID,JustGivingURL FROM entrants WHERE ifnull(JustGivingURL,'')<>''"
+	rows, err := DBH.Query(sqlx)
+	checkerr(err)
+	defer rows.Close()
+	psns := make([]pair, 0)
+	for rows.Next() {
+		var rec pair
+		err = rows.Scan(&rec.eid, &rec.url)
+		checkerr(err)
+		psns = append(psns, rec)
+	}
+	rows.Close()
+	sqlx = "DELETE FROM justgs"
+	_, err = DBH.Exec(sqlx)
+	checkerr(err)
+
+	for _, r := range psns {
+		psn := parsePageShortName(r.url)
+		sqlx = fmt.Sprintf("UPDATE entrants SET JGPageShortName='%v' WHERE EntrantID=%v", psn, r.eid)
+		_, err = DBH.Exec(sqlx)
+		checkerr(err)
+		sqlx = fmt.Sprintf("INSERT INTO justgs(PageShortName,NumUsers)VALUES('%v',1) ON CONFLICT(PageShortName) DO UPDATE SET NumUsers=NumUsers+1", psn)
+		fmt.Println(sqlx)
+		_, err = DBH.Exec(sqlx)
+		checkerr(err)
+	}
+}
+func updateJGPages() {
+
+	sqlx := "SELECT PageShortName,NumUsers FROM justgs"
+	urls := make([]justg, 0)
+	rows, err := DBH.Query(sqlx)
+	checkerr(err)
+	defer rows.Close()
+	for rows.Next() {
+		var r justg
+		err = rows.Scan(&r.url, &r.nu)
+		checkerr(err)
+		urls = append(urls, r)
+	}
+	rows.Close()
+	for i, r := range urls {
+		n := getFundsRaised(r.url)
+		urls[i].fr = n
+		urls[i].pu = n
+		if r.nu > 1 {
+			urls[i].pu = n / r.nu
+		}
+		sqlx = fmt.Sprintf("UPDATE entrants SET JustGivingAmt='%v' WHERE JGPageShortName='%v'", urls[i].pu, r.url)
+		_, err = DBH.Exec(sqlx)
+		checkerr(err)
+		sqlx = fmt.Sprintf("UPDATE justgs SET FundsRaised=%v,PerUser=%v WHERE PageShortName='%v'", urls[i].fr, urls[i].pu, r.url)
+		_, err = DBH.Exec(sqlx)
+		checkerr(err)
+
+	}
+
+}
 func parsePageShortName(url string) string {
 
 	psn := url

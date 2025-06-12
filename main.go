@@ -155,6 +155,8 @@ func main() {
 		return
 	}
 	if *JGTest {
+		extractJGPages()
+		updateJGPages()
 		doJGTestOffline()
 	}
 	http.HandleFunc("/", show_root)
