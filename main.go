@@ -29,6 +29,8 @@ var HTTPPort *string = flag.String("port", "80", "Web port")
 
 var EntrantsCSV *string = flag.String("import", "", "CSV to import")
 
+var JGTest *bool = flag.Bool("jg", false, "test jg")
+
 // DBH provides access to the database
 var DBH *sql.DB
 
@@ -152,6 +154,9 @@ func main() {
 		LoadEntrantsFromCSV(*EntrantsCSV, "Y", true, false)
 		return
 	}
+	if *JGTest {
+		doJGTestOffline()
+	}
 	http.HandleFunc("/", show_root)
 	http.HandleFunc("/getcsv", show_loadCSV)
 	http.HandleFunc("/menu", show_menu)
@@ -170,6 +175,7 @@ func main() {
 	http.HandleFunc("/putentrant", update_entrant)
 	http.HandleFunc("/upload", load_entrants)
 	http.HandleFunc("/just", export_JustGiving)
+	http.HandleFunc("/jgtest", doJGTest)
 	err = http.ListenAndServe(":"+*HTTPPort, nil)
 	if err != nil {
 		panic(err)

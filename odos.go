@@ -164,6 +164,7 @@ func update_odo(w http.ResponseWriter, r *http.Request) {
 	case "f":
 		sqlx = "OdoFinish=" + r.FormValue("v")
 
+		// This needs to cater for odos reflecting M/K flag
 		sqlx += ",CorrectedMiles=(" + r.FormValue("v") + " - IfNull(OdoStart,0))"
 
 		ns := STATUSCODES["finishedOK"]

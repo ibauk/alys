@@ -238,21 +238,24 @@ func LoadEntrantsFromCSV(csvFile string, certAvail string, zapExisting bool, fil
 		if err != nil {
 			fmt.Printf("%v gives %v with error %v\n", ln[r["Patches"]], patches, err)
 		}
-		res, err := stmt.Exec(ln[r["EntrantID"]], ln[r["Bike"]], ln[r["BikeReg"]], ln[r["RiderFirst"]], ln[r["RiderLast"]],
-			ln[r["Address1"]], ln[r["Address2"]], ln[r["Town"]], ln[r["County"]],
-			ln[r["Postcode"]], ln[r["Country"]], ln[r["RiderIBA"]], ln[r["Phone"]], ln[r["Email"]],
-			ln[r["PillionFirst"]], ln[r["PillionLast"]],
-			ln[r["PAddress1"]], ln[r["PAddress2"]], ln[r["PTown"]], ln[r["PCounty"]],
-			ln[r["PPostcode"]], ln[r["PCountry"]], ln[r["PillionIBA"]], ln[r["PPhone"]], ln[r["PEmail"]],
-			ln[r["OdoCounts"]], STATUSCODES["DNS"], ln[r["NokName"]], ln[r["NokPhone"]], ln[r["NokRelation"]],
-			ln[r["Sponsorship"]], RouteClass(ln[r["RouteClass"]]), ln[r["RiderRBL"]], ln[r["PillionRBL"]],
-			ln[r["Tshirt1"]], ln[r["Tshirt2"]], patches, ln[r["FreeCamping"]],
-			certAvail, "N",
-		)
-		checkerr(err)
-		ra, err := res.RowsAffected()
-		checkerr(err)
-		nl += ra
+		fmt.Printf("%v={%v}    ", ln[r["EntrantID"]], ln[r["OdoKms"]])
+		if false {
+			res, err := stmt.Exec(ln[r["EntrantID"]], ln[r["Bike"]], ln[r["BikeReg"]], ln[r["RiderFirst"]], ln[r["RiderLast"]],
+				ln[r["Address1"]], ln[r["Address2"]], ln[r["Town"]], ln[r["County"]],
+				ln[r["Postcode"]], ln[r["Country"]], ln[r["RiderIBA"]], ln[r["Phone"]], ln[r["Email"]],
+				ln[r["PillionFirst"]], ln[r["PillionLast"]],
+				ln[r["PAddress1"]], ln[r["PAddress2"]], ln[r["PTown"]], ln[r["PCounty"]],
+				ln[r["PPostcode"]], ln[r["PCountry"]], ln[r["PillionIBA"]], ln[r["PPhone"]], ln[r["PEmail"]],
+				ln[r["OdoKms"]], STATUSCODES["DNS"], ln[r["NokName"]], ln[r["NokPhone"]], ln[r["NokRelation"]],
+				ln[r["Sponsorship"]], RouteClass(ln[r["RouteClass"]]), ln[r["RiderRBL"]], ln[r["PillionRBL"]],
+				ln[r["Tshirt1"]], ln[r["Tshirt2"]], patches, ln[r["FreeCamping"]],
+				certAvail, "N",
+			)
+			checkerr(err)
+			ra, err := res.RowsAffected()
+			checkerr(err)
+			nl += ra
+		}
 	}
 	DBH.Exec("COMMIT")
 	fmt.Printf("%v records loaded\n", nl)
