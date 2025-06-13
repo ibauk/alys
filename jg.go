@@ -20,11 +20,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"slices"
 	"strings"
 )
 
 const AppID = "48326b85"
-const testPage = "Pawel-Janik" //"jason-bassett-1" //"rblr10002025" //"jason-bassett-1"
+
+const NullCharityReg = "000000"
 
 type jgCharityDetails struct {
 	Id     int    `json:"id"`
@@ -41,92 +43,9 @@ type jgPageDetails struct {
 	Charity       jgCharityDetails
 }
 
-var PD jgPageDetails
-
-type donation struct {
-	Amount string `json:"amount"`
-}
-type pagination struct {
-	PageSizeRequested int
-	PageSizeReturned  int `json:"pageSizeReturned"`
-	TotalPages        int
-	TotalResults      int
-}
-
-/*
-*
-
-	"id": "page/rblr10002025",
-	"pageShortName": "page/rblr10002025",
-	"pagination": {
-	  "nextPageCursor": null,
-	  "pageSizeRequested": 50,
-	  "pageSizeReturned": 40,
-	  "totalPages": 1,
-	  "totalResults": 40
-	}
-
-*
-*/
-type donations struct {
-	Donations     []donation `json:"donations"`
-	Id            string
-	PageShortName string
-	Pagination    pagination `json:"pagination"`
-}
-
-var DD donations
-
-/**
-	{
-      "amount": "30",
-      "charityId": 250914,
-      "currencyCode": "GBP",
-      "donationDate": "/Date(1749476949000)/",
-      "donationRef": null,
-      "donorDisplayName": "Anonymous",
-      "donorLocalAmount": "30",
-      "donorLocalCurrencyCode": "GBP",
-      "estimatedTaxReclaim": 7.5,
-      "id": 1147789313,
-      "image": "https://www.justgiving.com/content/images/graphics/icons/avatars/facebook-avatar.gif",
-      "message": "Fantastic effort guys! All completed, even if a bit soggy and tired! We’ll done all!",
-      "source": "SponsorshipDonations",
-      "thirdPartyReference": null
-    }
-**/
-
-var urls = []string{
-	"https://www.justgiving.com/page/rblr1000?utm_medium=FR&utm_source=CL&utm_campaign=015",
-	"https://www.justgiving.com/page/dave-broome-2?utm_medium=FR&utm_source=CL&utm_campaign=015",
-	"https://www.justgiving.com/page/rblr1000-smiths-1735650564643?utm_medium=FR&utm_source=CL&utm_campaign=015",
-	"https://www.justgiving.com/fundraising/Pawel-Janik?utm_medium=FR&utm_source=CL&utm_campaign=015",
-	"https://www.justgiving.com/page/rblr10002025",
-}
-
 func doJGTest(w http.ResponseWriter, r *http.Request) {
 
-	getFundsRaised(testPage)
-
-	fmt.Fprintln(w, "<p>Parsing urls</p>")
-	for u := range urls {
-		psn := parsePageShortName(urls[u])
-		fmt.Fprintf(w, "%v == %v\n", psn, urls[u])
-		fmt.Fprintf(w, "<p>Funds raised %v</p>", getFundsRaised(psn))
-	}
-
-}
-func doJGTestOffline() {
-
-	getFundsRaised(testPage)
-
-	fmt.Println("Parsing urls")
-	for u := range urls {
-		psn := parsePageShortName(urls[u])
-		fmt.Printf("%v == %v\n", psn, urls[u])
-		getFundsRaised(psn)
-	}
-
+	rebuildJGPages()
 }
 
 type pair struct {
@@ -140,7 +59,9 @@ type justg struct {
 	pu  int
 }
 
-func extractJGPages() {
+func rebuildJGPages() {
+
+	rcsok := strings.Split(getStringFromDB("SELECT JustGCharities FROM config", ""), ",")
 
 	sqlx := "SELECT EntrantID,JustGivingURL FROM entrants WHERE ifnull(JustGivingURL,'')<>''"
 	rows, err := DBH.Query(sqlx)
@@ -154,22 +75,37 @@ func extractJGPages() {
 		psns = append(psns, rec)
 	}
 	rows.Close()
+
+	_, err = DBH.Exec("BEGIN TRANSACTION")
+	checkerr(err)
+	defer DBH.Exec("ROLLBACK")
+
 	sqlx = "DELETE FROM justgs"
 	_, err = DBH.Exec(sqlx)
 	checkerr(err)
 
 	for _, r := range psns {
-		psn := parsePageShortName(r.url)
-		sqlx = fmt.Sprintf("UPDATE entrants SET JGPageShortName='%v' WHERE EntrantID=%v", psn, r.eid)
+		psn := parseJGPageShortName(r.url)
+		pd := getJGPageDetails(psn)
+		sqlx = fmt.Sprintf("UPDATE entrants SET JustGivingPSN='%v' WHERE EntrantID=%v", psn, r.eid)
 		_, err = DBH.Exec(sqlx)
 		checkerr(err)
-		sqlx = fmt.Sprintf("INSERT INTO justgs(PageShortName,NumUsers)VALUES('%v',1) ON CONFLICT(PageShortName) DO UPDATE SET NumUsers=NumUsers+1", psn)
-		fmt.Println(sqlx)
+		pageValid := 1
+		if !slices.Contains(rcsok, pd.Charity.RegNum) {
+			pageValid = 0
+		}
+		sqlx = fmt.Sprintf("INSERT INTO justgs(PageShortName,NumUsers,CharityReg,CharityName,PageValid)VALUES('%v',1,'%v','%v',%v) ON CONFLICT(PageShortName) DO UPDATE SET NumUsers=NumUsers+1", psn, pd.Charity.RegNum, safesql(pd.Charity.Name), pageValid)
+		//fmt.Println(sqlx)
 		_, err = DBH.Exec(sqlx)
 		checkerr(err)
 	}
+	_, err = DBH.Exec("COMMIT")
+	checkerr(err)
+
+	refreshJGPageTotals()
 }
-func updateJGPages() {
+
+func refreshJGPageTotals() {
 
 	sqlx := "SELECT PageShortName,NumUsers FROM justgs"
 	urls := make([]justg, 0)
@@ -183,24 +119,30 @@ func updateJGPages() {
 		urls = append(urls, r)
 	}
 	rows.Close()
+	_, err = DBH.Exec("BEGIN TRANSACTION")
+	checkerr(err)
+	defer DBH.Exec("COMMIT")
+
 	for i, r := range urls {
-		n := getFundsRaised(r.url)
+		n := getJGFundsRaised(r.url)
 		urls[i].fr = n
 		urls[i].pu = n
 		if r.nu > 1 {
 			urls[i].pu = n / r.nu
 		}
-		sqlx = fmt.Sprintf("UPDATE entrants SET JustGivingAmt='%v' WHERE JGPageShortName='%v'", urls[i].pu, r.url)
+		if getIntegerFromDB(fmt.Sprintf("SELECT PageValid FROM justgs WHERE PageShortName='%v'", r.url), 0) == 0 {
+			urls[i].pu = 0
+		}
+		sqlx = fmt.Sprintf("UPDATE entrants SET JustGivingAmt='%v' WHERE JustGivingPSN='%v'", urls[i].pu, r.url)
 		_, err = DBH.Exec(sqlx)
 		checkerr(err)
 		sqlx = fmt.Sprintf("UPDATE justgs SET FundsRaised=%v,PerUser=%v WHERE PageShortName='%v'", urls[i].fr, urls[i].pu, r.url)
 		_, err = DBH.Exec(sqlx)
 		checkerr(err)
-
 	}
 
 }
-func parsePageShortName(url string) string {
+func parseJGPageShortName(url string) string {
 
 	psn := url
 	// drop the parameters
@@ -217,7 +159,18 @@ func parsePageShortName(url string) string {
 	}
 	return psn
 }
-func getFundsRaised(jgpage string) int {
+func getJGFundsRaised(jgpage string) int {
+
+	PD := getJGPageDetails(jgpage)
+	totval := intval(PD.FundsRaised)
+
+	return totval
+
+}
+
+func getJGPageDetails(jgpage string) jgPageDetails {
+
+	var PD jgPageDetails
 
 	jgurl := fmt.Sprintf("https://api.justgiving.com/v1/fundraising/pages/%v", jgpage)
 	client := &http.Client{}
@@ -237,16 +190,12 @@ func getFundsRaised(jgpage string) int {
 		//fmt.Println(string(bodyBytes)) //
 		err = json.Unmarshal(bodyBytes, &PD)
 		checkerr(err)
+	} else {
+		fmt.Printf("%v returned %v\n", jgpage, resp.StatusCode)
+		PD.PageShortName = jgpage
+		PD.Charity.RegNum = NullCharityReg
+		PD.Charity.Name = "page not found"
 	}
 
-	fmt.Printf("%v == %v \n", jgurl, resp.Status)
-
-	totval := intval(PD.FundsRaised)
-	fmt.Printf("Total funds: %v\n", totval)
-
-	//fmt.Printf("Page details\n%v\n", PD)
-	// ...
-
-	return totval
-
+	return PD
 }

@@ -63,6 +63,22 @@ main.signin {
   display: grid;
   justify-content: space-around;
 }
+main.search {
+  margin: 2em;
+}
+main.search input {
+  font-size: 1.2em;
+}
+main.search button {
+  border-radius: 6px;
+  font-size: 1.2em;
+  padding: 5px;
+}
+main.search button:hover {
+  background-color: lightblue;
+  cursor: pointer;
+}
+
 div.top {
   margin: 0 auto 5px auto;
   background-color: var(--topbar-background);
