@@ -78,6 +78,22 @@ main.search button:hover {
   background-color: lightblue;
   cursor: pointer;
 }
+.results {
+  margin-top: 1em;
+  display: table;
+}
+.resultline {
+  display: table-row;
+}
+.resultline span {
+  display: table-cell;
+  padding: 0.5em 2em 0.5em 0.5em;
+}
+.resultline:hover {
+  background-color: var(--hover-background);
+  color: var(--hover-text);
+  cursor: pointer;
+}
 
 div.top {
   margin: 0 auto 5px auto;
@@ -341,7 +357,7 @@ main.upload button:hover {
 .JustGivingURL {
   width: 40rem;
   max-width: 98vw;
-  font-size: .8em;
+  font-size: 0.8em;
 }
 
 .Notes {

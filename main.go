@@ -604,6 +604,7 @@ func show_menu(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, `<button onclick="loadPage('signin?mode=full');" title="Inspect/update entrant details regardless of status">Full entrant list</button>`)
 
 	fmt.Fprint(w, `<button class="bigscreen" onclick="loadPage('admin');">Event setup</button>`)
+	fmt.Fprint(w, `<button onclick="loadPage('search');">Search</button>`)
 	fmt.Fprint(w, `</main>`)
 }
 
@@ -658,67 +659,4 @@ func update_entrant(w http.ResponseWriter, r *http.Request) {
 func safesql(x string) string {
 
 	return strings.ReplaceAll(strings.TrimSpace(x), "'", "''")
-}
-
-func global_search(w http.ResponseWriter, r *http.Request) {
-
-	type table_info struct {
-		cid     int
-		cname   string
-		ctype   string
-		notnull int
-		defval  any
-		pk      int
-	}
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
-	w.Header().Set("Pragma", "no-cache")
-	w.Header().Set("Expires", "0")
-
-	fmt.Fprint(w, refresher)
-
-	fmt.Fprint(w, `<div class="top"><h2>RBLR1000 - Search  </h2></div>`)
-	fmt.Fprint(w, `<main class="search">`)
-
-	fmt.Fprint(w, `<form action="/search"`)
-	fmt.Fprint(w, `<label for="txt2find">What should I look for?</label> `)
-	fmt.Fprintf(w, `<input type="search" autofocus id="txt2find" name="q" value="%v"> `, r.FormValue("q"))
-	fmt.Fprint(w, `<button onclick="this.parent.submit()">Find it!</button>`)
-	fmt.Fprint(w, `</form>`)
-
-	if r.FormValue("q") == "" {
-		fmt.Fprint(w, `</main></div></body></html>`)
-		return
-	}
-	rows, err := DBH.Query("pragma table_info(entrants)")
-	checkerr(err)
-	defer rows.Close()
-	cols := make([]string, 0)
-	for rows.Next() {
-		var ti table_info
-		err = rows.Scan(&ti.cid, &ti.cname, &ti.ctype, &ti.notnull, &ti.defval, &ti.pk)
-		checkerr(err)
-		cols = append(cols, ti.cname)
-	}
-	rows.Close()
-	sqlx := "SELECT EntrantID,RiderFirst,RiderLast,RiderPhone FROM entrants WHERE "
-	xk := "'%" + safesql(r.FormValue("q")) + "%'"
-	wherex := ""
-	for n := range cols {
-		if wherex != "" {
-			wherex += " OR "
-		}
-		wherex += cols[n] + " LIKE " + xk
-	}
-	fmt.Println(sqlx + wherex)
-	rows, err = DBH.Query(sqlx + wherex)
-	checkerr(err)
-	defer rows.Close()
-	for rows.Next() {
-		var e, rf, rl, rp string
-		err = rows.Scan(&e, &rf, &rl, &rp)
-		checkerr(err)
-		fmt.Fprintf(w, `%v = %v,%v : %v<br>`, e, rl, rf, rp)
-	}
-
 }
