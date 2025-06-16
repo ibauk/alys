@@ -19,7 +19,7 @@ import (
 **/
 
 var StatusSearchOptions = map[string]string{
-	"not signed-in":             "<2",
+	"not signed-in":             "=0",
 	"withdrawn":                 "=1",
 	"signed-in,not checked-out": "=2",
 	"signed-in":                 ">=2",
@@ -54,9 +54,9 @@ func global_search(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, `<div class="top"><h2>RBLR1000 - Search  </h2></div>`)
 	fmt.Fprint(w, `<main class="search">`)
 
-	fmt.Fprint(w, `<form action="/search"`)
-	fmt.Fprint(w, `<label for="txt2find">What should I look for?</label> `)
-	fmt.Fprintf(w, `<input type="search" autofocus id="txt2find" name="q" value="%v"> `, r.FormValue("q"))
+	fmt.Fprint(w, `<form action="/search">`)
+	//	fmt.Fprint(w, `<label for="txt2find">What should I look for?</label> `)
+	fmt.Fprintf(w, `<input type="search" placeholder="What should I look for?" autofocus id="txt2find" name="q" value="%v"> `, r.FormValue("q"))
 
 	fmt.Fprint(w, `<select name="qr"> `)
 
@@ -128,7 +128,9 @@ func global_search(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sqlx += " ORDER BY RiderLast,RiderFirst"
-	fmt.Println(sqlx)
+	if r.FormValue("debug") == "1" {
+		fmt.Println(sqlx)
+	}
 	rows, err = DBH.Query(sqlx)
 	checkerr(err)
 	defer rows.Close()

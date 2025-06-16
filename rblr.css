@@ -65,6 +65,7 @@ main.signin {
 }
 main.search {
   margin: 2em;
+  
 }
 main.search input {
   font-size: 1.2em;
@@ -86,7 +87,9 @@ main.search button:hover {
   display: table;
 }
 .resultline {
-  display: table-row;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
 }
 .resultline span {
   display: table-cell;
