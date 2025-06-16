@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"slices"
 	"strconv"
 	"text/template"
 )
@@ -79,7 +78,7 @@ func edit_entrant(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func show_signin(w http.ResponseWriter, r *http.Request) {
+func status_icon_map() map[int]string {
 
 	scv := make(map[int]string)
 	scv[STATUSCODES["DNS"]] = "&nbsp;?&nbsp;"                 // Registered online
@@ -89,6 +88,13 @@ func show_signin(w http.ResponseWriter, r *http.Request) {
 	scv[STATUSCODES["DNF"]] = "&nbsp;&#9745; &#9760;"         // Ride aborted
 	scv[STATUSCODES["finishedOK"]] = "&nbsp;&#9745; &#10004;" // Finished inside 24 hours
 	scv[STATUSCODES["finished24+"]] = "&nbsp;&#9745; &check;" // Finished outside 24 hours
+	return scv
+
+}
+
+func show_signin(w http.ResponseWriter, r *http.Request) {
+
+	scv := status_icon_map()
 
 	sqlx := EntrantSQL
 
@@ -126,8 +132,8 @@ func show_signin(w http.ResponseWriter, r *http.Request) {
 		action = "Full entrant list"
 	}
 
-	fmt.Fprintf(w, `<div class="top"><h2>RBLR1000 - %v  <span id="ticker">&diams;</span></h2></div>`, action)
-	fmt.Fprint(w, `<script>`+timerticker+`</script>`)
+	fmt.Fprintf(w, `<div class="top"><h2 class="link" onclick="reloadPage();" title="Click to refresh">RBLR1000 - %v  <span id="ticker">&diams;</span></h2></div>`, action)
+	//fmt.Fprint(w, `<script>`+timerticker+`</script>`)
 	fmt.Fprint(w, `<main class="signin">`)
 
 	fmt.Fprint(w, `<div id="signinlist">`)
@@ -177,15 +183,8 @@ func show_finals(w http.ResponseWriter, r *http.Request) {
 	scv[STATUSCODES["signedin"]] = "&nbsp;&#9745;&nbsp;" // Signed in at Squires
 	scv[STATUSCODES["riding"]] = "out"                   // Checked-out at Squires
 	scv[STATUSCODES["DNF"]] = "dnf"                      // Ride aborted
-	scv[STATUSCODES["finishedOK"]] = "fin"               // Finished inside 24 hours
+	scv[STATUSCODES["finishedOK"]] = "ok"                // Finished inside 24 hours
 	scv[STATUSCODES["finished24+"]] = "24+"              // Finished outside 24 hours
-
-	MyStatuscodes := []int{
-		STATUSCODES["riding"],
-		STATUSCODES["DNF"],
-		STATUSCODES["finishedOK"],
-		STATUSCODES["finished24+"],
-	}
 
 	var refresher = `<!DOCTYPE html>
 	<html lang="en">
@@ -200,7 +199,7 @@ func show_finals(w http.ResponseWriter, r *http.Request) {
 	sqlx := EntrantSQL
 	sqlx += " WHERE EntrantStatus IN (" + strconv.Itoa(STATUSCODES["finishedOK"]) + "," + strconv.Itoa(STATUSCODES["finished24+"])
 	sqlx += ")"
-	sqlx += " AND CertificateDelivered <> 'Y'"
+	sqlx += " AND Verified <> 'Y'"
 	sqlx += " ORDER BY RiderLast,RiderFirst"
 
 	//fmt.Println(sqlx)
@@ -217,12 +216,11 @@ func show_finals(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprint(w, refresher)
 
-	fmt.Fprint(w, `<div class="top"><h2>RBLR1000 - Verification  <span id="ticker">&diams;</span></h2></div>`)
-	fmt.Fprint(w, `<script>`+timerticker+`</script>`)
+	fmt.Fprint(w, `<div class="top"><h2 class="link" onclick="reloadPage();" title="Click to refresh">RBLR1000 - Verification  <span id="ticker">&diams;</span></h2></div>`)
+	//fmt.Fprint(w, `<script>`+timerticker+`</script>`)
 	fmt.Fprint(w, `<main class="signin">`)
 
 	fmt.Fprint(w, `<div id="signinlist">`)
-	n := 0
 	oe := true
 	itemno := 0
 	for rows.Next() {
@@ -242,53 +240,28 @@ func show_finals(w http.ResponseWriter, r *http.Request) {
 
 		fmt.Fprintf(w, `<span class="name"><strong>%v</strong>, %v</span> `, e.Rider.Last, e.Rider.First)
 
-		fmt.Fprintf(w, `<span class="Route">%v</span> `, e.Route)
+		fmt.Fprintf(w, `<span class="Route">%v-%v</span> `, DisplayRoute(e.Route), scv[e.EntrantStatus])
 
-		fmt.Fprintf(w, `<span><select id="%ves" name="EntrantStatus" data-e="%v" data-fs="%v" data-dnf="%v" onchange="changeFinalStatus(this);">`, itemno, e.EntrantID, STATUSCODES["finishedOK"], STATUSCODES["DNF"])
-		for k, v := range STATUSCODES {
-			if slices.Contains(MyStatuscodes, v) {
-				fmt.Fprintf(w, `<option value="%v"`, v)
-				if e.EntrantStatus == v {
-					fmt.Fprint(w, ` selected`)
-				}
-				fmt.Fprintf(w, `>%v</option>`, k)
+		fmt.Fprintf(w, `<span class="field"><select id="%vcs" name="CertificateAD" data-e="%v" data-ca="%v" onchange="changeFinalStatus(this);">`, itemno, e.EntrantID, e.CertificateAvailable)
+
+		if e.EntrantStatus == STATUSCODES["DNF"] {
+			fmt.Fprint(w, `<option value="" selected>Marked as DNF, no cert</option>`)
+		} else {
+			switch e.CertificateStatus {
+			case "A":
+				fmt.Fprint(w, `<option value="A" selected>Certificate available</option>`)
+				fmt.Fprint(w, `<option value="D">Certificate delivered</option>`)
+			case "N":
+				fmt.Fprint(w, `<option value="" selected>Certificate needed</option>`)
+			default:
+				//
 			}
+			fmt.Fprint(w, `<option value="N">Confirm reprint needed</option>`)
+			fmt.Fprint(w, `<option value="dnf">Ride rejected, no cert</option>`)
+
 		}
 		fmt.Fprint(w, `</select></span>`)
-
-		fmt.Fprintf(w, `<span class="field"><select id="%vcs" name="CertificateAD" data-e="%v" data-ca="%v" onchange="changeCertStatus(this);">`, itemno, e.EntrantID, e.CertificateAvailable)
-
-		ca := e.CertificateAvailable != "N"
-		cd := e.CertificateDelivered != "N"
-		dnf := e.EntrantStatus == STATUSCODES["DNF"]
-		fmt.Fprint(w, `<option value="A-D"`)
-		if ca && !cd && !dnf {
-			fmt.Fprint(w, ` selected`)
-		}
-		fmt.Fprint(w, `>Certificate available</option>`)
-
-		fmt.Fprint(w, `<option value="A+D"`)
-		if ca && cd && !dnf {
-			fmt.Fprint(w, ` selected`)
-		}
-		fmt.Fprint(w, `>Certificate delivered &#10003;</option>`)
-
-		fmt.Fprint(w, `<option value="-A-D"`)
-		if !ca && !dnf {
-			fmt.Fprint(w, ` selected`)
-		}
-		fmt.Fprint(w, `>Certificate NEEDED</option>`)
-
-		fmt.Fprint(w, `<option value="dnf"`)
-		if dnf {
-			fmt.Fprint(w, ` selected`)
-		}
-		fmt.Fprint(w, `>No certificate due</option>`)
-
-		fmt.Fprint(w, `</select></span>`)
-
-		n++
-		fmt.Fprint(w, `</div>`)
+		fmt.Fprint(w, `</div> <!-- signinrow -->`)
 	}
 	fmt.Fprint(w, `</div></main>`)
 	fmt.Fprint(w, `<footer><button class="nav" onclick="loadPage('menu');">Main menu</button>  `)

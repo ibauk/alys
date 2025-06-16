@@ -650,7 +650,7 @@ func update_entrant(w http.ResponseWriter, r *http.Request) {
 		sqlx += "," + xtra
 	}
 	sqlx += " WHERE EntrantID=" + e
-	//fmt.Printf("update_entrant: %v\n", sqlx)
+	fmt.Printf("update_entrant: %v\n", sqlx)
 	_, err = DBH.Exec(sqlx)
 	checkerr(err)
 	fmt.Fprint(w, `{"err":false,"msg":"ok"}`)

@@ -289,24 +289,6 @@ func readCsvFile(filePath string) [][]string {
 	return records
 }
 
-func RouteClass(rc string) string {
-
-	RC := map[string]string{
-		"A": "A-NCW",
-		"B": "B-NAC",
-		"C": "C-SCW",
-		"D": "D-SAC",
-		"E": "E-5CW",
-		"F": "F-5AC",
-	}
-	rca := rc[0:1]
-	val, ok := RC[rca]
-	if !ok {
-		return RC["A"]
-	}
-	return val
-}
-
 func show_loadCSV(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")

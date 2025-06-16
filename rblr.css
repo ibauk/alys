@@ -69,6 +69,9 @@ main.search {
 main.search input {
   font-size: 1.2em;
 }
+main.search select {
+  font-size: .6em;
+}
 main.search button {
   border-radius: 6px;
   font-size: 1.2em;

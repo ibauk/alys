@@ -3,6 +3,7 @@
 const RBLRCSVRE = /^Entrantid,RiderFirst,RiderLast.*RouteClass.*Miles2Squires/;
 
 const StatusCodeCheckedOut = 4; // Out riding
+const StatusCodeDNF = 6;
 
 const myStackItem = "odoStack";
 var timertick;
@@ -38,32 +39,6 @@ function calcMileage() {
   mlgdiv.innerHTML = " " + units + " miles";
 }
 
-function changeCertStatus(sel) {
-  console.log("changeCertStatus called");
-  reloadok = false;
-  sel.classList.add("oi");
-  let ent = sel.getAttribute("data-e");
-  let url = "putentrant?EntrantID=" + ent;
-  let val = sel.value;
-  let ca = "Y";
-  let cd = "Y";
-  switch (val) {
-    case "A-D":
-      cd = "N";
-      break;
-    case "A+D":
-      break;
-    case "-A-D":
-    case "dnf":
-      ca = "N";
-      cd = "N";
-      break;
-  }
-  url += "&CertificateAvailable=" + ca + "&CertificateDelivered=" + cd;
-  stackTransaction(encodeURI(url), sel.id);
-  sendTransactions();
-}
-
 function changeFinalStatus(sel) {
   reloadok = false;
 
@@ -73,35 +48,32 @@ function changeFinalStatus(sel) {
   const latefinisher = 10;
   sel.classList.add("oi");
   let ent = sel.getAttribute("data-e");
-  let div = sel.parentNode.parentNode;
-  let cert = div.querySelector("select[name=CertificateAD");
-  let ca = cert.getAttribute("data-ca");
-  console.log("cFS ca(r) = " + ca);
-  if (ca != "Y" && ca != "N") ca = "N";
-  console.log("cFS ca = " + ca);
-  let status = sel.value;
-  if (status == latefinisher) {
-    ca = "N";
+  let spn = sel.parentNode;
+  console.log("changeFinalStatus is '" + sel.value + "'");
+  let args = "";
+  switch (sel.value) {
+    case "":
+      return;
+    case "A":
+      return;
+    case "N":
+      args = "CertificateStatus=N";
+      break;
+    case "D":
+      args = "CertificateStatus=D";
+      break;
+    case "dnf":
+      args = "EntrantStatus=" + StatusCodeDNF + "&CertificateStatus=N";
+      break;
+    default:
+      return;
   }
-  let url = "putentrant?EntrantID=" + ent + "&EntrantStatus=" + status;
-  let certix = -1;
-
-  if (status != sel.getAttribute("data-fs") || true) {
-    url += "&CertificateAvailable=N";
-    if (status == sel.getAttribute("data-dnf")) {
-      certix = certDNF;
-    } else {
-      url += "&CertificateDelivered=" + ca;
-      certix = certNeeded;
-    }
-  } else {
-    // FinisherOK
-    if (ca != "N") certix = signedout;
-    else certix = certNeeded;
-  }
+  args += "&Verified=Y";
+  let url = "putentrant?EntrantID=" + ent + "&" + args;
   stackTransaction(encodeURI(url), sel.id);
   sendTransactions();
-  if (certix >= 0) cert.options[certix].selected = true;
+  let tick = document.createTextNode("✓");
+  spn.appendChild(tick);
 }
 
 function clickTime() {
@@ -435,7 +407,7 @@ function saveData(obj) {
         xtra = "&FinishTime=&OdoFinish=";
       }
       if (val < StatusCodeCheckedOut) {
-        xtra = "&StartTime=&OdoStart="
+        xtra = "&StartTime=&OdoStart=";
       }
       setTimeout(endEditEntrant, 1000);
       break;
@@ -451,7 +423,13 @@ function saveData(obj) {
   }
 
   let url = encodeURI(
-    "putentrant?EntrantID=" + ent + "&" + obj.name + "=" + encodeURIComponent(val) + xtra
+    "putentrant?EntrantID=" +
+      ent +
+      "&" +
+      obj.name +
+      "=" +
+      encodeURIComponent(val) +
+      xtra
   );
   stackTransaction(url, obj.id);
 
