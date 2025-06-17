@@ -361,7 +361,7 @@ main.upload button:hover {
   width: 5em;
 }
 .JustGivingURL {
-  width: 40rem;
+  width: 30rem;
   max-width: 98vw;
   font-size: 0.8em;
 }
@@ -430,7 +430,7 @@ ul#tabs li a.selected {
 
 .flex {
   display: inline-block;
-  width: 28em;
+  /*width: 18em;*/
   max-width: 98vw;
   border: none;
 }

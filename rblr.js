@@ -5,6 +5,8 @@ const RBLRCSVRE = /^Entrantid,RiderFirst,RiderLast.*RouteClass.*Miles2Squires/;
 const StatusCodeCheckedOut = 4; // Out riding
 const StatusCodeDNF = 6;
 
+const textmodeTick = "✓";
+
 const myStackItem = "odoStack";
 var timertick;
 var reloadok = true;
@@ -48,7 +50,6 @@ function changeFinalStatus(sel) {
   const latefinisher = 10;
   sel.classList.add("oi");
   let ent = sel.getAttribute("data-e");
-  let spn = sel.parentNode;
   console.log("changeFinalStatus is '" + sel.value + "'");
   let args = "";
   switch (sel.value) {
@@ -72,8 +73,7 @@ function changeFinalStatus(sel) {
   let url = "putentrant?EntrantID=" + ent + "&" + args;
   stackTransaction(encodeURI(url), sel.id);
   sendTransactions();
-  let tick = document.createTextNode("✓");
-  spn.appendChild(tick);
+  tickInput(sel);
 }
 
 function clickTime() {
@@ -255,7 +255,7 @@ function nextButtonSlot() {
 function oi(obj) {
   obj.classList.remove("oc");
   obj.classList.add("oi");
-
+  obj.setAttribute("data-changed", 1);
   // autosave handler
   if (obj.timer) {
     clearTimeout(obj.timer);
@@ -454,7 +454,8 @@ function saveOdo(obj) {
   if (obj.timer) {
     clearTimeout(obj.timer);
   }
-
+  if (obj.getAttribute("data-changed") != 1) return;
+  obj.setAttribute("data-changed", 0);
   let timeDisplay = document.querySelector("#timenow");
 
   let ent = obj.getAttribute("data-e");
@@ -471,6 +472,8 @@ function saveOdo(obj) {
     timeDisplay.getAttribute("data-time");
 
   stackTransaction(url, obj.id);
+  sendTransactions();
+  tickInput(obj);
 }
 
 function sendTransactions() {
@@ -580,6 +583,16 @@ function stackTransaction(url, objid) {
   obj.classList.remove("oi");
   obj.classList.add("oc");
   */
+}
+
+function tickInput(obj) {
+  let spn = obj.parentNode;
+  if (!spn) return;
+  let tick = document.createTextNode(textmodeTick);
+  spn.appendChild(tick);
+  let div = spn.parentNode;
+  if (!div) return;
+  div.setAttribute("data-ticked", 1);
 }
 
 function validate_entrant() {
