@@ -238,8 +238,8 @@ func LoadEntrantsFromCSV(csvFile string, certAvail string, zapExisting bool, fil
 		if err != nil {
 			fmt.Printf("%v gives %v with error %v\n", ln[r["Patches"]], patches, err)
 		}
-		fmt.Printf("%v={%v}    ", ln[r["EntrantID"]], ln[r["OdoKms"]])
-		if false {
+		fmt.Printf("%v={%v,'%v'}    ", ln[r["EntrantID"]], ln[r["OdoKms"]], ln[r["RiderRBL"]])
+		if true {
 			res, err := stmt.Exec(ln[r["EntrantID"]], ln[r["Bike"]], ln[r["BikeReg"]], ln[r["RiderFirst"]], ln[r["RiderLast"]],
 				ln[r["Address1"]], ln[r["Address2"]], ln[r["Town"]], ln[r["County"]],
 				ln[r["Postcode"]], ln[r["Country"]], ln[r["RiderIBA"]], ln[r["Phone"]], ln[r["Email"]],

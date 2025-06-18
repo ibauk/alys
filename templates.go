@@ -160,10 +160,6 @@ var SigninScreenSingle = `
 
     <fieldset class="flex field">
         <div class="field">
-	        <label for="FreeCamping">Camping</label>
-	        <input type="checkbox" id="FreeCamping" name="FreeCamping" class="FreeCamping" value="FreeCamping"{{if eq .FreeCamping "Y"}} checked{{end}} onchange="oic(this);" tabindex="15">
-        </div>
-        <div class="field">
             <label for="Tshirt1">T-shirt 1</label> 
             <select id="Tshirt1" name="Tshirt1" class="Tshirt1"   data-chg="1" data-static="1" onchange="ocd(this);" tabindex="16">
 		        <option value=""{{if eq .Tshirt1 ""}} selected{{end}}>no thanks</option>
@@ -190,6 +186,14 @@ var SigninScreenSingle = `
             <label for="Patches">&nbsp; Patches</label> 
             <input type="number" min="0" max="2" id="Patches" name="Patches" class="Patches" value="{{.Patches}}" oninput="oid(this);" onchange="ocd(this);" tabindex="18"> 
         </div>
+
+        <div class="field">
+			<select name="FreeCamping"   data-chg="1" data-static="1" onchange="ocd(this);" tabindex="18">
+			<option value="Y" {{if eq .FreeCamping "Y"}}selected{{end}}>Camping</option>
+			<option value="N" {{if eq .FreeCamping "N"}}selected{{end}}>not camping</option>
+			</select>
+        </div>
+
 
 		<!--
         <div class="field">
@@ -226,8 +230,10 @@ var SigninScreenSingle = `
 					</div>
 			    	{{end}}
 					<div class="field" title="Has this been checked by the verifier?">
-						<label for="Verified">Verified?</label>
-						<input type="checkbox" id="Verified" name="Verified" class="Verified" value="Y"{{if eq .Verified "Y"}} checked{{end}} onchange="oic(this);" tabindex="20">
+						<select id="Verified" name="Verified"  data-chg="1" data-static="1" onchange="ocd(this);" tabindex="20">
+						<option value="Y" {{if eq .Verified "Y"}}selected{{end}}>Verified</option>
+						<option value="N" {{if eq .Verified "N"}}selected{{end}}>not verified</option>
+						</select>
 					</div>
 				{{end}}
             </div>
@@ -243,9 +249,14 @@ var SigninScreenSingle = `
 
 <div class="tabs_area">
 	<ul id="tabs">
+		{{if eq .EditMode "signin"}}
 		<li><a tabindex="21" href="#tab_money">Donations <span id="showmoney"></span></a></li>
 		<li><a tabindex="28" href="tab_notes">Notes <span id="shownotes"></span></a></li>
-		<li><a tabindex="30" href="tab_rider">Rider <span id="shownotes"></span></a></li>
+		{{else}}
+		<li><a tabindex="21" href="tab_notes">Notes <span id="shownotes"></span></a></li>
+		<li><a tabindex="28" href="#tab_money">Donations <span id="showmoney"></span></a></li>
+		{{end}}
+		<li><a tabindex="30" href="tab_rider">Rider <span id="showrider"></span></a></li>
 		<li><a tabindex="43" href="#tab_bike">Bike</a></li>
 		<li><a tabindex="50" href="#tab_nok" id="noktab">Emergency</a></li>
 		<li><a tabindex="54" href="#tab_pillion">Pillion <span id="showpillion"></span></a></li>
@@ -300,15 +311,11 @@ var SigninScreenSingle = `
     </div>
     <div class="field">
 	    <label for="RiderIBA">IBA member</label> 
-	    {{if .Rider.HasIBANumber}}
-	    <input type="text" id="RiderIBA" name="RiderIBA" class="RiderIBA" value="{{.Rider.IBA}}" readonly tabindex="-1">
-	    {{else}}
-	    <input type="checkbox" id="RiderIBA" name="RiderIBA" class="RiderIBA" value="RiderIBA"{{if ne .Rider.IBA ""}} checked{{end}} onchange="oic(this);" tabindex="33">
-	    {{end}}
+	    <input type="text" id="RiderIBA" name="RiderIBA" class="RiderIBA" value="{{if .Rider.HasIBANumber}}{{.Rider.IBA}}{{else}}no{{end}}" readonly tabindex="-1">
     </div>
     <div class="field">
         <label for="RiderRBL">RBL Member</label> 
-        <input type="checkbox" id="RiderRBL" name="RiderRBL" class="RiderRBL" value="RiderRBL"{{if ne .Rider.RBL ""}} checked{{end}} onchange="oic(this);" tabindex="34">
+		<input type="text" id="RiderRBL" name="RiderRBL" class="RiderRBL" value="{{if eq .Rider.RBL "R"}}Rider's Branch{{else if eq .Rider.RBL "L"}}ordinary{{else}}no	{{end}}" readonly tabindex="-1">
     </div>
     <div class="field">
         <label for="RiderEmail">Email</label> 
@@ -390,15 +397,11 @@ var SigninScreenSingle = `
     </div>
     <div class="field">
 	    <label for="PillionIBA">IBA member</label> 
-	    {{if .Pillion.HasIBANumber}}
-	    <input type="text" id="PillionIBA" name="PillionIBA" class="PillionIBA" value="{{.Pillion.IBA}}" readonly tabindex="-1">
-	    {{else}}
-	    <input type="checkbox" id="PillionIBA" name="PillionIBA" class="PillionIBA" value="PillionIBA"{{if ne .Pillion.IBA ""}} checked{{end}} onchange="oic(this);" tabindex="57">
-	    {{end}}
+	    <input type="text" id="PillionIBA" name="PillionIBA" class="PillionIBA" value="{{if .Pillion.HasIBANumber}}{{.Pillion.IBA}}{{else}}no{{end}}" readonly tabindex="-1">
     </div>
     <div class="field">
         <label for="PillionRBL">RBL Member</label> 
-        <input type="checkbox" id="PillionRBL" name="PillionRBL" class="PillionRBL" value="PillionRBL"{{if ne .Pillion.RBL ""}} checked{{end}} onchange="oic(this);" tabindex="58">
+		<input type="text" id="PillionRBL" name="PillionRBL" class="PillionRBL" value="{{if eq .Pillion.RBL "R"}}Rider's Branch{{else if eq .Pillion.RBL "L"}}ordinary{{else}}no	{{end}}" readonly tabindex="-1">
     </div>
     <div class="field">
         <label for="PillionEmail">Email</label> 
