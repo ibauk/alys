@@ -166,6 +166,7 @@ func main() {
 	http.HandleFunc("/stats", show_stats)
 	http.HandleFunc("/signin", show_signin)
 	http.HandleFunc("/finals", show_finals)
+	http.HandleFunc("/justgpsn", extractJGPSN)
 	http.HandleFunc("/edit", edit_entrant)
 	http.HandleFunc("/export", export_finishers)
 	http.HandleFunc("/checkin", check_in)
@@ -650,7 +651,7 @@ func update_entrant(w http.ResponseWriter, r *http.Request) {
 		sqlx += "," + xtra
 	}
 	sqlx += " WHERE EntrantID=" + e
-	fmt.Printf("update_entrant: %v\n", sqlx)
+	//fmt.Printf("update_entrant: %v\n", sqlx)
 	_, err = DBH.Exec(sqlx)
 	checkerr(err)
 	fmt.Fprint(w, `{"err":false,"msg":"ok"}`)

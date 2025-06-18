@@ -144,7 +144,7 @@ func show_odo(w http.ResponseWriter, r *http.Request, showstart bool, fullaccess
 			pch = "start odo"
 			val = OdoStart
 		}
-		fmt.Fprintf(w, `<span><input id="%v" data-e="%v" data-st="%v" data-so="%v" data-oc="%v" name="%v" type="number" class="bignumber" oninput="oi(this);" onchange="oc(this);" onblur="oc(this);" min="0" placeholder="%v" value="%v" data-minod="%v" data-maxod="%v"></span>`, itemno, EntrantID, StartTime, OdoStart, OdoCounts, odoname, pch, val, minOdoDiff, maxOdoDiff)
+		fmt.Fprintf(w, `<span><input id="%v" data-e="%v" data-st="%v" data-so="%v" data-oc="%v" name="%v" type="number" class="bignumber" oninput="oi(this);" onchange="oc(this);" onblur="oc(this);" min="0" placeholder="%v" value="%v" data-minod="%v" data-maxod="%v" ondblclick="explainOdo(this);" autocomplete="off"></span>`, itemno, EntrantID, StartTime, OdoStart, OdoCounts, odoname, pch, val, minOdoDiff, maxOdoDiff)
 		fmt.Fprint(w, `</div>`)
 
 	}

@@ -59,6 +59,16 @@ type justg struct {
 	pu  int
 }
 
+func extractJGPSN(w http.ResponseWriter, r *http.Request) {
+
+	jgurl := r.FormValue("jgurl")
+	if jgurl == "" {
+		fmt.Fprint(w, `{"err":true,"msg":""}`)
+		return
+	}
+	jgpsn := parseJGPageShortName(jgurl)
+	fmt.Fprintf(w, `{"err":false,"msg":"%v"}`, jgpsn)
+}
 func rebuildJGPages() {
 
 	rcsok := strings.Split(getStringFromDB("SELECT JustGCharities FROM config", ""), ",")

@@ -118,7 +118,6 @@ type Entrant = struct {
 	Patches              int
 	EditMode             string
 	Notes                string
-	JustGivingPSN        string
 	Verified             string
 	CertificateStatus    string
 	StartTimeOnly        string
@@ -312,6 +311,10 @@ var SigninScreenSingle = `
 	    <label for="JustGivingURL">JustGiving URL</label> 
         <input id="JustGivingURL" name="JustGivingURL" class="JustGivingURL" value="{{.FundsRaised.JustGivingURL}}" oninput="oid(this);" onchange="ocd(this);" tabindex="27" title="{{.FundsRaised.JustGivingURL}}">
     </div>
+    <div class="field" title="{{.FundsRaised.JustGivingPSN}}">
+	    <label for="JustGivingPSN">JustGiving PSN</label> 
+        <input id="JustGivingPSN" name="JustGivingPSN" class="JustGivingPSN" value="{{.FundsRaised.JustGivingPSN}}" oninput="oid(this);" onchange="ocd(this);" tabindex="27" title="{{.FundsRaised.JustGivingPSN}}">
+    </div>
 </fieldset>
 
 
@@ -453,15 +456,6 @@ var SigninScreenSingle = `
 <script>` + my_tabs_js + ` setupTabs();showMoneyAmt();showNotesPresent();showPillionPresent();calcMileage();validate_entrant();setInterval(sendTransactions,1000);</script>
 `
 
-func FixJustGivingURL(x string) string {
-
-	xl := len(x)
-	if xl > len(JGV) && x[0:len(JGV)] == JGV {
-		return x
-	}
-	return JGV + x
-}
-
 func TimeOnly(dt string) string {
 
 	dtx := strings.Split(dt, "T")
@@ -472,7 +466,7 @@ func TimeOnly(dt string) string {
 }
 func ScanEntrant(rows *sql.Rows, e *Entrant) {
 
-	err := rows.Scan(&e.EntrantID, &e.Rider.First, &e.Rider.Last, &e.Rider.IBA, &e.Rider.RBL, &e.Rider.Email, &e.Rider.Phone, &e.Rider.Address1, &e.Rider.Address2, &e.Rider.Town, &e.Rider.County, &e.Rider.Postcode, &e.Rider.Country, &e.Pillion.First, &e.Pillion.Last, &e.Pillion.IBA, &e.Pillion.RBL, &e.Pillion.Email, &e.Pillion.Phone, &e.Pillion.Address1, &e.Pillion.Address2, &e.Pillion.Town, &e.Pillion.County, &e.Pillion.Postcode, &e.Pillion.Country, &e.Bike, &e.BikeReg, &e.NokName, &e.NokRelation, &e.NokPhone, &e.OdoStart, &e.StartTime, &e.OdoFinish, &e.FinishTime, &e.EntrantStatus, &e.OdoCounts, &e.Route, &e.FundsRaised.EntryDonation, &e.FundsRaised.SquiresCash, &e.FundsRaised.SquiresCheque, &e.FundsRaised.RBLRAccount, &e.FundsRaised.JustGivingAmt, &e.FundsRaised.JustGivingURL, &e.Tshirt1, &e.Tshirt2, &e.Patches, &e.FreeCamping, &e.CertificateDelivered, &e.CertificateAvailable, &e.Notes, &e.JustGivingPSN, &e.Verified, &e.CertificateStatus)
+	err := rows.Scan(&e.EntrantID, &e.Rider.First, &e.Rider.Last, &e.Rider.IBA, &e.Rider.RBL, &e.Rider.Email, &e.Rider.Phone, &e.Rider.Address1, &e.Rider.Address2, &e.Rider.Town, &e.Rider.County, &e.Rider.Postcode, &e.Rider.Country, &e.Pillion.First, &e.Pillion.Last, &e.Pillion.IBA, &e.Pillion.RBL, &e.Pillion.Email, &e.Pillion.Phone, &e.Pillion.Address1, &e.Pillion.Address2, &e.Pillion.Town, &e.Pillion.County, &e.Pillion.Postcode, &e.Pillion.Country, &e.Bike, &e.BikeReg, &e.NokName, &e.NokRelation, &e.NokPhone, &e.OdoStart, &e.StartTime, &e.OdoFinish, &e.FinishTime, &e.EntrantStatus, &e.OdoCounts, &e.Route, &e.FundsRaised.EntryDonation, &e.FundsRaised.SquiresCash, &e.FundsRaised.SquiresCheque, &e.FundsRaised.RBLRAccount, &e.FundsRaised.JustGivingAmt, &e.FundsRaised.JustGivingURL, &e.Tshirt1, &e.Tshirt2, &e.Patches, &e.FreeCamping, &e.CertificateDelivered, &e.CertificateAvailable, &e.Notes, &e.FundsRaised.JustGivingPSN, &e.Verified, &e.CertificateStatus)
 	checkerr(err)
 
 	e.Rider.HasIBANumber, _ = regexp.Match(`\d{1,6}`, []byte(e.Rider.IBA))

@@ -155,6 +155,42 @@ function fix2(n) {
   return n;
 }
 
+function extractJustGPSN(obj) {
+  let url = "/justgpsn?jgurl=" + encodeURIComponent(obj.value);
+  let psn = document.getElementById("JustGivingPSN");
+  if (!psn) return;
+
+  if (psn.value != "") return;
+
+  fetch(url)
+    .then((response) => {
+      if (!response.ok) {
+        // Handle HTTP errors
+        return;
+        //        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      if (data.err) {
+        // Handle JSON error field
+        console.error(`Error: ${data.msg}`);
+      } else {
+        // Process the data if no error
+        //if (errlog){errlog.innerHTML="Hello sailor: "+JSON.stringify(data)}
+        console.log("Data:", data);
+        psn.value = data.msg;
+        saveData(psn);
+      }
+    })
+    .catch((error) => {
+      // Handle network or other errors
+      //if (errlog) {errlog.innerHTML="ERROR CAUGHT"}
+      console.error("Fetch error:", error);
+      return;
+    });
+}
+
 function getRallyTime(dt) {
   let yy = dt.getFullYear();
   let mm = dt.getMonth() + 1;
@@ -419,6 +455,7 @@ function saveData(obj) {
       calcMileage();
       break;
     case "JustGivingURL":
+      extractJustGPSN(obj);
       break;
   }
 
@@ -474,7 +511,7 @@ function saveOdo(obj) {
   stackTransaction(url, obj.id);
   sendTransactions();
   if (obj.name == "f") {
-    let diff = parseInt(obj.value) - parseInt(obj.getAttribute('data-so'));
+    let diff = parseInt(obj.value) - parseInt(obj.getAttribute("data-so"));
     if (
       diff < obj.getAttribute("data-minod") ||
       diff > obj.getAttribute("data-maxod")
@@ -483,6 +520,20 @@ function saveOdo(obj) {
     else obj.classList.remove("badodo");
   }
   tickInput(obj);
+}
+
+function explainOdo(obj) {
+  let msg = "";
+  if (obj.name == "s") {
+    msg = "Start " + obj.value;
+  } else {
+    let so = parseInt(obj.getAttribute("data-so"));
+    let fo = parseInt(obj.value);
+    msg = "Start = " + so;
+    msg = msg + " Finish = " + fo;
+    msg = msg + "\nDelta = " + (fo - so);
+  }
+  alert(msg);
 }
 
 function sendTransactions() {
