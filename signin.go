@@ -62,6 +62,7 @@ func edit_entrant(w http.ResponseWriter, r *http.Request) {
 
 		ScanEntrant(rows, &e)
 		e.EditMode = mode
+		e.MinDonation = getIntegerFromDB("SELECT MinDonation FROM config", 1)
 		err = sss.Execute(w, e)
 		checkerr(err)
 

@@ -535,7 +535,7 @@ func show_config(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 	if rows.Next() {
 		var c ConfigRecord
-		err = rows.Scan(&c.StartTime, &c.StartCohortMins, &c.ExtraCohorts, &c.RallyStatus)
+		err = rows.Scan(&c.StartTime, &c.StartCohortMins, &c.ExtraCohorts, &c.RallyStatus, &c.MinDonation, &c.JustGCharities, &c.MinOdoDiff, &c.MaxOdoDiff)
 		checkerr(err)
 		err = sss.Execute(w, c)
 		checkerr(err)

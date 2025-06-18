@@ -473,6 +473,15 @@ function saveOdo(obj) {
 
   stackTransaction(url, obj.id);
   sendTransactions();
+  if (obj.name == "f") {
+    let diff = parseInt(obj.value) - parseInt(obj.getAttribute('data-so'));
+    if (
+      diff < obj.getAttribute("data-minod") ||
+      diff > obj.getAttribute("data-maxod")
+    )
+      obj.classList.add("badodo");
+    else obj.classList.remove("badodo");
+  }
   tickInput(obj);
 }
 
@@ -532,9 +541,15 @@ function sendTransactions() {
 
 function showMoneyAmt() {
   let amt = addMoney();
+  let mind = document.getElementById("MinDonation");
   let sf = document.getElementById("showmoney");
   if (sf) {
     sf.innerHTML = "£" + amt;
+    if (mind) {
+      let sfp = sf.parentNode;
+      if (amt < mind.value) sfp.classList.add("notblank");
+      else sfp.classList.remove("notblank);");
+    }
   }
 }
 
@@ -607,6 +622,7 @@ function validate_entrant() {
     "NokPhone",
   ];
   let noktabFields = ["NokName", "NokRelation", "NokPhone"];
+  let ridertabFields = ["RiderFirst", "RiderLast", "RiderEmail", "RiderPhone"];
 
   mustFields.forEach((fld) => {
     let f = document.getElementById(fld);
@@ -623,5 +639,16 @@ function validate_entrant() {
   if (noktab) {
     if (nokAlert) noktab.classList.add("notblank");
     else noktab.classList.remove("notblank");
+  }
+
+  let riderAlert = false;
+  ridertabFields.forEach((fld) => {
+    let f = document.getElementById(fld);
+    riderAlert = riderAlert || f.value == "";
+  });
+  let ridertab = document.getElementById("ridertab");
+  if (ridertab) {
+    if (riderAlert) ridertab.classList.add("notblank");
+    else ridertab.classList.remove("notblank");
   }
 }

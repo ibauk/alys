@@ -136,8 +136,8 @@ main.frontmenu button {
   border-radius: 6px;
   font-size: 1.1em;
   padding: 0.2rem 1em 0.2rem 1em;
-  width: 15em;
-  max-width: 98%;
+  width: 90%;
+  max-width: 30rem;
   margin: 0 auto 1em auto;
 }
 main.frontmenu button:hover {
@@ -181,15 +181,15 @@ main.frontmenu button:hover {
   display: table;
   overflow: hidden;
 }
-#odolist div {
+#odolist .odorow {
   display: table-row;
   width: 100%;
 }
-#odolist span {
+#odolist .odorow span {
   display: table-cell;
   padding: 0 0.2em 0.2em 0.1em;
 }
-#odolist span input {
+#odolist .odorow span input {
   vertical-align: middle;
   font-size: 0.9em;
 }
@@ -361,8 +361,7 @@ main.upload button:hover {
   width: 5em;
 }
 .JustGivingURL {
-  width: 30rem;
-  max-width: 98vw;
+  width: 20rem;
   font-size: 0.8em;
 }
 
@@ -377,6 +376,10 @@ main.upload button:hover {
   font-size: 14pt;
 }
 
+.address {
+  display: flex;
+  flex-direction: column;
+}
 .tabContent {
   border: 5px solid var(--solid-border);
   border-radius: 5px;
@@ -499,6 +502,13 @@ input.ExtraCohorts {
   width: 2em;
 }
 
+input.MinDonation {
+  width: 4em;
+}
+input.MinOdoDiff,
+input.MaxOdoDiff {
+  width: 4em;
+}
 input:read-only {
   background-color: inherit;
   border: none;
@@ -525,6 +535,7 @@ footer {
 }
 
 .about {
+  width: 98%;
   max-width: 30em;
   margin: 1em auto 0 auto;
   border: double 6px;
@@ -562,4 +573,8 @@ h2.shop {
   font-size: 0.7em;
   font-style: italic;
   text-align: right;
+}
+
+.badodo {
+  background-color: rgb(238, 158, 158);
 }

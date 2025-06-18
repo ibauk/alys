@@ -119,6 +119,8 @@ func show_odo(w http.ResponseWriter, r *http.Request, showstart bool, fullaccess
 	fmt.Fprint(w, `<div id="odolist">`)
 	oe := true
 	itemno := 0
+	minOdoDiff := getIntegerFromDB("SELECT MinOdoDiff FROM config", 0)
+	maxOdoDiff := getIntegerFromDB("SELECT MaxOdoDiff FROM config", 0)
 	for rows.Next() {
 		var EntrantID int
 		var RiderFirst, RiderLast, OdoStart, StartTime, OdoFinish, FinishTime string
@@ -142,7 +144,7 @@ func show_odo(w http.ResponseWriter, r *http.Request, showstart bool, fullaccess
 			pch = "start odo"
 			val = OdoStart
 		}
-		fmt.Fprintf(w, `<span><input id="%v" data-e="%v" data-st="%v" data-so="%v" data-oc="%v" name="%v" type="number" class="bignumber" oninput="oi(this);" onchange="oc(this);" onblur="oc(this);" min="0" placeholder="%v" value="%v"></span>`, itemno, EntrantID, StartTime, OdoStart, OdoCounts, odoname, pch, val)
+		fmt.Fprintf(w, `<span><input id="%v" data-e="%v" data-st="%v" data-so="%v" data-oc="%v" name="%v" type="number" class="bignumber" oninput="oi(this);" onchange="oc(this);" onblur="oc(this);" min="0" placeholder="%v" value="%v" data-minod="%v" data-maxod="%v"></span>`, itemno, EntrantID, StartTime, OdoStart, OdoCounts, odoname, pch, val, minOdoDiff, maxOdoDiff)
 		fmt.Fprint(w, `</div>`)
 
 	}

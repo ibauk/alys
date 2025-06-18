@@ -4,15 +4,13 @@ CREATE TABLE IF NOT EXISTS "config" (
 	"StartTime"	TEXT NOT NULL DEFAULT '05:00',
 	"StartCohortMins"	INTEGER NOT NULL DEFAULT 10,
 	"ExtraCohorts"	INTEGER NOT NULL DEFAULT 3,
-	"RallyStatus"	TEXT NOT NULL DEFAULT 'S'
+	"RallyStatus"	TEXT NOT NULL DEFAULT 'S',
+	"MinDonation"	INTEGER NOT NULL DEFAULT 50,
+	"JustGCharities"	TEXT NOT NULL DEFAULT 219279,
+	"MinOdoDiff"	INTEGER NOT NULL DEFAULT 500,
+	"MaxOdoDiff"	INTEGER NOT NULL DEFAULT 2000
 );
-INSERT INTO config (DBInitialised) VALUES(1);
-CREATE TABLE IF NOT EXISTS "rallyparams" (
-	"RallyTitle" TEXT,
-	"StartTime" TEXT,
-	"FinishTime" TEXT
-);
-INSERT INTO rallyparams(RallyTitle,StartTime,FinishTime) VALUES('RBLR1000','2025-06-7T05:00','2025-06-08T12:00');
+INSERT INTO config(DBInitialised) VALUES(1);
 CREATE TABLE IF NOT EXISTS "entrants" (
 	"EntrantID"	INTEGER NOT NULL,
 	"Bike"	TEXT DEFAULT 'motorbike',
@@ -26,7 +24,7 @@ CREATE TABLE IF NOT EXISTS "entrants" (
 	"RiderPostcode"	TEXT,
 	"RiderCountry"	TEXT DEFAULT 'United Kingdom',
 	"RiderIBA"	TEXT,
-	"RiderRBL" 	TEXT,
+	"RiderRBL"	TEXT,
 	"RiderPhone"	TEXT,
 	"RiderEmail"	TEXT,
 	"PillionFirst"	TEXT,
@@ -66,7 +64,27 @@ CREATE TABLE IF NOT EXISTS "entrants" (
 	"FreeCamping"	TEXT NOT NULL DEFAULT 'N',
 	"CertificateDelivered"	TEXT NOT NULL DEFAULT 'N',
 	"CertificateAvailable"	TEXT NOT NULL DEFAULT 'N',
-	"Notes" TEXT,
+	"Notes"	TEXT,
+	"JustGivingPSN"	TEXT,
+	"Verified"	TEXT NOT NULL DEFAULT 'N',
+	"CertificateStatus"	TEXT NOT NULL DEFAULT 'N',
 	PRIMARY KEY("EntrantID")
 );
+CREATE TABLE IF NOT EXISTS "justgs" (
+	"PageShortName"	TEXT NOT NULL,
+	"NumUsers"	INTEGER NOT NULL DEFAULT 0,
+	"FundsRaised"	INTEGER NOT NULL DEFAULT 0,
+	"PerUser"	INTEGER NOT NULL DEFAULT 0,
+	"PageValid"	INTEGER NOT NULL DEFAULT 1,
+	"CharityReg"	TEXT NOT NULL DEFAULT '',
+	"CharityName"	TEXT NOT NULL DEFAULT '',
+	PRIMARY KEY("PageShortName")
+);
+CREATE TABLE IF NOT EXISTS "rallyparams" (
+	"RallyTitle"	TEXT,
+	"StartTime"	TEXT,
+	"FinishTime"	TEXT,
+	"DBVersion"	INTEGER DEFAULT 21
+);
+INSERT INTO rallyparams (RallyTitle,StartTime,FinishTime) VALUES('RBLR1000','2026-06-06T05:00','2026-06-07T12:00');
 COMMIT;

@@ -17,9 +17,13 @@ type ConfigRecord struct {
 	StartCohortMins int
 	ExtraCohorts    int
 	RallyStatus     string
+	MinDonation     int
+	JustGCharities  string
+	MinOdoDiff      int
+	MaxOdoDiff      int
 }
 
-const ConfigSQL = `SELECT ifnull(StartTime,'05:00'),ifnull(StartCohortMins,10),ifnull(ExtraCohorts,3),ifnull(RallyStatus,'S') FROM config`
+const ConfigSQL = `SELECT ifnull(StartTime,'05:00'),ifnull(StartCohortMins,10),ifnull(ExtraCohorts,3),ifnull(RallyStatus,'S'),ifnull(MinDonation,50),ifnull(JustGCharities,''),ifnull(MinOdoDiff,0),ifnull(MaxOdoDiff,0) FROM config`
 
 const ConfigScreen = `
 <div class="ConfigScreen">
@@ -44,6 +48,22 @@ const ConfigScreen = `
 		<label for="RallyStatusF">Check back in and finish after the ride</label>
 	</div>
 	-->
+	<div class="field">
+		<label for="MinDonation">Minimum donation to Poppy appeal</label>
+		<input type="number" id="MinDonation" name="MinDonation" class="MinDonation" value="{{.MinDonation}}" oninput="oidcfg(this);" onchange="ocdcfg(this);">
+	</div>
+	<div class="field" title="Comma-separated list of acceptable RC numbers">
+		<label for="JustGCharities">Poppy appeal Reg. Charity #</label>
+		<input type="text" id="JustGCharities" name="JustGCharities" class="JustGCharities" value="{{.JustGCharities}}" oninput="oidcfg(this);" onchange="ocdcfg(this);">
+	</div>
+	<div class="field">
+		<label for="MinOdoDiff">Minimum Odo difference</label>
+		<input type="number" id="MinOdoDiff" name="MinOdoDiff" class="MinOdoDiff" value="{{.MinOdoDiff}}" oninput="oidcfg(this);" onchange="ocdcfg(this);">
+	</div>
+	<div class="field">
+		<label for="MaxOdoDiff">Maximum Odo difference</label>
+		<input type="number" id="MaxOdoDiff" name="MaxOdoDiff" class="MaxOdoDiff" value="{{.MaxOdoDiff}}" oninput="oidcfg(this);" onchange="ocdcfg(this);">
+	</div>
 </div>
 `
 
@@ -70,6 +90,7 @@ type Money = struct {
 	RBLRAccount   string
 	JustGivingAmt string
 	JustGivingURL string
+	JustGivingPSN string
 }
 
 type Entrant = struct {
@@ -102,6 +123,7 @@ type Entrant = struct {
 	CertificateStatus    string
 	StartTimeOnly        string
 	FinishTimeOnly       string
+	MinDonation          int
 }
 
 const EntrantSQL = `SELECT EntrantID,ifnull(RiderFirst,''),ifnull(RiderLast,''),ifnull(RiderIBA,''),ifnull(RiderRBL,''),ifnull(RiderEmail,''),ifnull(RiderPhone,'')
@@ -121,6 +143,7 @@ var SigninScreenSingle = `
 <div class="SigninScreenSingle">
 <input type="hidden" id="EntrantID" name="EntrantID" value="{{.EntrantID}}">
 <input type="hidden" id="EditMode" name="EditMode" value="{{.EditMode}}">
+<input type="hidden" id="MinDonation" value="{{.MinDonation}}">
 
 <fieldset class="tabContent" id="tab_main"><legend>&nbsp; {{.Rider.First}} {{.Rider.Last}} &nbsp;</legend>
     <div class="field special" title="Changing status closes the form">
@@ -256,7 +279,7 @@ var SigninScreenSingle = `
 		<li><a tabindex="21" href="tab_notes">Notes <span id="shownotes"></span></a></li>
 		<li><a tabindex="28" href="#tab_money">Donations <span id="showmoney"></span></a></li>
 		{{end}}
-		<li><a tabindex="30" href="tab_rider">Rider <span id="showrider"></span></a></li>
+		<li><a tabindex="30" href="tab_rider" id="ridertab">Rider <span id="showrider"></span></a></li>
 		<li><a tabindex="43" href="#tab_bike">Bike</a></li>
 		<li><a tabindex="50" href="#tab_nok" id="noktab">Emergency</a></li>
 		<li><a tabindex="54" href="#tab_pillion">Pillion <span id="showpillion"></span></a></li>
@@ -285,7 +308,7 @@ var SigninScreenSingle = `
 	    <label for="JustGivingAmt">JustGiving</label> 
         <input title="Amount raised using JustGiving page" id="JustGivingAmt" name="JustGivingAmt" class="JustGivingAmt money" value="{{.FundsRaised.JustGivingAmt}}" oninput="moneyChg(this);" onchange="ocd(this);" placeholder="0.00" tabindex="26" title="{{.FundsRaised.JustGivingAmt}}">
     </div>
-    <div class="field">
+    <div class="field" title="{{.FundsRaised.JustGivingURL}}">
 	    <label for="JustGivingURL">JustGiving URL</label> 
         <input id="JustGivingURL" name="JustGivingURL" class="JustGivingURL" value="{{.FundsRaised.JustGivingURL}}" oninput="oid(this);" onchange="ocd(this);" tabindex="27" title="{{.FundsRaised.JustGivingURL}}">
     </div>
@@ -310,14 +333,6 @@ var SigninScreenSingle = `
         <input id="RiderFirst" name="RiderFirst" class="RiderFirst" value="{{.Rider.First}}" oninput="oid(this);" onchange="ocd(this);" tabindex="32">
     </div>
     <div class="field">
-	    <label for="RiderIBA">IBA member</label> 
-	    <input type="text" id="RiderIBA" name="RiderIBA" class="RiderIBA" value="{{if .Rider.HasIBANumber}}{{.Rider.IBA}}{{else}}no{{end}}" readonly tabindex="-1">
-    </div>
-    <div class="field">
-        <label for="RiderRBL">RBL Member</label> 
-		<input type="text" id="RiderRBL" name="RiderRBL" class="RiderRBL" value="{{if eq .Rider.RBL "R"}}Rider's Branch{{else if eq .Rider.RBL "L"}}ordinary{{else}}no	{{end}}" readonly tabindex="-1">
-    </div>
-    <div class="field">
         <label for="RiderEmail">Email</label> 
         <input id="RiderEmail" name="RiderEmail" class="RiderEmail" value="{{.Rider.Email}}" oninput="oid(this);" onchange="ocd(this);" tabindex="35">
     </div>
@@ -326,14 +341,21 @@ var SigninScreenSingle = `
         <input id="RiderPhone" name="RiderPhone" class="RiderPhone" value="{{.Rider.Phone}}" oninput="oid(this);" onchange="ocd(this);" tabindex="36">
     </div>
 
-    <br>
+    <div class="field">
+	    <label for="RiderIBA">IBA member</label> 
+	    <input type="text" id="RiderIBA" name="RiderIBA" class="RiderIBA" value="{{if .Rider.HasIBANumber}}{{.Rider.IBA}}{{else}}no{{end}}" readonly tabindex="-1">
+    </div>
+    <div class="field">
+        <label for="RiderRBL">RBL Member</label> 
+		<input type="text" id="RiderRBL" name="RiderRBL" class="RiderRBL" value="{{if eq .Rider.RBL "R"}}Rider's Branch{{else if eq .Rider.RBL "L"}}ordinary{{else}}no	{{end}}" readonly tabindex="-1">
+    </div>
 
     <div class="field">
-        <fieldset><legend class="small">Address</legend>
-            <input id="RiderAddress1" name="RiderAddress1" class="RiderAddress1"  value="{{.Rider.Address1}}" oninput="oid(this);" onchange="ocd(this);" tabindex="37"><br>
-            <input id="RiderAddress2" name="RiderAddress2" class="RiderAddress2"  value="{{.Rider.Address2}}" oninput="oid(this);" onchange="ocd(this);" tabindex="38"><br>
-            <input id="RiderTown" name="RiderTown" class="RiderTown" placeholder="town" value="{{.Rider.Town}}" oninput="oid(this);" onchange="ocd(this);" tabindex="39"><br>
-            <input id="RiderCounty" name="RiderCounty" class="RiderCounty" placeholder="county" value="{{.Rider.County}}" oninput="oid(this);" onchange="ocd(this);" tabindex="40"><br>
+        <fieldset class="address"><legend class="small">Address</legend>
+            <input id="RiderAddress1" name="RiderAddress1" class="RiderAddress1"  value="{{.Rider.Address1}}" oninput="oid(this);" onchange="ocd(this);" tabindex="37">
+            <input id="RiderAddress2" name="RiderAddress2" class="RiderAddress2"  value="{{.Rider.Address2}}" oninput="oid(this);" onchange="ocd(this);" tabindex="38">
+            <input id="RiderTown" name="RiderTown" class="RiderTown" placeholder="town" value="{{.Rider.Town}}" oninput="oid(this);" onchange="ocd(this);" tabindex="39">
+            <input id="RiderCounty" name="RiderCounty" class="RiderCounty" placeholder="county" value="{{.Rider.County}}" oninput="oid(this);" onchange="ocd(this);" tabindex="40">
 	        <input id="RiderPostcode" name="RiderPostcode" class="RiderPostcode" placeholder="postcode" value="{{.Rider.Postcode}}" oninput="oid(this);" onchange="ocd(this);" tabindex="41">
             <input id="RiderCountry" name="RiderCountry" class="RiderCountry" placeholder="country" value="{{.Rider.Country}}" oninput="oid(this);" onchange="ocd(this);" tabindex="42">
         </fieldset>
@@ -358,10 +380,9 @@ var SigninScreenSingle = `
 	    </fieldset>
     </div>
 
-    <br>
 
     <div class="field">
-        <label for="OdoStart">Odo @ start</label> 
+        <label for="OdoStart"> Odo @ start</label> 
         <input id="OdoStart" name="OdoStart" class="OdoStart" value="{{.OdoStart}}" oninput="oid(this);" onchange="ocd(this);" tabindex="48">
     </div>
     <div class="field">
@@ -396,14 +417,6 @@ var SigninScreenSingle = `
         <input id="PillionFirst" name="PillionFirst" class="PillionFirst" value="{{.Pillion.First}}" oninput="showPillionPresent();" onchange="ocd(this);" tabindex="56">
     </div>
     <div class="field">
-	    <label for="PillionIBA">IBA member</label> 
-	    <input type="text" id="PillionIBA" name="PillionIBA" class="PillionIBA" value="{{if .Pillion.HasIBANumber}}{{.Pillion.IBA}}{{else}}no{{end}}" readonly tabindex="-1">
-    </div>
-    <div class="field">
-        <label for="PillionRBL">RBL Member</label> 
-		<input type="text" id="PillionRBL" name="PillionRBL" class="PillionRBL" value="{{if eq .Pillion.RBL "R"}}Rider's Branch{{else if eq .Pillion.RBL "L"}}ordinary{{else}}no	{{end}}" readonly tabindex="-1">
-    </div>
-    <div class="field">
         <label for="PillionEmail">Email</label> 
         <input id="PillionEmail" name="PillionEmail" class="PillionEmail" value="{{.Pillion.Email}}" oninput="oid(this);" onchange="ocd(this);" tabindex="59">
     </div>
@@ -411,15 +424,22 @@ var SigninScreenSingle = `
         <label for="PillionPhone">Mobile</label> 
         <input id="PillionPhone" name="PillionPhone" class="PillionPhone" value="{{.Pillion.Phone}}" oninput="oid(this);" onchange="ocd(this);" tabindex="60">
     </div>
+    <div class="field">
+	    <label for="PillionIBA">IBA member</label> 
+	    <input type="text" id="PillionIBA" name="PillionIBA" class="PillionIBA" value="{{if .Pillion.HasIBANumber}}{{.Pillion.IBA}}{{else}}no{{end}}" readonly tabindex="-1">
+    </div>
+    <div class="field">
+        <label for="PillionRBL">RBL Member</label> 
+		<input type="text" id="PillionRBL" name="PillionRBL" class="PillionRBL" value="{{if eq .Pillion.RBL "R"}}Rider's Branch{{else if eq .Pillion.RBL "L"}}ordinary{{else}}no	{{end}}" readonly tabindex="-1">
+    </div>
 
-    <br>
 
     <div class="field"> 
-        <fieldset><legend class="small">Address</legend>
-            <input id="PillionAddress1" name="PillionAddress1" class="PillionAddress1"  value="{{.Pillion.Address1}}" oninput="oid(this);" onchange="ocd(this);" tabindex="61"><br>
-            <input id="PillionAddress2" name="PillionAddress2" class="PillionAddress2"  value="{{.Pillion.Address2}}" oninput="oid(this);" onchange="ocd(this);" tabindex="62"><br>
-            <input id="PillionTown" name="PillionTown" class="PillionTown" placeholder="town" value="{{.Pillion.Town}}" oninput="oid(this);" onchange="ocd(this);" tabindex="63"><br>
-            <input id="PillionCounty" name="PillionCounty" class="PillionCounty" placeholder="county" value="{{.Pillion.County}}" oninput="oid(this);" onchange="ocd(this);" tabindex="64"><br>
+        <fieldset class="address"><legend class="small">Address</legend>
+            <input id="PillionAddress1" name="PillionAddress1" class="PillionAddress1"  value="{{.Pillion.Address1}}" oninput="oid(this);" onchange="ocd(this);" tabindex="61">
+            <input id="PillionAddress2" name="PillionAddress2" class="PillionAddress2"  value="{{.Pillion.Address2}}" oninput="oid(this);" onchange="ocd(this);" tabindex="62">
+            <input id="PillionTown" name="PillionTown" class="PillionTown" placeholder="town" value="{{.Pillion.Town}}" oninput="oid(this);" onchange="ocd(this);" tabindex="63">
+            <input id="PillionCounty" name="PillionCounty" class="PillionCounty" placeholder="county" value="{{.Pillion.County}}" oninput="oid(this);" onchange="ocd(this);" tabindex="64">
 	        <input id="PillionPostcode" name="PillionPostcode" class="PillionPostcode" placeholder="postcode" value="{{.Pillion.Postcode}}" oninput="oid(this);" onchange="ocd(this);" tabindex="65">
             <input id="PillionCountry" name="PillionCountry" class="PillionCountry" placeholder="country" value="{{.Pillion.Country}}" oninput="oid(this);" onchange="ocd(this);" tabindex="66">
         </fieldset>
