@@ -43,6 +43,16 @@ type jgPageDetails struct {
 	Charity       jgCharityDetails
 }
 
+type jgRecord struct {
+	PageShortName string
+	NumUsers      int
+	FundsRaised   int
+	PerUser       int
+	PageValid     int
+	CharityReg    string
+	CharityName   string
+}
+
 func doJGTest(w http.ResponseWriter, r *http.Request) {
 
 	rebuildJGPages()
@@ -208,4 +218,57 @@ func getJGPageDetails(jgpage string) jgPageDetails {
 	}
 
 	return PD
+}
+
+func showJustGPages(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+	w.Header().Set("Pragma", "no-cache")
+	w.Header().Set("Expires", "0")
+
+	fmt.Fprint(w, refresher)
+	fmt.Fprint(w, `<div class="top"><h2 class="link" onclick="loadPage('showjg?refresh=1');">JustGiving pages</h2>`)
+	fmt.Fprint(w, `</div>`)
+	fmt.Fprint(w, `<main class="justgpages">`)
+
+	if r.FormValue("refresh") != "" {
+		if f, ok := w.(http.Flusher); ok {
+			f.Flush()
+		}
+		refreshJGPageTotals()
+	}
+	sqlx := "SELECT PageShortName,NumUsers,FundsRaised,PerUser,PageValid,CharityReg,CharityName FROM justgs ORDER BY PageShortName"
+	rows, err := DBH.Query(sqlx)
+	checkerr(err)
+	defer rows.Close()
+	oe := true
+	for rows.Next() {
+		var rec jgRecord
+		err = rows.Scan(&rec.PageShortName, &rec.NumUsers, &rec.FundsRaised, &rec.PerUser, &rec.PageValid, &rec.CharityReg, &rec.CharityName)
+		checkerr(err)
+		fmt.Fprint(w, `<div class="pagerow `)
+		if oe {
+			fmt.Fprint(w, ` odd`)
+		} else {
+			fmt.Fprint(w, ` even`)
+		}
+		oe = !oe
+		fmt.Fprint(w, `">`)
+		fmt.Fprintf(w, `<span class="PageShortName" title="%v">%v</span>`, rec.PageShortName, rec.PageShortName)
+		fmt.Fprintf(w, `<span class="NumUsers">%v</span>`, rec.NumUsers)
+		fmt.Fprintf(w, `<span class="FundsRaised">%v`, rec.FundsRaised)
+		if rec.NumUsers > 1 {
+			fmt.Fprintf(w, ` (%v)`, rec.PerUser)
+		}
+		fmt.Fprint(w, `</span>`)
+		fmt.Fprint(w, `<span class="RegCharity`)
+		if rec.PageValid != 1 {
+			fmt.Fprint(w, ` duff`)
+		}
+		fmt.Fprintf(w, `">%v %v</span>`, rec.CharityReg, rec.CharityName)
+		fmt.Fprint(w, `</div>`)
+	}
+
+	fmt.Fprint(w, `</main></body></html>`)
 }

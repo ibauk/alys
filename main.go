@@ -178,6 +178,7 @@ func main() {
 	http.HandleFunc("/just", export_JustGiving)
 	http.HandleFunc("/jgtest", doJGTest)
 	http.HandleFunc("/search", global_search)
+	http.HandleFunc("/showjg", showJustGPages)
 	err = http.ListenAndServe(":"+*HTTPPort, nil)
 	if err != nil {
 		panic(err)

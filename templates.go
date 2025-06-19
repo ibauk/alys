@@ -210,7 +210,7 @@ var SigninScreenSingle = `
         </div>
 
         <div class="field">
-			<select name="FreeCamping"   data-chg="1" data-static="1" onchange="ocd(this);" tabindex="18">
+			<select name="FreeCamping"  class="FreeCamping" data-chg="1" data-static="1" onchange="ocd(this);" tabindex="18">
 			<option value="Y" {{if eq .FreeCamping "Y"}}selected{{end}}>Camping</option>
 			<option value="N" {{if eq .FreeCamping "N"}}selected{{end}}>not camping</option>
 			</select>
@@ -241,7 +241,7 @@ var SigninScreenSingle = `
         {{if ge .EntrantStatus 4}}
 	    <fieldset class="flex field">
 		    <div class="field">
-			    <label for="StartTime"><br>Checked out @</label>
+			    <label for="StartTime">Checked out @</label>
 			    <input type="text" class="showtime" id="StartTime" title="{{.StartTime}}" readonly value="{{.StartTimeOnly}}" tabindex="-1">
 
 				{{if ge .EntrantStatus 6}}

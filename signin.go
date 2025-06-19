@@ -70,7 +70,7 @@ func edit_entrant(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprint(w, `</main>`)
 	fmt.Fprint(w, "<footer>")
-	if mode == "signin" {
+	if mode == "signin" || true {
 		fmt.Fprint(w, `<button class="nav" onclick="loadPage('signin');">back to list</button>`)
 		fmt.Fprint(w, `<script>document.onkeydown=function(e){if(e.keyCode==27) {e.preventDefault();loadPage('signin');}}</script>`)
 	}

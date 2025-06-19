@@ -257,7 +257,7 @@ input.oc {
 .field {
   display: inline-block;
   vertical-align: middle;
-  margin-bottom: 0.5rem;
+  margin: 0.5rem 0 .5rem 0;
 }
 .fullwidth {
   width: 100%;
@@ -351,6 +351,10 @@ main.upload button:hover {
 
 .Patches {
   width: 2em;
+}
+
+.FreeCamping {
+  margin: 0 .5em 0 .5em;
 }
 
 .EntryDonation,
@@ -577,4 +581,28 @@ h2.shop {
 
 .badodo {
   background-color: rgb(238, 158, 158);
+}
+
+.justgpages {
+  display: flex;
+  flex-direction: column;
+}
+.pagerow {
+  display: grid;
+  grid-template-columns: 3fr 1fr 2fr 3fr;
+  grid-template-rows: auto;
+}
+.pagerow span {
+  display: table-cell;
+}
+.pagerow .PageShortName1 {
+  width: 12em;
+}
+.pagerow .NumUsers {
+  text-align: center;
+  margin: 0 .5em 0 .5em;
+}
+.duff {
+  text-decoration: line-through;
+  background-color: yellow;
 }

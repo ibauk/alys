@@ -97,7 +97,7 @@ func global_search(w http.ResponseWriter, r *http.Request) {
 		cols = append(cols, ti.cname)
 	}
 	rows.Close()
-	sqlx := "SELECT EntrantID,RiderFirst,RiderLast,RiderPhone,Route,ifnull(PillionLast,''),ifnull(PillionFirst,''),EntrantStatus FROM entrants "
+	sqlx := "SELECT EntrantID,ifnull(RiderFirst,''),ifnull(RiderLast,''),ifnull(RiderPhone,''),ifnull(Route,''),ifnull(PillionLast,''),ifnull(PillionFirst,''),EntrantStatus FROM entrants "
 	xk := "'%" + safesql(r.FormValue("q")) + "%'"
 	wherex := ""
 	for n := range cols {
