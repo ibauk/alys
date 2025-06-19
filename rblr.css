@@ -59,6 +59,17 @@ h6 {
 main {
   padding: 5px;
 }
+
+button {
+  border-radius: 6px;
+  font-size: .8em;
+  padding: 5px;
+}
+button:hover {
+  background-color: var(--hover-background);
+  cursor: pointer;
+}
+
 main.signin {
   display: grid;
   justify-content: space-around;
@@ -84,12 +95,20 @@ main.search button:hover {
 }
 .results {
   margin-top: 1em;
-  display: table;
+  display: flex;
+  flex-direction: column;
 }
 .resultline {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 30% 38% 8% 8% 15%;
+  grid-template-rows: auto;
+  grid-auto-flow: column;
+}
+.resultline .status {
+  font-size: .7em;
+}
+.resultline .route  {
+  font-size: .7em;
 }
 .resultline span {
   display: table-cell;
@@ -600,7 +619,8 @@ h2.shop {
 }
 .pagerow .NumUsers {
   text-align: center;
-  margin: 0 .5em 0 .5em;
+  padding: 0 .3em 0 .3em;
+  margin: 0 .2em 0 .2em;
 }
 .duff {
   text-decoration: line-through;

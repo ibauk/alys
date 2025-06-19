@@ -282,33 +282,18 @@ func show_funds_breakdown(w http.ResponseWriter) {
 
 func show_funds_JustGiving() (int64, string) {
 
-	row, err := DBH.Query("SELECT ifnull(JustGivingAmt,''),ifnull(JustGivingURL,'') FROM entrants WHERE ifnull(JustGivingAmt,'')<>'' ORDER BY JustGivingURL")
+	row, err := DBH.Query("SELECT ifnull(JustGivingAmt,'') FROM entrants WHERE ifnull(JustGivingAmt,'')<>''")
 	checkerr(err)
 	defer row.Close()
 	var amt string
-	var lastjgurl string
 	var totamt int
-	var jgurl string
 	var n int64
 	for row.Next() {
-		err = row.Scan(&amt, &jgurl)
+		err = row.Scan(&amt)
 		checkerr(err)
-		if len(jgurl) > len(JGV) {
-			jgurl = jgurl[len(JGV):]
-		}
-		p := strings.Index(jgurl, "?")
-		if p >= 0 {
-			jgurl = jgurl[:p]
-		}
-
+		v := intval(amt)
+		totamt += v
 		n++
-		v := 0
-		if jgurl != lastjgurl {
-			v = intval(amt)
-			totamt += v
-		}
-		//fmt.Printf("#%v '%v' = %v\n", n, jgurl, v)
-		lastjgurl = jgurl
 	}
 	return n, strconv.Itoa(totamt)
 }
@@ -606,6 +591,7 @@ func show_menu(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, `<button onclick="loadPage('signin?mode=full');" title="Inspect/update entrant details regardless of status">Full entrant list</button>`)
 
 	fmt.Fprint(w, `<button class="bigscreen" onclick="loadPage('admin');">Event setup</button>`)
+	fmt.Fprint(w, `<button onclick="loadPage('showjg');">JustGiving pages</button>`)
 	fmt.Fprint(w, `<button onclick="loadPage('search');">Search</button>`)
 	fmt.Fprint(w, `</main>`)
 }

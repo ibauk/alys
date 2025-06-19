@@ -51,7 +51,7 @@ func global_search(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprint(w, refresher)
 
-	fmt.Fprint(w, `<div class="top"><h2>RBLR1000 - Search  </h2></div>`)
+	fmt.Fprint(w, `<div class="top"><h2>RBLR1000 - Search  </h2>`)
 	fmt.Fprint(w, `<main class="search">`)
 
 	fmt.Fprint(w, `<form action="/search">`)
@@ -84,7 +84,7 @@ func global_search(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, `</select> `)
 
 	fmt.Fprint(w, `<button onclick="this.parent.submit()">Find it!</button>`)
-	fmt.Fprint(w, `</form>`)
+	fmt.Fprint(w, `</form></div>`)
 
 	rows, err := DBH.Query("pragma table_info(entrants)")
 	checkerr(err)
@@ -153,8 +153,8 @@ func global_search(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, `" onclick="signin('full','%v');">`, e)
 		fmt.Fprintf(w, `<span class="name"><strong>%v</strong>, %v</span>`, rl, rf)
 		fmt.Fprintf(w, `<span class="phone">%v</span>`, rp)
-		fmt.Fprintf(w, `<span class="route">%v</span>`, DisplayRoute(rt))
 		fmt.Fprintf(w, `<span class="status">%v</span>`, scv[es])
+		fmt.Fprintf(w, `<span class="route">%v</span>`, DisplayRoute(rt))
 		if pl != "" {
 			fmt.Fprintf(w, `<span class="name"><strong>%v</strong>, %v</span>`, pl, pf)
 		}

@@ -67,6 +67,7 @@ type justg struct {
 	nu  int
 	fr  int
 	pu  int
+	ok  int
 }
 
 func extractJGPSN(w http.ResponseWriter, r *http.Request) {
@@ -79,11 +80,17 @@ func extractJGPSN(w http.ResponseWriter, r *http.Request) {
 	jgpsn := parseJGPageShortName(jgurl)
 	fmt.Fprintf(w, `{"err":false,"msg":"%v"}`, jgpsn)
 }
+
+// rebuildJGPages rebuilds the table of JustGiving pages starting with examining
+// entrant records for a list of PSNs, using the api to fetch data for those PSNs
+// and finally calling refreshJGPageTotals to update the entrant records
 func rebuildJGPages() {
+
+	fmt.Println("rebuildJGPages()")
 
 	rcsok := strings.Split(getStringFromDB("SELECT JustGCharities FROM config", ""), ",")
 
-	sqlx := "SELECT EntrantID,JustGivingURL FROM entrants WHERE ifnull(JustGivingURL,'')<>''"
+	sqlx := "SELECT EntrantID,JustGivingPSN FROM entrants WHERE ifnull(JustGivingPSN,'')<>''"
 	rows, err := DBH.Query(sqlx)
 	checkerr(err)
 	defer rows.Close()
@@ -104,37 +111,44 @@ func rebuildJGPages() {
 	_, err = DBH.Exec(sqlx)
 	checkerr(err)
 
+	totfunds := 0
 	for _, r := range psns {
-		psn := parseJGPageShortName(r.url)
+		psn := r.url
 		pd := getJGPageDetails(psn)
-		sqlx = fmt.Sprintf("UPDATE entrants SET JustGivingPSN='%v' WHERE EntrantID=%v", psn, r.eid)
-		_, err = DBH.Exec(sqlx)
-		checkerr(err)
+		val := intval(pd.FundsRaised)
 		pageValid := 1
 		if !slices.Contains(rcsok, pd.Charity.RegNum) {
 			pageValid = 0
+		} else {
+			totfunds += val
 		}
-		sqlx = fmt.Sprintf("INSERT INTO justgs(PageShortName,NumUsers,CharityReg,CharityName,PageValid)VALUES('%v',1,'%v','%v',%v) ON CONFLICT(PageShortName) DO UPDATE SET NumUsers=NumUsers+1", psn, pd.Charity.RegNum, safesql(pd.Charity.Name), pageValid)
+		sqlx = fmt.Sprintf("INSERT INTO justgs(PageShortName,NumUsers,CharityReg,CharityName,PageValid,FundsRaised,PerUser)VALUES('%v',1,'%v','%v',%v,%v,%v) ON CONFLICT(PageShortName) DO UPDATE SET NumUsers=NumUsers+1", psn, pd.Charity.RegNum, safesql(pd.Charity.Name), pageValid, val, val)
 		//fmt.Println(sqlx)
 		_, err = DBH.Exec(sqlx)
 		checkerr(err)
 	}
+	sqlx = "UPDATE justgs SET PerUser=FundsRaised / NumUsers WHERE NumUsers > 1"
+	_, err = DBH.Exec(sqlx)
+	checkerr(err)
 	_, err = DBH.Exec("COMMIT")
 	checkerr(err)
 
 	refreshJGPageTotals()
 }
 
+// refreshJGPageTotals updates the entrant records using data held in the justgs table
 func refreshJGPageTotals() {
 
-	sqlx := "SELECT PageShortName,NumUsers FROM justgs"
+	fmt.Println("refreshJGPageTotals()")
+
+	sqlx := "SELECT PageShortName,NumUsers,FundsRaised,PerUser,PageValid FROM justgs"
 	urls := make([]justg, 0)
 	rows, err := DBH.Query(sqlx)
 	checkerr(err)
 	defer rows.Close()
 	for rows.Next() {
 		var r justg
-		err = rows.Scan(&r.url, &r.nu)
+		err = rows.Scan(&r.url, &r.nu, &r.fr, &r.pu, &r.ok)
 		checkerr(err)
 		urls = append(urls, r)
 	}
@@ -144,24 +158,19 @@ func refreshJGPageTotals() {
 	defer DBH.Exec("COMMIT")
 
 	for i, r := range urls {
-		n := getJGFundsRaised(r.url)
-		urls[i].fr = n
-		urls[i].pu = n
-		if r.nu > 1 {
-			urls[i].pu = n / r.nu
-		}
-		if getIntegerFromDB(fmt.Sprintf("SELECT PageValid FROM justgs WHERE PageShortName='%v'", r.url), 0) == 0 {
+		pageValid := r.ok
+		if pageValid == 0 {
 			urls[i].pu = 0
 		}
 		sqlx = fmt.Sprintf("UPDATE entrants SET JustGivingAmt='%v' WHERE JustGivingPSN='%v'", urls[i].pu, r.url)
 		_, err = DBH.Exec(sqlx)
 		checkerr(err)
-		sqlx = fmt.Sprintf("UPDATE justgs SET FundsRaised=%v,PerUser=%v WHERE PageShortName='%v'", urls[i].fr, urls[i].pu, r.url)
-		_, err = DBH.Exec(sqlx)
-		checkerr(err)
 	}
 
 }
+
+// parseJGPageShortName extracts the PageShortName (PSN) from the full url of a
+// JustGiving page link
 func parseJGPageShortName(url string) string {
 
 	psn := url
@@ -179,15 +188,9 @@ func parseJGPageShortName(url string) string {
 	}
 	return psn
 }
-func getJGFundsRaised(jgpage string) int {
 
-	PD := getJGPageDetails(jgpage)
-	totval := intval(PD.FundsRaised)
-
-	return totval
-
-}
-
+// getJGPageDetails uses the api to obtain accurate current data relating to
+// the particular PSN
 func getJGPageDetails(jgpage string) jgPageDetails {
 
 	var PD jgPageDetails
@@ -222,27 +225,33 @@ func getJGPageDetails(jgpage string) jgPageDetails {
 
 func showJustGPages(w http.ResponseWriter, r *http.Request) {
 
+	fmt.Println("showJustGPages()")
+
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
 	w.Header().Set("Pragma", "no-cache")
 	w.Header().Set("Expires", "0")
 
 	fmt.Fprint(w, refresher)
-	fmt.Fprint(w, `<div class="top"><h2 class="link" onclick="loadPage('showjg?refresh=1');">JustGiving pages</h2>`)
+	fmt.Fprint(w, `<div class="top"><h2 class="link" onclick="loadPage('showjg?refresh=1');">JustGiving pages`)
+	fmt.Fprint(w, ` <button onclick="loadPage('showjg?refresh=1');">Refresh pages</button> <span id="jgtotal"></span></h2>`)
 	fmt.Fprint(w, `</div>`)
 	fmt.Fprint(w, `<main class="justgpages">`)
 
 	if r.FormValue("refresh") != "" {
+		fmt.Fprint(w, `<p>refreshing ...</p>`)
 		if f, ok := w.(http.Flusher); ok {
 			f.Flush()
 		}
-		refreshJGPageTotals()
+		rebuildJGPages()
+		fmt.Fprint(w, `<script>function x() {loadPage('showjg');}setTimeout(x,0);</script></main></body></html>`)
 	}
 	sqlx := "SELECT PageShortName,NumUsers,FundsRaised,PerUser,PageValid,CharityReg,CharityName FROM justgs ORDER BY PageShortName"
 	rows, err := DBH.Query(sqlx)
 	checkerr(err)
 	defer rows.Close()
 	oe := true
+	totfunds := 0
 	for rows.Next() {
 		var rec jgRecord
 		err = rows.Scan(&rec.PageShortName, &rec.NumUsers, &rec.FundsRaised, &rec.PerUser, &rec.PageValid, &rec.CharityReg, &rec.CharityName)
@@ -256,8 +265,15 @@ func showJustGPages(w http.ResponseWriter, r *http.Request) {
 		oe = !oe
 		fmt.Fprint(w, `">`)
 		fmt.Fprintf(w, `<span class="PageShortName" title="%v">%v</span>`, rec.PageShortName, rec.PageShortName)
-		fmt.Fprintf(w, `<span class="NumUsers">%v</span>`, rec.NumUsers)
-		fmt.Fprintf(w, `<span class="FundsRaised">%v`, rec.FundsRaised)
+		fmt.Fprintf(w, `<span class="NumUsers"><a href="/search?q=%v"> %v </a></span>`, rec.PageShortName, rec.NumUsers)
+		fmt.Fprint(w, `<span class="FundsRaised`)
+		if rec.PageValid != 1 {
+			fmt.Fprint(w, ` duff`)
+		} else {
+			totfunds += rec.FundsRaised
+		}
+
+		fmt.Fprintf(w, `">£%v`, rec.FundsRaised)
 		if rec.NumUsers > 1 {
 			fmt.Fprintf(w, ` (%v)`, rec.PerUser)
 		}
@@ -270,5 +286,12 @@ func showJustGPages(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, `</div>`)
 	}
 
-	fmt.Fprint(w, `</main></body></html>`)
+	fmt.Fprint(w, `</main>`)
+	fmt.Fprint(w, `<footer><button class="nav" onclick="loadPage('menu');">Main menu</button>  `)
+	fmt.Fprint(w, `</footer>`)
+	fmt.Fprint(w, `<script>document.onkeydown=function(e){if(e.keyCode==27) {e.preventDefault();loadPage('menu');}}</script>`)
+	fmt.Fprintf(w, `<script>document.getElementById('jgtotal').innerText='£%v';</script>`, totfunds)
+
+	fmt.Fprint(w, `</body></html>`)
+
 }
