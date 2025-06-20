@@ -79,7 +79,7 @@ main.search {
   
 }
 main.search input {
-  font-size: 1.2em;
+  font-size: 1.0em;
 }
 main.search select {
   font-size: .6em;
@@ -567,7 +567,7 @@ footer {
   font-size: 0.9em;
 }
 .merch {
-  display: table;
+  display: grid;
   margin: auto;
 }
 h2.shop {
@@ -576,6 +576,10 @@ h2.shop {
 }
 .row {
   display: table-row;
+}
+.merch .row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
 }
 .col {
   display: table-cell;
@@ -590,7 +594,9 @@ h2.shop {
 
 .footnote {
   font-size: 0.5em;
-  padding: 0 0 0.5em 10em;
+  padding: 0.5em;
+  margin: 0 auto 0 auto;
+  text-align: right;
 }
 .subrow td {
   font-size: 0.7em;

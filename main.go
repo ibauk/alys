@@ -19,7 +19,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const PROGRAMVERSION = "Alys v1.4 Copyright © 2025 Bob Stammers"
+const PROGRAMVERSION = "Alys v1.5 Copyright © 2025 Bob Stammers"
 
 // DBNAME names the database file
 var DBNAME *string = flag.String("db", "rblr.db", "database file")
@@ -28,8 +28,6 @@ var DBNAME *string = flag.String("db", "rblr.db", "database file")
 var HTTPPort *string = flag.String("port", "80", "Web port")
 
 var EntrantsCSV *string = flag.String("import", "", "CSV to import")
-
-var JGTest *bool = flag.Bool("jg", false, "test jg")
 
 // DBH provides access to the database
 var DBH *sql.DB
@@ -154,9 +152,7 @@ func main() {
 		LoadEntrantsFromCSV(*EntrantsCSV, "Y", true, false)
 		return
 	}
-	if *JGTest {
-		rebuildJGPages()
-	}
+
 	http.HandleFunc("/", show_root)
 	http.HandleFunc("/getcsv", show_loadCSV)
 	http.HandleFunc("/menu", show_menu)
@@ -381,7 +377,7 @@ func show_shop(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprint(w, `</main>`)
 
-	fmt.Fprint(w, `<div class="footnote">* Unclaimed means items ordered by entrants who have not yet been signed in.</div>`)
+	fmt.Fprint(w, `<div class="footnote">* Unclaimed means items pre-ordered by entrants who have not yet been signed in.</div>`)
 
 	fmt.Fprint(w, `<script>document.onkeydown=function(e){if(e.keyCode==27) {e.preventDefault();loadPage('menu');}}</script>`)
 	fmt.Fprint(w, `<footer>`)
