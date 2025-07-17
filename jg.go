@@ -239,7 +239,7 @@ func showJustGPages(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, `<main class="justgpages">`)
 
 	if r.FormValue("refresh") != "" {
-		fmt.Fprint(w, `<p>refreshing ...</p>`)
+		fmt.Fprint(w, `<p>refreshing ...</p><p>This will take a few minutes. Please be patient.</p>`)
 		if f, ok := w.(http.Flusher); ok {
 			f.Flush()
 		}
@@ -275,7 +275,7 @@ func showJustGPages(w http.ResponseWriter, r *http.Request) {
 
 		fmt.Fprintf(w, `">£%v`, rec.FundsRaised)
 		if rec.NumUsers > 1 {
-			fmt.Fprintf(w, ` (%v)`, rec.PerUser)
+			fmt.Fprintf(w, ` (%vea)`, rec.PerUser)
 		}
 		fmt.Fprint(w, `</span>`)
 		fmt.Fprint(w, `<span class="RegCharity`)

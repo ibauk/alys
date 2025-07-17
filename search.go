@@ -58,7 +58,7 @@ func global_search(w http.ResponseWriter, r *http.Request) {
 	//	fmt.Fprint(w, `<label for="txt2find">What should I look for?</label> `)
 	fmt.Fprintf(w, `<input type="search" placeholder="What should I look for?" autofocus id="txt2find" name="q" value="%v"> `, r.FormValue("q"))
 
-	fmt.Fprint(w, `<select name="qr"> `)
+	fmt.Fprint(w, `<select name="qr" onchange="this.form.submit()"> `)
 
 	fmt.Fprint(w, `<option value="" >any route</option>`)
 	rso := slices.Sorted(maps.Keys(RouteSearchOptions))
@@ -71,7 +71,7 @@ func global_search(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Fprint(w, `</select> `)
 
-	fmt.Fprint(w, ` <select name="qs"> `)
+	fmt.Fprint(w, ` <select name="qs" onchange="this.form.submit()"> `)
 	fmt.Fprint(w, `<option value="">any status</option>`)
 	sso := slices.Sorted(maps.Keys(StatusSearchOptions))
 	for _, so := range sso {
@@ -83,7 +83,7 @@ func global_search(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Fprint(w, `</select> `)
 
-	fmt.Fprint(w, `<button onclick="this.parent.submit()">Find it!</button>`)
+	fmt.Fprint(w, `<button onclick="this.form.submit()">Find it!</button>`)
 	fmt.Fprint(w, `</form></div>`)
 
 	rows, err := DBH.Query("pragma table_info(entrants)")
