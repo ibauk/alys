@@ -275,7 +275,7 @@ func showJustGPages(w http.ResponseWriter, r *http.Request) {
 
 		fmt.Fprintf(w, `">£%v`, rec.FundsRaised)
 		if rec.NumUsers > 1 {
-			fmt.Fprintf(w, ` (%vea)`, rec.PerUser)
+			fmt.Fprintf(w, ` (&div;%v=%v)`, rec.NumUsers, rec.PerUser)
 		}
 		fmt.Fprint(w, `</span>`)
 		fmt.Fprint(w, `<span class="RegCharity`)
