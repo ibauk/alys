@@ -243,7 +243,7 @@ func show_finals(w http.ResponseWriter, r *http.Request) {
 
 		fmt.Fprintf(w, `<span class="Route">%v-%v</span> `, DisplayRoute(e.Route), scv[e.EntrantStatus])
 
-		fmt.Fprintf(w, `<span class="field"><select id="%vcs" name="CertificateAD" data-e="%v" data-ca="%v" onchange="changeFinalStatus(this);">`, itemno, e.EntrantID, e.CertificateAvailable)
+		fmt.Fprintf(w, `<span class="field certcheck"><select id="%vcs" name="CertificateAD" data-e="%v" data-ca="%v" onchange="changeFinalStatus(this);">`, itemno, e.EntrantID, e.CertificateAvailable)
 
 		if e.EntrantStatus == STATUSCODES["DNF"] {
 			fmt.Fprint(w, `<option value="" selected>Marked as DNF, no cert</option>`)

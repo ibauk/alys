@@ -151,13 +151,14 @@ func global_search(w http.ResponseWriter, r *http.Request) {
 		}
 		oe = !oe
 		fmt.Fprintf(w, `" onclick="signin('full','%v');">`, e)
-		fmt.Fprintf(w, `<span class="name"><strong>%v</strong>, %v</span>`, rl, rf)
-		fmt.Fprintf(w, `<span class="phone">%v</span>`, rp)
+		fmt.Fprintf(w, `<span class="name"><strong>%v</strong>, %v`, rl, rf)
+		if pl != "" {
+			fmt.Fprintf(w, ` + <strong>%v</strong>, %v`, pl, pf)
+		}
+		fmt.Fprint(w, `</span>`)
+		fmt.Fprintf(w, `<span class="phone">%v <button onclick="callPhone('%v')">call</button></span>`, rp, rp)
 		fmt.Fprintf(w, `<span class="status">%v</span>`, scv[es])
 		fmt.Fprintf(w, `<span class="route">%v</span>`, DisplayRoute(rt))
-		if pl != "" {
-			fmt.Fprintf(w, `<span class="name"><strong>%v</strong>, %v</span>`, pl, pf)
-		}
 		fmt.Fprint(w, `</div>`)
 		foundit = true
 	}

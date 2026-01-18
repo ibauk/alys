@@ -54,7 +54,7 @@ h4,
 h5,
 h6 {
   margin: 0 0 1rem 0;
-  font-size: 1em;
+  font-size: 1rem;
 }
 main {
   padding: 5px;
@@ -62,7 +62,7 @@ main {
 
 button {
   border-radius: 6px;
-  font-size: .8em;
+  font-size: .8rem;
   padding: 5px;
 }
 button:hover {
@@ -75,18 +75,21 @@ main.signin {
   justify-content: space-around;
 }
 main.search {
-  margin: 2em;
+  margin: 2rem;
+  text-align: left;
   
 }
 main.search input {
-  font-size: 1.0em;
+  font-size: 1.2rem;
+  margin-bottom: .5rem;
 }
 main.search select {
-  font-size: .6em;
+  font-size: 1rem;
+  margin-bottom: .3rem;
 }
 main.search button {
   border-radius: 6px;
-  font-size: 1.2em;
+  font-size: 1.2rem;
   padding: 5px;
 }
 main.search button:hover {
@@ -94,7 +97,7 @@ main.search button:hover {
   cursor: pointer;
 }
 .results {
-  margin-top: 1em;
+  margin-top: 1rem;
   display: flex;
   flex-direction: column;
 }
@@ -105,14 +108,17 @@ main.search button:hover {
   grid-auto-flow: column;
 }
 .resultline .status {
-  font-size: .7em;
+  font-size: .8rem;
+}
+.resultline .phone {
+  font-size: .9rem;
 }
 .resultline .route  {
-  font-size: .7em;
+  font-size: .8rem;
 }
 .resultline span {
   display: table-cell;
-  padding: 0.5em 2em 0.5em 0.5em;
+  padding: 0.5rem 2rem 0.5rem 0.5rem;
 }
 .resultline:hover {
   background-color: var(--hover-background);
@@ -138,7 +144,7 @@ main.stats {
   display: grid;
   justify-content: space-around;
   grid-template-rows: 15% 80%;
-  margin: 0.5em auto 2em auto;
+  margin: 0.5rem auto 2rem auto;
 }
 main.frontmenu {
   display: flex;
@@ -148,13 +154,13 @@ main.frontmenu {
 }
 main.frontmenu h1 {
   display: block;
-  font-size: 1.1em;
+  font-size: 1.1rem;
   padding: 5px;
 }
 main.frontmenu button {
   border-radius: 6px;
-  font-size: 1.1em;
-  padding: 0.2rem 1em 0.2rem 1em;
+  font-size: 1.1rem;
+  padding: 0.2rem 1rem 0.2rem 1rem;
   width: 90%;
   max-width: 30rem;
   margin: 0 auto 1em auto;
@@ -168,7 +174,7 @@ main.frontmenu button:hover {
   top: 0;
   background-color: var(--topbar-background);
   width: 100%;
-  padding: 0.5em 0 0.5em 0;
+  padding: 0.5rem 0 0.5rem 0;
   text-align: center;
   margin: 0;
   box-sizing: border-box;
@@ -180,9 +186,9 @@ main.frontmenu button:hover {
   display: inline-block;
   border-radius: 6px;
   font-size: calc(14pt + 1vmin);
-  width: 4em;
-  padding: 0.2em;
-  margin-left: 0.5em;
+  width: 4rem;
+  padding: 0.2rem;
+  margin-left: 0.5rem;
 }
 #nextSlot.hide {
   display: none;
@@ -191,12 +197,12 @@ main.frontmenu button:hover {
   display: inline-block;
   border-radius: 6px;
   font-size: calc(14pt + 1vmin);
-  width: 6em;
-  padding: 0.2em;
-  margin-left: 0.5em;
+  width: 6rem;
+  padding: 0.2rem;
+  margin-left: 0.5rem;
 }
 #odolist {
-  margin: 0.5em auto 2em auto;
+  margin: 0.5rem auto 2rem auto;
   display: table;
   overflow: hidden;
 }
@@ -206,18 +212,18 @@ main.frontmenu button:hover {
 }
 #odolist .odorow span {
   display: table-cell;
-  padding: 0 0.2em 0.2em 0.1em;
+  padding: 0 0.2rem 0.2rem 0.1rem;
 }
 #odolist .odorow span input {
   vertical-align: middle;
-  font-size: 0.9em;
+  font-size: 0.9rem;
 }
 
 #signinlist {
   display: table;
   overflow: hidden;
-  font-size: 1.5em;
-  margin: 0.5em auto 2em auto;
+  font-size: 1.5rem;
+  margin: 0.5rem auto 2rem auto;
 }
 
 #signinlist div {
@@ -225,16 +231,16 @@ main.frontmenu button:hover {
 }
 #signinlist span {
   display: table-cell;
-  padding: 0 0.2em 0.2em 0.1em;
+  padding: 0 0.2rem 0.2rem 0.1rem;
 }
 
 button.nav {
   display: inline-block;
   border-radius: 6px;
   font-size: calc(14pt + 1vmin);
-  width: 8em;
-  margin: 0.5em 0.5em 0.5em 0.5em;
-  padding: 0.2em;
+  width: 8rem;
+  margin: 0.5rem 0.5rem 0.5rem 0.5rem;
+  padding: 0.2rem;
 }
 button.nav:hover {
   background-color: lightblue;
@@ -245,12 +251,12 @@ button.nav:hover {
   background-color: lightgray;
 }
 .bignumber {
-  width: 6em;
+  width: 6rem;
 }
 .val {
   font-weight: bold;
   text-align: right;
-  padding-left: 1em;
+  padding-left: 1rem;
 }
 input {
   background-color: white;
@@ -283,7 +289,7 @@ input.oc {
 }
 fieldset.setup {
   border: none;
-  margin: 1.5em;
+  margin: 1.5rem;
 }
 fieldset label,
 fieldset .label {
@@ -292,28 +298,28 @@ fieldset .label {
 fieldset input,
 fieldset select,
 .signinrow select {
-  font-size: 16pt;
+  font-size: 1.1rem;
   font-weight: bold;
   color: var(--input-text);
 }
 
 input[type="checkbox"] {
-  width: 1em;
-  margin-right: 1em;
+  width: 1rem;
+  margin-right: 1rem;
 }
 
 input[type="radio"] {
-  width: 1em;
-  margin-left: 1em;
+  width: 1rem;
+  margin-left: 1rem;
 }
 
 .upload {
-  max-width: 30em;
+  max-width: 30rem;
   margin: auto;
 }
 main.upload button {
   border-radius: 6px;
-  font-size: 1.1em;
+  font-size: 1.1rem;
   padding: 0.2rem;
 }
 main.upload button:hover {
@@ -323,57 +329,57 @@ main.upload button:hover {
 
 .upload fieldset {
   border: none;
-  height: 2em;
+  height: 2rem;
 }
 
 .RiderIBA,
 .PillionIBA {
-  width: 5em;
+  width: 5rem;
 }
 
 .RiderRBLR,
 .PillionRBLR {
-  width: 5em;
+  width: 5rem;
 }
 
 .RiderEmail,
 .PillionEmail {
-  width: 18em;
+  width: 18rem;
 }
 
 .BikeReg {
-  width: 6em;
+  width: 6rem;
 }
 
 .OdoStart,
 .OdoFinish {
-  width: 5em;
+  width: 5rem;
 }
 
 .RiderAddress,
 .PillionAddress {
-  width: 30em;
+  width: 30rem;
 }
 
 .RiderPostcode,
 .PillionPostcode {
-  width: 6em;
+  width: 6rem;
 }
 
 .RiderCountry,
 .PillionCountry {
-  width: 10em;
+  width: 10rem;
 }
 .showtime {
-  width: 6em;
+  width: 6rem;
 }
 
 .Patches {
-  width: 2em;
+  width: 2rem;
 }
 
 .FreeCamping {
-  margin: 0 .5em 0 .5em;
+  margin: 0 .5rem 0 .5rem;
 }
 
 .EntryDonation,
@@ -385,15 +391,15 @@ main.upload button:hover {
 }
 .JustGivingURL {
   width: 20rem;
-  font-size: 0.8em;
+  font-size: 0.8rem;
 }
 
 .Notes {
   box-sizing: border-box;
-  padding: 1em;
+  padding: 1rem;
   width: inherit;
   margin: auto;
-  font-size: 1em;
+  font-size: 1rem;
 }
 .small {
   font-size: 14pt;
@@ -407,7 +413,7 @@ main.upload button:hover {
   border: 5px solid var(--solid-border);
   border-radius: 5px;
   background-color: var(--form-background);
-  padding: 0.2em;
+  padding: 0.2rem;
   display: block;
   overflow: auto;
 }
@@ -419,11 +425,11 @@ main.upload button:hover {
 
 .tabs_area {
   display: block;
-  margin: 1em 0 0 0;
+  margin: 1rem 0 0 0;
   padding: 0;
 }
 .tabs_area ul {
-  margin: 1em 0 0 0;
+  margin: 1rem 0 0 0;
 }
 .tabs_area li {
   display: inline-block;
@@ -441,7 +447,7 @@ ul#tabs li a {
   border-bottom-style: none;
   border-left-style: solid;
   border-radius: 5px;
-  padding: 0em 0.3em 0 0.3em;
+  padding: 0rem 0.3rem 0 0.3rem;
 }
 ul#tabs li a:hover {
   font-weight: bold;
@@ -476,14 +482,14 @@ ul#tabs li a.selected {
   font-weight: bold;
 }
 .signout .Route {
-  font-size: 0.4em;
+  font-size: 0.8rem;
   width: 5em;
 }
 .special {
   border: solid;
   border-radius: 8px;
-  margin-left: 1em;
-  padding: 0.1em 0.5em 0.5em 0.5em;
+  margin-left: 1rem;
+  padding: 0.1rem 0.5rem 0.5rem 0.5rem;
 }
 
 .link:hover {
@@ -511,26 +517,26 @@ nav {
 
 .ConfigScreen .field {
   display: block;
-  margin: 0 0 1em 0;
+  margin: 0 0 1rem 0;
 }
 .ConfigScreen input {
-  font-size: 0.9em;
+  font-size: 0.9rem;
 }
 
 input.StartCohortMins {
-  width: 3em;
+  width: 3rem;
 }
 
 input.ExtraCohorts {
-  width: 2em;
+  width: 2rem;
 }
 
 input.MinDonation {
-  width: 4em;
+  width: 4rem;
 }
 input.MinOdoDiff,
 input.MaxOdoDiff {
-  width: 4em;
+  width: 4rem;
 }
 input:read-only {
   background-color: inherit;
@@ -554,17 +560,17 @@ footer {
   font-size: 12pt;
 }
 .vspace {
-  margin: 1em 0 3em 0;
+  margin: 1rem 0 3rem 0;
 }
 
 .about {
   width: 98%;
-  max-width: 30em;
+  max-width: 30rem;
   margin: 1em auto 0 auto;
   border: double 6px;
   padding: 1em;
   font-family: "Times New Roman", Times, serif;
-  font-size: 0.9em;
+  font-size: 0.9rem;
 }
 .merch {
   display: grid;
@@ -583,23 +589,23 @@ h2.shop {
 }
 .col {
   display: table-cell;
-  padding: 0 1em 1em 1em;
+  padding: 0 1rem 1rem 1rem;
   text-align: center;
 }
 .hdr .col {
-  padding-bottom: 0.1em;
-  margin-bottom: 1em;
+  padding-bottom: 0.1rem;
+  margin-bottom: 1rem;
   text-decoration: underline;
 }
 
 .footnote {
-  font-size: 0.5em;
-  padding: 0.5em;
+  font-size: 0.5rem;
+  padding: 0.5rem;
   margin: 0 auto 0 auto;
   text-align: right;
 }
 .subrow td {
-  font-size: 0.7em;
+  font-size: 0.7rem;
   font-style: italic;
   text-align: right;
 }
@@ -607,6 +613,7 @@ h2.shop {
 .badodo {
   background-color: rgb(238, 158, 158);
 }
+
 
 .justgpages {
   display: flex;
@@ -621,12 +628,12 @@ h2.shop {
   display: table-cell;
 }
 .pagerow .PageShortName1 {
-  width: 12em;
+  width: 12rem;
 }
 .pagerow .NumUsers {
   text-align: center;
-  padding: 0 .3em 0 .3em;
-  margin: 0 .2em 0 .2em;
+  padding: 0 .3rem 0 .3rem;
+  margin: 0 .2rem 0 .2rem;
 }
 .duff {
   text-decoration: line-through;

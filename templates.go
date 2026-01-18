@@ -342,6 +342,7 @@ var SigninScreenSingle = `
     <div class="field">
         <label for="RiderPhone">Mobile</label> 
         <input id="RiderPhone" name="RiderPhone" class="RiderPhone" value="{{.Rider.Phone}}" oninput="oid(this);" onchange="ocd(this);" tabindex="36">
+		{{if ne .Rider.Phone ""}}<button onclick="callPhone('{{.Rider.Phone}}')">call</button>{{end}}
     </div>
 
     <div class="field">
@@ -407,6 +408,7 @@ var SigninScreenSingle = `
     <div class="field">
         <label for="NokPhone">Contact phone</label> 
         <input id="NokPhone" name="NokPhone" class="NokPhone" value="{{.NokPhone}}" oninput="oid(this);" onchange="ocd(this);" tabindex="53">
+		{{if ne .NokPhone ""}}<button onclick="callPhone('{{.NokPhone}}')">call</button>{{end}}
     </div>
 </fieldset>
 
@@ -426,6 +428,7 @@ var SigninScreenSingle = `
     <div class="field">
         <label for="PillionPhone">Mobile</label> 
         <input id="PillionPhone" name="PillionPhone" class="PillionPhone" value="{{.Pillion.Phone}}" oninput="oid(this);" onchange="ocd(this);" tabindex="60">
+		{{if ne .Pillion.Phone ""}}<button onclick="callPhone('{{.Pillion.Phone}}')">call</button>{{end}}
     </div>
     <div class="field">
 	    <label for="PillionIBA">IBA member</label> 

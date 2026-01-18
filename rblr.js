@@ -41,6 +41,14 @@ function calcMileage() {
   mlgdiv.innerHTML = " " + units + " miles";
 }
 
+function callPhone(tel) {
+
+  if (tel=="") return
+  event.cancelBubble=true;
+  window.open('tel:'+tel)
+
+}
+
 function changeFinalStatus(sel) {
   reloadok = false;
 
